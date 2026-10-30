@@ -1,9 +1,9 @@
 /* ==========================================================================
    WHY BOTHER? — GENERATIVE RABBIT HOLE & CREATE
-   Styling for Narrative Book, Tunnels, Create Stage & Contemplation
+   Styling for Narrative Book, Cinematic Phrases & Living Reflection
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Montserrat:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Montserrat:wght@300;400;500;600&display=swap');
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -38,7 +38,7 @@ html, body {
 }
 
 /* ==========================================================================
-   NARRATIVE OVERLAY (BOOK OPENING & TRANSITION TEXTS)
+   NARRATIVE OVERLAY (BOOK OPENING)
    ========================================================================== */
 .narrative-overlay {
   position: fixed;
@@ -52,7 +52,7 @@ html, body {
   justify-content: center;
   align-items: center;
   background: radial-gradient(circle at center, #0c0a12 0%, #050407 100%);
-  padding: 40px 24px;
+  padding: 30px 20px;
   cursor: pointer;
   transition: opacity 0.8s ease, visibility 0.8s ease;
 }
@@ -63,29 +63,39 @@ html, body {
   pointer-events: none;
 }
 
-/* Antique Book Container */
+/* Antique Book: CONSTANT & STABLE DIMENSIONS */
 .book-container {
-  max-width: 920px;
-  width: 90%;
+  width: 900px;
+  max-width: 92vw;
+  height: 520px;
+  max-height: 86vh;
   perspective: 1400px;
   animation: bookEnter 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+  margin: auto;
 }
 
 .book-cover {
+  width: 100%;
+  height: 100%;
   display: flex;
   background: #2a1c12;
   padding: 16px;
   border-radius: 10px;
   box-shadow: 0 30px 70px rgba(0, 0, 0, 0.9), 0 0 50px rgba(18, 12, 8, 0.6), inset 0 0 15px rgba(0, 0, 0, 0.8);
   border: 1px solid rgba(197, 160, 89, 0.3);
+  box-sizing: border-box;
 }
 
 .book-page {
   flex: 1;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
   background: #fbf8f0;
   color: #1a1714;
-  padding: 38px 44px;
-  min-height: 440px;
+  padding: 36px 40px;
   display: flex;
   flex-direction: column;
   box-shadow: inset 0 0 25px rgba(180, 150, 110, 0.25);
@@ -105,7 +115,7 @@ html, body {
   border-radius: 0 6px 6px 0;
   border-left: 1px solid rgba(0, 0, 0, 0.15);
   background: linear-gradient(to left, #f2ece0 0%, #fbf8f0 10%, #fcf9f2 92%, #e5ddcf 100%);
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .book-illustration-ornament {
@@ -144,14 +154,17 @@ html, body {
 
 .book-text-body {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 18.5px;
-  line-height: 1.75;
+  font-size: 18px;
+  line-height: 1.68;
   color: #141210;
   text-align: justify;
+  height: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .book-text-body p {
-  margin-bottom: 16px;
+  margin-bottom: 14px;
   text-indent: 1.6em;
 }
 
@@ -170,46 +183,10 @@ html, body {
   font-weight: 700;
 }
 
-/* Transition Text Container (Projection on Sober Background) */
-.transition-text-container {
-  max-width: 760px;
-  width: 90%;
-  text-align: justify;
-  animation: fadeIn 0.8s ease;
-}
-
-.transition-era-tag {
-  font-family: 'Cinzel', serif;
-  font-size: 13px;
-  letter-spacing: 0.35em;
-  text-transform: uppercase;
-  color: #cca462;
-  margin-bottom: 24px;
-  text-align: center;
-  opacity: 0.9;
-}
-
-.transition-text-body {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 21px;
-  line-height: 1.8;
-  color: #ede2d2;
-  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.8);
-}
-
-.transition-text-body p {
-  margin-bottom: 20px;
-  text-indent: 1.8em;
-}
-
-.transition-text-body p:first-of-type {
-  text-indent: 0;
-}
-
 /* Discreet Continue Prompt */
 .narrative-continue-hint {
   position: absolute;
-  bottom: 32px;
+  bottom: 28px;
   left: 50%;
   transform: translateX(-50%);
   font-family: 'Montserrat', sans-serif;
@@ -248,7 +225,52 @@ html, body {
 }
 
 /* ==========================================================================
-   UI OVERLAY (POCKET WATCH & CONTROLS)
+   CINEMATIC PHRASE-BY-PHRASE TRANSITIONS (DISNEY, GAME, CREATE)
+   ========================================================================== */
+.cinematic-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 50;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #050407;
+  padding: 40px 60px;
+  cursor: pointer;
+  transition: opacity 0.6s ease;
+}
+
+.cinematic-phrase-wrap {
+  max-width: 920px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.cinematic-phrase-text {
+  font-family: 'Cormorant Garamond', 'Cinzel', serif;
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 1.6;
+  color: #f7ede0;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.95), 0 0 35px rgba(215, 175, 120, 0.15);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.cinematic-phrase-text.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ==========================================================================
+   UI OVERLAY (POCKET WATCH & CREATE CONTROLS)
    ========================================================================== */
 .ui-overlay {
   position: fixed;
@@ -379,107 +401,98 @@ html, body {
 }
 
 /* ==========================================================================
-   FINAL CONTEMPLATION OVERLAY: WHY BOTHER?
+   FINAL REFLECTION: DIRECT ON THE LIVING ARTWORK
+   Phrases appear individually in white background with black border
    ========================================================================== */
-.final-contemplation-overlay {
+.final-reflection-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 100;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: rgba(5, 4, 8, 0.28); /* Delicate transparent wash: artwork remains completely visible */
+  padding: 40px 30px;
+  cursor: pointer;
+  animation: fadeIn 0.8s ease;
+}
+
+.final-phrase-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: radial-gradient(circle at center, rgba(10, 8, 16, 0.72) 0%, rgba(4, 3, 7, 0.88) 100%);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  padding: 28px;
-  animation: fadeIn 1.0s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.final-card {
-  max-width: 680px;
-  width: 100%;
-  background: rgba(14, 11, 18, 0.88);
-  border: 1px solid rgba(215, 175, 120, 0.45);
-  border-radius: 18px;
-  padding: 44px 48px;
   text-align: center;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.9), 0 0 50px rgba(197, 160, 89, 0.15);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  max-width: 960px;
+  width: 90%;
+  min-height: 180px;
 }
 
-.final-main-title {
-  font-family: 'Cinzel', serif;
-  font-size: 34px;
-  font-weight: 700;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: #fff6ea;
-  text-shadow: 0 0 25px rgba(215, 175, 120, 0.4);
-  margin-bottom: 4px;
-}
-
-.final-subtitle {
-  font-family: 'Cinzel', serif;
-  font-size: 19px;
+/* White background with solid black border: clean artistic intervention */
+.final-phrase-badge {
+  background: #ffffff;
+  color: #080808;
+  border: 3px solid #000000;
+  border-radius: 6px;
+  padding: 24px 38px;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 30px;
   font-weight: 600;
-  letter-spacing: 0.15em;
-  color: #cca462;
-  margin-bottom: 26px;
+  line-height: 1.5;
+  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.75);
+  display: inline-block;
+  opacity: 0;
+  transform: scale(0.96);
+  transition: opacity 0.42s ease, transform 0.42s ease;
 }
 
-.final-body-text {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 18.5px;
-  line-height: 1.7;
-  color: #ddd0be;
-  text-align: justify;
-  margin-bottom: 30px;
+.final-phrase-badge.visible {
+  opacity: 1;
+  transform: scale(1);
 }
 
-.final-body-text p {
-  margin-bottom: 14px;
-  text-indent: 1.6em;
+.final-phrase-badge.title-phrase {
+  font-family: 'Cinzel', serif;
+  font-size: 42px;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 22px 50px;
 }
 
-.final-body-text p:first-of-type {
-  text-indent: 0;
+.final-phrase-badge.subtitle-phrase {
+  font-family: 'Cinzel', serif;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  font-style: italic;
+  padding: 18px 40px;
 }
 
-.final-closing-phrase {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 20px;
+.final-phrase-badge.closing-phrase {
+  font-size: 32px;
   font-weight: 700;
   font-style: italic;
-  color: #fce7c0 !important;
-  text-align: center;
-  margin-top: 24px;
-  text-indent: 0 !important;
-  border-top: 1px solid rgba(200, 165, 110, 0.35);
-  padding-top: 18px;
-  text-shadow: 0 0 18px rgba(245, 185, 45, 0.3);
-  opacity: 0;
-  transition: opacity 1.2s ease;
+  border-width: 4px;
+  padding: 28px 44px;
+  box-shadow: 0 20px 55px rgba(0, 0, 0, 0.85);
 }
 
-.final-closing-phrase.revealed {
-  opacity: 1;
-}
-
-.final-actions {
+/* Subtle post-reflection controls (NO download button) */
+.final-controls {
+  position: absolute;
+  bottom: 38px;
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
+  gap: 16px;
+  pointer-events: auto;
+  animation: fadeIn 0.8s ease;
 }
 
 .final-action-btn {
-  width: 100%;
-  padding: 14px 20px;
+  padding: 12px 22px;
   border-radius: 10px;
   cursor: pointer;
   display: flex;
@@ -487,50 +500,38 @@ html, body {
   justify-content: center;
   gap: 8px;
   font-family: 'Cinzel', serif;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.final-action-btn.primary {
-  background: linear-gradient(135deg, rgba(165, 125, 60, 0.9), rgba(115, 80, 30, 0.95));
-  border: 1px solid rgba(255, 220, 150, 0.6);
-  color: #fffaf0;
-  box-shadow: 0 8px 24px rgba(165, 125, 60, 0.35);
-}
-
-.final-action-btn.primary:hover {
-  transform: translateY(-2px);
-  background: linear-gradient(135deg, rgba(195, 150, 75, 1.0), rgba(135, 95, 40, 1.0));
-  box-shadow: 0 12px 30px rgba(215, 175, 120, 0.5);
-}
-
 .final-action-btn.secondary {
-  background: rgba(30, 26, 36, 0.85);
-  border: 1px solid rgba(180, 160, 140, 0.35);
-  color: #e5dacb;
+  background: rgba(255, 255, 255, 0.92);
+  border: 2px solid #000000;
+  color: #111111;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
 .final-action-btn.secondary:hover {
   transform: translateY(-2px);
-  background: rgba(45, 38, 52, 0.95);
-  border-color: rgba(215, 185, 150, 0.6);
-  color: #fff;
+  background: #ffffff;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
 }
 
 .final-action-btn.tertiary {
-  background: transparent;
-  border: 1px solid transparent;
-  color: #a89a88;
-  padding: 8px;
-  font-size: 12px;
+  background: rgba(18, 14, 22, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #e5dacb;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .final-action-btn.tertiary:hover {
-  color: #f0e6d6;
-  text-decoration: underline;
+  background: rgba(30, 24, 38, 0.95);
+  color: #fff;
+  transform: translateY(-2px);
 }
 
 /* ==========================================================================
@@ -557,6 +558,11 @@ html, body {
 }
 
 @media (max-width: 860px) {
+  .book-container {
+    width: 92vw;
+    height: 480px;
+    max-height: 85vh;
+  }
   .book-cover {
     flex-direction: column;
   }
@@ -566,25 +572,30 @@ html, body {
   .book-page-right {
     border-radius: 6px;
     padding: 24px;
-    min-height: auto;
+    height: 100%;
   }
   .book-text-body {
     font-size: 16px;
+    line-height: 1.6;
   }
-  .transition-text-body {
-    font-size: 17px;
+  .cinematic-phrase-text {
+    font-size: 25px;
   }
-  .final-card {
-    padding: 28px 24px;
+  .final-phrase-badge {
+    font-size: 21px;
+    padding: 18px 24px;
   }
-  .final-main-title {
-    font-size: 26px;
+  .final-phrase-badge.title-phrase {
+    font-size: 28px;
+    padding: 16px 28px;
   }
-  .final-subtitle {
-    font-size: 16px;
+  .final-phrase-badge.subtitle-phrase {
+    font-size: 20px;
+    padding: 14px 24px;
   }
-  .final-body-text {
-    font-size: 15px;
+  .final-phrase-badge.closing-phrase {
+    font-size: 22px;
+    padding: 20px 26px;
   }
   #pocket-watch-canvas {
     width: 140px;
@@ -594,5 +605,9 @@ html, body {
     bottom: 20px;
     left: 20px;
     padding: 14px;
+  }
+  .final-controls {
+    flex-direction: column;
+    bottom: 20px;
   }
 }

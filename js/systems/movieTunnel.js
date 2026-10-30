@@ -1,9 +1,10 @@
 /**
  * Scene 2: Movie Tunnel (1951 Animated Film)
  * Authentic Soft Watercolor & Diluted Pigment on Paper (ESTÉTICA DE ACUARELA).
- * Powdery blues, grayish celestes, soft turquoise, lavenders, lilacs, muted violets, powdery rose.
- * Driven by ColorGrid pigment simulation, autonomous BrushAgents, and multi-layer FlowField.
- * Expanded to cover full screen from center to corners.
+ * Slower, languid, expressive watercolor ribbons with persistent pigment trails,
+ * multi-scale strokes (broad washes, medium ribbons, sinuous filigrees),
+ * and center-to-corner radial depth (deep midnight & prussian blues at center,
+ * blossoming into luminous powdery blues, soft turquoises, and lilacs at corners).
  */
 import { FastMath } from '../math/noise.js';
 import { FlowField } from './flowField.js';
@@ -17,44 +18,51 @@ export class MovieTunnel {
     this.width = 0;
     this.height = 0;
 
-    // Persistent offscreen canvas buffer for cumulative watercolor painting
+    // Persistent offscreen canvas buffer for accumulated watercolor layers
     this.offscreenCanvas = document.createElement('canvas');
     this.offCtx = this.offscreenCanvas.getContext('2d');
 
-    // Soft powdery watercolor palette (strictly non-neon, non-phosphorescent)
-    this.palette = [
-      { r: 132, g: 168, b: 206 },  // Azul empolvado (powdery blue)
-      { r: 164, g: 198, b: 218 },  // Celeste grisáceo (grayish sky blue)
-      { r: 118, g: 192, b: 196 },  // Turquesa suave (soft turquoise)
-      { r: 178, g: 162, b: 204 },  // Lavanda (lavender)
-      { r: 196, g: 172, b: 212 },  // Lila (lilac)
-      { r: 138, g: 120, b: 168 },  // Violeta apagado (muted violet)
-      { r: 214, g: 166, b: 178 },  // Rosa empolvado (powdery rose)
-      { r: 48,  g: 82,  b: 124 }   // Acento azul mineral más intenso (deep muted Prussian)
+    // Rich Watercolor Palette with Deep Center Tones & Luminous Outer Tones
+    this.centerColors = [
+      { r: 16, g: 28, b: 56 },  // Azul Prusia profundo
+      { r: 24, g: 22, b: 54 },  // Índigo abisal
+      { r: 38, g: 18, b: 46 },  // Ciruela / violeta oscuro
+      { r: 18, g: 46, b: 62 },  // Azul petróleo denso
+      { r: 32, g: 24, b: 42 }   // Sombra berenjena suave
     ];
 
-    // FlowField configuration for broad organic watercolor spirals reaching corners
+    this.outerColors = [
+      { r: 135, g: 172, b: 212 }, // Azul empolvado clásico Disney
+      { r: 168, g: 205, b: 232 }, // Celeste cielo acuarelado
+      { r: 115, g: 198, b: 195 }, // Turquesa suave luminoso
+      { r: 178, g: 162, b: 212 }, // Lavanda suave
+      { r: 202, g: 178, b: 222 }, // Lila empolvado
+      { r: 218, g: 168, b: 182 }, // Rosa empolvado
+      { r: 142, g: 218, b: 214 }  // Menta translúcido
+    ];
+
+    // FlowField for organic, sweeping watercolor vortex curves
     this.flowField = new FlowField({
-      vortexStrength: 0.82,
-      radialExpansion: 0.44, // Generous radial expansion towards corners
-      noiseScale: 0.0016,
-      noiseStrength: 0.75,
-      turbulence: 0.28,
+      vortexStrength: 0.78,
+      radialExpansion: 0.38, // Gentle, fluid radial expansion outward
+      noiseScale: 0.0018,
+      noiseStrength: 0.72,
+      turbulence: 0.26,
       spiralDirection: 1
     });
 
-    // Pigment simulation & spatial coverage map
+    // Low-res pigment simulation & spatial coverage map
     this.colorGrid = new ColorGrid(64, 48);
 
     // Active autonomous brush agents
     this.agents = [];
-    this.maxAgents = 28; // Increased for richer corner coverage
+    this.maxAgents = 32;
 
-    // Soft pigment wash drips / stains
+    // Soft pigment wash drips & stains
     this.washStains = [];
     this.nextStainTime = 0;
 
-    // Completed paths for gentle surface light shimmers
+    // Completed paths for light wave glazes
     this.recentPaths = [];
     this.maxRecentPaths = 45;
   }
@@ -69,14 +77,14 @@ export class MovieTunnel {
 
     const cx = width / 2;
     const cy = height / 2;
-    const maxR = Math.hypot(width, height) * 0.78;
+    const maxR = Math.hypot(width, height) * 0.82;
 
-    // Soft watercolor paper ground: subtle muted slate-indigo paper wash
-    const bgGrad = this.offCtx.createRadialGradient(cx, cy, 15, cx, cy, maxR);
-    bgGrad.addColorStop(0.0, '#0c101a');
-    bgGrad.addColorStop(0.35, '#121724');
-    bgGrad.addColorStop(0.75, '#182030');
-    bgGrad.addColorStop(1.0, '#0e121e');
+    // Deep luminous indigo-slate paper ground with darker center
+    const bgGrad = this.offCtx.createRadialGradient(cx, cy, 12, cx, cy, maxR);
+    bgGrad.addColorStop(0.0, '#060810');
+    bgGrad.addColorStop(0.30, '#0d111c');
+    bgGrad.addColorStop(0.65, '#141a28');
+    bgGrad.addColorStop(1.0, '#0a0e18');
     this.offCtx.fillStyle = bgGrad;
     this.offCtx.fillRect(0, 0, width, height);
 
@@ -84,10 +92,10 @@ export class MovieTunnel {
     this.recentPaths = [];
     this.washStains = [];
     this.time = 0;
-    this.nextStainTime = 0.4;
+    this.nextStainTime = 0.3;
 
-    // Spawn initial watercolor strokes across center and mid-radii
-    for (let i = 0; i < 10; i++) {
+    // Seed initial diverse watercolor ribbons
+    for (let i = 0; i < 14; i++) {
       this.spawnAgent();
     }
 
@@ -124,25 +132,67 @@ export class MovieTunnel {
     }
   }
 
+  /**
+   * Samples color dynamically based on distance from center:
+   * Dark deep tones near vanishing point, blossoming to luminous tones at edges
+   */
+  getColorForRadius(r) {
+    const maxCorner = Math.hypot(this.width, this.height) * 0.75;
+    const normDist = Math.min(1.0, r / Math.max(100, maxCorner));
+
+    // Choose base color from center or outer palette
+    const centerCol = this.centerColors[Math.floor(Math.random() * this.centerColors.length)];
+    const outerCol = this.outerColors[Math.floor(Math.random() * this.outerColors.length)];
+
+    return FastMath.blendRGB(centerCol, outerCol, Math.pow(normDist, 0.75));
+  }
+
   spawnAgent() {
     const cx = this.width / 2;
     const cy = this.height / 2;
-    const maxCorner = Math.hypot(this.width, this.height) * 0.78;
+    const maxCorner = Math.hypot(this.width, this.height) * 0.82;
 
-    // Vary spawn radius: mostly from center, occasionally from mid-radius to seed corners
-    const isMidSpawn = Math.random() > 0.75;
-    const baseR = isMidSpawn ? (50 + Math.random() * (maxCorner * 0.45)) : (10 + Math.random() * 26);
+    // Spawning: 65% near center, 35% seeded at mid radii for continuous stratified coverage
+    const isMidSpawn = Math.random() > 0.65;
+    const baseR = isMidSpawn ? (45 + Math.random() * (maxCorner * 0.42)) : (10 + Math.random() * 26);
 
     const spawnAngle = this.colorGrid.findLeastCoveredAngle(cx, cy, baseR);
     const x = cx + Math.cos(spawnAngle) * baseR;
     const y = cy + Math.sin(spawnAngle) * baseR;
 
-    const col = this.palette[Math.floor(Math.random() * this.palette.length)];
-    const thickness = 12 + Math.random() * 28;
-    const opacity = 0.22 + Math.random() * 0.28;
+    const col = this.getColorForRadius(baseR);
+
+    // 3 Distinct Brush Categories for High Visual Richness (Reference Painting)
+    const category = Math.random();
+    let thickness, opacity, speed, maxLife, numPasses, bristleSpread;
+
+    if (category < 0.35) {
+      // 1. Broad translucent watercolor washes (soft billowing strata)
+      thickness = 24 + Math.random() * 22;
+      opacity = 0.16 + Math.random() * 0.14;
+      speed = 18 + Math.random() * 14; // very languid, fluid
+      maxLife = 18.0 + Math.random() * 8.0;
+      numPasses = 4;
+      bristleSpread = 0.52;
+    } else if (category < 0.75) {
+      // 2. Medium expressive pigment ribbons (defined curving bands)
+      thickness = 10 + Math.random() * 14;
+      opacity = 0.28 + Math.random() * 0.22;
+      speed = 24 + Math.random() * 18;
+      maxLife = 14.0 + Math.random() * 7.0;
+      numPasses = 3;
+      bristleSpread = 0.40;
+    } else {
+      // 3. Delicate sinuous filigrees (vein-like interconnecting lines)
+      thickness = 2.5 + Math.random() * 4.0;
+      opacity = 0.48 + Math.random() * 0.30;
+      speed = 30 + Math.random() * 20;
+      maxLife = 12.0 + Math.random() * 6.0;
+      numPasses = 2;
+      bristleSpread = 0.25;
+    }
 
     const initForce = this.flowField.getForce(x, y, cx, cy, this.time);
-    const speed = 46 + Math.random() * 55;
 
     this.agents.push(new BrushAgent({
       x,
@@ -150,13 +200,13 @@ export class MovieTunnel {
       vx: initForce.x * speed,
       vy: initForce.y * speed,
       speed,
-      maxSteerForce: 3.4,
+      maxSteerForce: 3.2,
       thickness,
       opacity,
       color: col,
-      maxLife: 7.5 + Math.random() * 5.0, // Long life to reach full corners
-      numPasses: 3,
-      bristleSpread: 0.42,
+      maxLife,
+      numPasses,
+      bristleSpread,
       isWet: true,
       isGothic: false
     }));
@@ -166,16 +216,15 @@ export class MovieTunnel {
     const cx = this.width / 2;
     const cy = this.height / 2;
     const angle = Math.random() * Math.PI * 2;
-    // Puddles distributed across entire viewport
-    const r = 35 + Math.random() * (Math.hypot(this.width, this.height) * 0.55);
-    const col = this.palette[Math.floor(Math.random() * this.palette.length)];
+    const r = 25 + Math.random() * (Math.hypot(this.width, this.height) * 0.55);
+    const col = this.getColorForRadius(r);
 
     this.washStains.push({
       x: cx + Math.cos(angle) * r,
       y: cy + Math.sin(angle) * r,
-      radius: 25 + Math.random() * 65,
+      radius: 28 + Math.random() * 75,
       color: col,
-      opacity: 0.08 + Math.random() * 0.14,
+      opacity: 0.08 + Math.random() * 0.12,
       drawn: false
     });
   }
@@ -187,13 +236,13 @@ export class MovieTunnel {
     const cx = this.width / 2;
     const cy = this.height / 2;
     const offCtx = this.offCtx;
-    const maxCorner = Math.hypot(this.width, this.height) * 0.78;
+    const maxCorner = Math.hypot(this.width, this.height) * 0.82;
 
-    // Watercolor bloom puddles
+    // Soft watercolor bloom stains
     this.nextStainTime -= dt * speedMult;
     if (this.nextStainTime <= 0) {
       this.spawnWashStain();
-      this.nextStainTime = 1.5 / Math.max(1, speedMult * 0.8);
+      this.nextStainTime = 1.6 / Math.max(1, speedMult * 0.85);
     }
 
     for (let i = this.washStains.length - 1; i >= 0; i--) {
@@ -202,7 +251,7 @@ export class MovieTunnel {
         offCtx.save();
         const radGrad = offCtx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.radius);
         radGrad.addColorStop(0, `rgba(${s.color.r}, ${s.color.g}, ${s.color.b}, ${s.opacity})`);
-        radGrad.addColorStop(0.7, `rgba(${s.color.r}, ${s.color.g}, ${s.color.b}, ${s.opacity * 0.5})`);
+        radGrad.addColorStop(0.65, `rgba(${s.color.r}, ${s.color.g}, ${s.color.b}, ${s.opacity * 0.45})`);
         radGrad.addColorStop(1, 'rgba(0,0,0,0)');
         offCtx.fillStyle = radGrad;
         offCtx.beginPath();
@@ -210,7 +259,7 @@ export class MovieTunnel {
         offCtx.fill();
         offCtx.restore();
 
-        this.colorGrid.depositPigment(s.x, s.y, s.color, s.opacity * 0.8);
+        this.colorGrid.depositPigment(s.x, s.y, s.color, s.opacity * 0.75);
         s.drawn = true;
       }
       this.washStains.splice(i, 1);
@@ -224,11 +273,16 @@ export class MovieTunnel {
     // Step agents & paint onto persistent canvas buffer
     for (let i = this.agents.length - 1; i >= 0; i--) {
       const agent = this.agents[i];
+
+      // Dynamically blend agent color toward outward tone as it journeys away from center
+      const currentR = Math.hypot(agent.x - cx, agent.y - cy);
+      const targetCol = this.getColorForRadius(currentR);
+      agent.currentColor = FastMath.blendRGB(agent.currentColor, targetCol, 0.04);
+
       agent.update(dt, this.flowField, this.colorGrid, cx, cy, this.time, speedMult);
       agent.drawSegment(offCtx);
 
-      const dist = Math.hypot(agent.x - cx, agent.y - cy);
-      if (agent.isDead || dist > maxCorner) {
+      if (agent.isDead || currentR > maxCorner) {
         if (agent.history.length > 5) {
           this.recentPaths.push(agent.history);
           if (this.recentPaths.length > this.maxRecentPaths) {
@@ -239,8 +293,8 @@ export class MovieTunnel {
       }
     }
 
-    // Diffuse pigment in low-res buffer
-    this.colorGrid.diffuse(0.02 * dt * speedMult);
+    // Gentle pigment diffusion in ColorGrid
+    this.colorGrid.diffuse(0.016 * dt * speedMult);
   }
 
   render(ctx, width, height, cx, cy, lightWaves, alpha = 1.0) {
@@ -255,18 +309,16 @@ export class MovieTunnel {
 
     // Subtle light wave glazes over existing strokes
     if (lightWaves && lightWaves.waves.length > 0) {
-      const maxR = Math.hypot(width, height) * 0.75;
+      const maxR = Math.hypot(width, height) * 0.78;
 
       ctx.save();
       for (const wave of lightWaves.waves) {
         const waveRadius = (wave.direction > 0 ? (1.0 - wave.progress) : wave.progress) * maxR;
-        const waveBand = wave.width * maxR * 0.9;
+        const waveBand = wave.width * maxR;
 
         for (const path of this.recentPaths) {
           ctx.beginPath();
           let hasPoints = false;
-          let strokeCol = null;
-
           for (let k = 0; k < path.length; k++) {
             const pt = path[k];
             const dist = Math.abs(pt.r - waveRadius);
@@ -274,16 +326,14 @@ export class MovieTunnel {
               if (!hasPoints) {
                 ctx.moveTo(pt.x, pt.y);
                 hasPoints = true;
-                strokeCol = pt.color;
               } else {
                 ctx.lineTo(pt.x, pt.y);
               }
             }
           }
-
-          if (hasPoints && strokeCol) {
-            ctx.strokeStyle = `rgba(${Math.min(255, strokeCol.r + 35)}, ${Math.min(255, strokeCol.g + 35)}, ${Math.min(255, strokeCol.b + 35)}, ${(0.32 * wave.intensity).toFixed(3)})`;
-            ctx.lineWidth = 3.8;
+          if (hasPoints) {
+            ctx.strokeStyle = `rgba(185, 220, 255, ${0.30 * wave.intensity})`;
+            ctx.lineWidth = 2.0;
             ctx.stroke();
           }
         }
@@ -291,14 +341,14 @@ export class MovieTunnel {
       ctx.restore();
     }
 
-    // Central aperture eye
-    const coreGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 38);
-    coreGrad.addColorStop(0, '#060910');
-    coreGrad.addColorStop(0.65, '#0e121c');
-    coreGrad.addColorStop(1, 'rgba(14, 18, 28, 0)');
+    // Deep luminous center core gradient (Reference painting eye)
+    const coreGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 32);
+    coreGrad.addColorStop(0, '#04060c');
+    coreGrad.addColorStop(0.65, '#0a0e18');
+    coreGrad.addColorStop(1, 'rgba(10, 14, 24, 0)');
     ctx.fillStyle = coreGrad;
     ctx.beginPath();
-    ctx.arc(cx, cy, 38, 0, Math.PI * 2);
+    ctx.arc(cx, cy, 32, 0, Math.PI * 2);
     ctx.fill();
 
     ctx.restore();

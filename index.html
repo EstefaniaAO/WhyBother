@@ -12,9 +12,9 @@
     <canvas id="tunnel-canvas"></canvas>
   </div>
 
-  <!-- Narrative Overlay (Book Opening & Transition Texts) -->
+  <!-- Narrative Overlay (Book Opening) -->
   <div id="narrative-overlay" class="narrative-overlay">
-    <!-- Opening Book Visual -->
+    <!-- Opening Book Visual (Fixed dimensions, stable layout) -->
     <div id="opening-book-container" class="book-container">
       <div class="book-cover">
         <div class="book-page book-page-left">
@@ -29,15 +29,16 @@
       </div>
     </div>
 
-    <!-- Literary Projection Container for Transitions -->
-    <div id="transition-text-container" class="transition-text-container" style="display: none;">
-      <div class="transition-era-tag" id="transition-era-tag"></div>
-      <div class="transition-text-body" id="transition-text-body"></div>
-    </div>
-
-    <!-- Discreet Continue Prompt (Appears ONLY when text finishes) -->
+    <!-- Discreet Continue Prompt for Book Opening (Appears ONLY when book text finishes) -->
     <div id="narrative-continue-hint" class="narrative-continue-hint">
       <span class="hint-symbol">␣</span> Presiona <kbd>ESPACIO</kbd> o haz <kbd>CLIC</kbd> para continuar
+    </div>
+  </div>
+
+  <!-- Cinematic Phrase-by-Phrase Transition Screen (Disney, Game, CREATE) -->
+  <div id="cinematic-overlay" class="cinematic-overlay" style="display: none;">
+    <div class="cinematic-phrase-wrap">
+      <div id="cinematic-phrase-text" class="cinematic-phrase-text"></div>
     </div>
   </div>
 
@@ -62,35 +63,20 @@
     </div>
   </main>
 
-  <!-- Final Contemplation & Reflection Overlay: WHY BOTHER? -->
-  <div id="final-contemplation-overlay" class="final-contemplation-overlay" style="display: none;">
-    <div class="final-card">
-      <h1 class="final-main-title">WHY BOTHER?</h1>
-      <h2 class="final-subtitle">¿Por qué molestarse?</h2>
-      
-      <div class="final-body-text">
-        <p>Porque crear nunca ha consistido únicamente en producir algo. Ha consistido en imaginar lo que todavía no existe, en explorar caminos que no siempre llevan a donde esperábamos y en encontrar algo propio entre todas las posibilidades.</p>
-        
-        <p>Porque ninguna herramienta puede decidir por nosotros qué nos conmueve, qué despierta nuestra curiosidad o qué queremos expresar.</p>
-        
-        <p>Las herramientas pueden cambiar, multiplicarse e incluso hacer posible lo que antes parecía inalcanzable. Pero siempre habrá tantas maneras de imaginar como personas dispuestas a hacerlo.</p>
-        
-        <p class="final-closing-phrase" id="final-closing-phrase">
-          Y porque, después de tantos años, de tantas historias y de tantas formas de contarla, Alicia siempre encontrará una madriguera en la que meterse.
-        </p>
-      </div>
+  <!-- Final Reflection Overlay: Direct over the living artwork (Phrase by Phrase) -->
+  <div id="final-reflection-overlay" class="final-reflection-overlay" style="display: none;">
+    <div class="final-phrase-container">
+      <div id="final-phrase-element" class="final-phrase-badge"></div>
+    </div>
 
-      <div class="final-actions">
-        <button class="final-action-btn primary" id="btn-download-art">
-          <span class="action-icon">📥</span> Guardar Mi Obra (PNG)
-        </button>
-        <button class="final-action-btn secondary" id="btn-resume-creating">
-          <span class="action-icon">🎨</span> Continuar Interviniendo
-        </button>
-        <button class="final-action-btn tertiary" id="btn-restart-experience">
-          <span class="action-icon">↺</span> Volver a la Madriguera
-        </button>
-      </div>
+    <!-- Subtle post-reflection controls (Appears only after all phrases are read) -->
+    <div id="final-controls" class="final-controls" style="display: none;">
+      <button class="final-action-btn secondary" id="btn-resume-creating">
+        <span class="action-icon">🎨</span> Continuar Interviniendo
+      </button>
+      <button class="final-action-btn tertiary" id="btn-restart-experience">
+        <span class="action-icon">↺</span> Volver a la Madriguera
+      </button>
     </div>
   </div>
 

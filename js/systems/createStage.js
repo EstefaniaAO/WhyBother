@@ -4,7 +4,7 @@
  * Palette: Rich purples & violets, warm golden yellows, deep & sky blues, turquoises,
  * lavenders, and rose accents.
  * Autonomous multi-agent organic system influenced by cursor forces (deflection, vortex wells, flick branchings).
- * Features Contemplate mode to stabilize the work into a finished presentation.
+ * Features gradual acceleration after ~15s and Contemplate mode to stabilize the work.
  */
 
 import { noise } from '../math/noise.js';
@@ -19,6 +19,10 @@ export class CreateStage {
     this.width = 0;
     this.height = 0;
     this.emergenceAlpha = 0; // Gradually emerges from darkness (0 -> 1)
+
+    // Gradual acceleration state (15s timer)
+    this.timeInCreate = 0;
+    this.speedBoost = 1.0;
 
     // Persistent canvas buffer for accumulated generative artwork
     this.offscreenCanvas = document.createElement('canvas');
@@ -90,6 +94,10 @@ export class CreateStage {
     this.cursor.isDown = false;
     this.cursor.active = false;
     this.cursor.holdTime = 0;
+
+    // Reset 15s acceleration timer fresh on entry
+    this.timeInCreate = 0;
+    this.speedBoost = 1.0;
 
     // Distribute wandering foci across the canvas
     this.foci.forEach((f, idx) => {
@@ -307,7 +315,16 @@ export class CreateStage {
   update(dt, speedMult = 1.0) {
     if (!this.isActive) return;
 
-    this.time += dt * speedMult;
+    // Track active time in CREATE stage
+    this.timeInCreate += dt;
+
+    // Gradual acceleration after ~15 seconds: gently ramps up to 1.35x
+    if (this.timeInCreate >= 15.0) {
+      this.speedBoost += (1.35 - this.speedBoost) * Math.min(1.0, dt * 0.35);
+    }
+
+    const currentSpeedMult = speedMult * this.speedBoost;
+    this.time += dt * currentSpeedMult;
     const offCtx = this.offCtx;
 
     // Gradual emergence from darkness into visibility
@@ -346,7 +363,7 @@ export class CreateStage {
 
     // Update wandering foci with smooth Lissajous & Simplex motion
     this.foci.forEach((f, idx) => {
-      f.angle += f.speed * dt;
+      f.angle += f.speed * dt * currentSpeedMult;
       const baseR = Math.min(this.width, this.height) * (0.24 + (idx % 2) * 0.14);
       const wanderX = noise.noise2D(idx * 15 + this.time * 0.07, idx * 8) * 110;
       const wanderY = noise.noise2D(idx * 8, idx * 15 + this.time * 0.07) * 110;
@@ -370,7 +387,7 @@ export class CreateStage {
     // Update and draw agents
     for (let i = this.agents.length - 1; i >= 0; i--) {
       const agent = this.agents[i];
-      agent.update(dt, adapterFlow, this.colorGrid, this.width / 2, this.height / 2, this.time, speedMult);
+      agent.update(dt, adapterFlow, this.colorGrid, this.width / 2, this.height / 2, this.time, currentSpeedMult);
       agent.drawSegment(offCtx);
 
       // Branching when cursor flicks or during high energy
@@ -388,7 +405,7 @@ export class CreateStage {
     }
 
     // Gentle pigment diffusion
-    this.colorGrid.diffuse(0.018 * dt * speedMult);
+    this.colorGrid.diffuse(0.018 * dt * currentSpeedMult);
   }
 
   render(ctx) {

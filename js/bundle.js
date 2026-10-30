@@ -680,9 +680,9 @@ class LightWaveSystem {
 /**
  * Scene 1: Book Tunnel (Original Book, 1865)
  * Inspired by Lewis Carroll & John Tenniel.
- * The original text paragraph literally builds the spiral tunnel
- * expanding from the central vanishing point all the way to the screen corners.
- * Strictly monochromatic (SOLO BLANCO Y NEGRO). High contrast black ink on cut paper.
+ * Monochromatic antique engraving, cut paper with drop shadows,
+ * grayscale depth tiers, and progressive spiral word streamers
+ * building the perspective tunnel outward from the central vanishing point to the corners.
  */
 
 class BookTunnel {
@@ -696,7 +696,7 @@ class BookTunnel {
     this.offscreenCanvas = document.createElement('canvas');
     this.offCtx = this.offscreenCanvas.getContext('2d');
 
-    // Complete original paragraph of Lewis Carroll provided by user
+    // Complete original paragraph of Lewis Carroll
     this.fullParagraph = 
       "Un momento más tarde, Alicia se metía también en la madriguera, sin pararse a considerar cómo se las arreglaría después para salir. " +
       "Al principio, la madriguera del conejo se extendía en línea recta como un túnel, y después torció bruscamente hacia abajo, tan bruscamente que Alicia no tuvo siquiera tiempo de pensar en detenerse y se encontró cayendo por lo que parecía un pozo muy profundo. " +
@@ -707,21 +707,24 @@ class BookTunnel {
 
     this.words = this.fullParagraph.split(/\s+/).filter(w => w.length > 0);
 
-    // Progressive spiral text streamers (streams of words forming the tunnel)
+    // Progressive spiral text streamers building the tunnel walls
     this.textStreamers = [];
-    this.maxStreamers = 6;
+    this.maxStreamers = 8;
     this.nextStreamerTime = 0;
 
-    // Concentric paper ring bands with drop shadows
+    // Concentric paper ring bands with drop shadows (structural tunnel arches)
     this.paperRings = [];
     this.nextRingTime = 0;
-    this.ringInterval = 1.25;
+    this.ringInterval = 1.35;
 
-    // Fine ink pen agents accompanying the text
+    // Multi-tone engraving pen agents (grays and deep blacks for depth)
     this.penAgents = [];
-    this.maxPenAgents = 26;
+    this.maxPenAgents = 28;
 
-    // Completed paths for subtle light wave shimmer
+    // Tunnel progressive emergence timer
+    this.tunnelAge = 0;
+
+    // Completed paths for light wave traversal
     this.recentPaths = [];
     this.maxRecentPaths = 50;
   }
@@ -732,20 +735,20 @@ class BookTunnel {
     this.offscreenCanvas.width = width;
     this.offscreenCanvas.height = height;
 
-    // Crisp heavy white/ivory paper ground
-    this.offCtx.fillStyle = '#faf8f5';
+    // Crisp heavy ivory paper ground
+    this.offCtx.fillStyle = '#faf8f4';
     this.offCtx.fillRect(0, 0, width, height);
 
-    // Initial deep center aperture (black hole at center)
+    // Initial deep vanishing point aperture
     const cx = width / 2;
     const cy = height / 2;
-    const coreGrad = this.offCtx.createRadialGradient(cx, cy, 0, cx, cy, 36);
+    const coreGrad = this.offCtx.createRadialGradient(cx, cy, 0, cx, cy, 38);
     coreGrad.addColorStop(0, '#000000');
-    coreGrad.addColorStop(0.7, '#0a0a0a');
-    coreGrad.addColorStop(1, 'rgba(250, 248, 245, 0)');
+    coreGrad.addColorStop(0.65, '#0e0e12');
+    coreGrad.addColorStop(1, 'rgba(250, 248, 244, 0)');
     this.offCtx.fillStyle = coreGrad;
     this.offCtx.beginPath();
-    this.offCtx.arc(cx, cy, 36, 0, Math.PI * 2);
+    this.offCtx.arc(cx, cy, 38, 0, Math.PI * 2);
     this.offCtx.fill();
 
     this.textStreamers = [];
@@ -753,16 +756,12 @@ class BookTunnel {
     this.penAgents = [];
     this.recentPaths = [];
     this.time = 0;
-    this.nextRingTime = 0.2;
-    this.nextStreamerTime = 0.1;
+    this.tunnelAge = 0;
+    this.nextRingTime = 0.5;
+    this.nextStreamerTime = 0.2;
 
-    // Seed initial text streamers from center
-    for (let i = 0; i < 3; i++) {
-      this.spawnTextStreamer(i * (Math.PI * 2 / 3));
-    }
-
-    // Seed initial pen agents
-    for (let i = 0; i < 10; i++) {
+    // Initial pen agents with multi-tonal depth
+    for (let i = 0; i < 14; i++) {
       this.spawnPenAgent();
     }
 
@@ -798,69 +797,102 @@ class BookTunnel {
     }
   }
 
+  /**
+   * Spawns a spiral text stream emerging directly from the central vanishing point
+   */
   spawnTextStreamer(startAngle = null) {
     const baseAngle = startAngle !== null ? startAngle : Math.random() * Math.PI * 2;
-    const maxCorner = Math.hypot(this.width, this.height) * 0.82;
+    const maxCorner = Math.hypot(this.width, this.height) * 0.84;
 
     this.textStreamers.push({
       baseAngle,
-      currentR: 16 + Math.random() * 20,
+      currentR: 18 + Math.random() * 16, // starts tight at vanishing point
       currentAngle: baseAngle,
-      spiralPitch: 36 + Math.random() * 28, // Radial growth per full revolution
+      spiralPitch: 34 + Math.random() * 24, // outward growth per revolution
       angularSpeed: 0.65 + Math.random() * 0.35,
-      wordIndex: 0,
+      wordIndex: Math.floor(Math.random() * this.words.length),
       charTimer: 0,
-      charInterval: 0.045, // Progressive character typing speed
+      charInterval: 0.042, // steady, readable word-stream cadence
       maxDist: maxCorner,
       isDone: false
     });
   }
 
+  /**
+   * Spawns expanding cut-paper ring arches with drop shadows
+   */
   spawnPaperRing() {
     const cx = this.width / 2;
     const cy = this.height / 2;
-    const wordCount = 14 + Math.floor(Math.random() * 18);
+    const wordCount = 12 + Math.floor(Math.random() * 16);
     const startIdx = Math.floor(Math.random() * (this.words.length - wordCount));
     const ringWords = [];
     for (let i = 0; i < wordCount; i++) {
       ringWords.push(this.words[(startIdx + i) % this.words.length]);
     }
 
-    // Rings expand all the way out to screen borders and corners
-    const maxScreenRadius = Math.hypot(this.width, this.height) * (0.28 + Math.random() * 0.52);
+    const maxScreenRadius = Math.hypot(this.width, this.height) * (0.32 + Math.random() * 0.52);
 
     this.paperRings.push({
-      currentRadius: 22 + Math.random() * 18,
+      currentRadius: 24 + Math.random() * 18,
       targetRadius: maxScreenRadius,
-      expansionSpeed: 28 + Math.random() * 34,
+      expansionSpeed: 24 + Math.random() * 30,
       rotationAngle: Math.random() * Math.PI * 2,
-      rotationSpeed: (0.03 + Math.random() * 0.04) * (Math.random() > 0.5 ? 1 : -1),
-      irregularity: 0.035 + Math.random() * 0.04,
+      rotationSpeed: (0.025 + Math.random() * 0.035) * (Math.random() > 0.5 ? 1 : -1),
+      irregularity: 0.032 + Math.random() * 0.038,
       words: ringWords,
       isStamped: false,
       shadowBlur: 14 + Math.random() * 16,
-      lineWidth: 1.4 + Math.random() * 1.6
+      lineWidth: 1.2 + Math.random() * 1.5
     });
   }
 
+  /**
+   * Spawns multi-tone engraving pen agent (Grayscale tiers + deep black)
+   */
   spawnPenAgent() {
     const cx = this.width / 2;
     const cy = this.height / 2;
     const angle = Math.random() * Math.PI * 2;
-    const startR = 10 + Math.random() * 22;
-    const maxCorner = Math.hypot(this.width, this.height) * 0.82;
+    const startR = 12 + Math.random() * 35;
+    const maxCorner = Math.hypot(this.width, this.height) * 0.84;
+
+    // Grayscale Depth Tiers:
+    // 1. Light graphite gray (distant paper etching)
+    // 2. Medium charcoal gray (mid-ground cross-hatching)
+    // 3. Rich Victorian jet ink (foreground contrast)
+    const tier = Math.random();
+    let strokeColor, strokeWidth, opacity;
+
+    if (tier < 0.35) {
+      // Light graphite gray
+      strokeColor = '178, 172, 164';
+      strokeWidth = 0.6 + Math.random() * 1.0;
+      opacity = 0.35 + Math.random() * 0.25;
+    } else if (tier < 0.70) {
+      // Medium charcoal gray
+      strokeColor = '98, 92, 86';
+      strokeWidth = 0.9 + Math.random() * 1.4;
+      opacity = 0.55 + Math.random() * 0.25;
+    } else {
+      // Rich deep ink black
+      strokeColor = '14, 14, 16';
+      strokeWidth = 1.2 + Math.random() * 1.8;
+      opacity = 0.75 + Math.random() * 0.25;
+    }
 
     this.penAgents.push({
       x: cx + Math.cos(angle) * startR,
       y: cy + Math.sin(angle) * startR,
       angle: angle,
       r: startR,
-      speedR: 45 + Math.random() * 60,
-      speedTheta: (0.42 + Math.random() * 0.75) * (Math.random() > 0.4 ? 1 : -1),
-      noiseScale: 0.0022 + Math.random() * 0.003,
-      lineWidth: 0.8 + Math.random() * 2.2,
-      opacity: 0.7 + Math.random() * 0.3, // Deep crisp black ink
-      isHatch: Math.random() > 0.55,
+      speedR: 38 + Math.random() * 52,
+      speedTheta: (0.38 + Math.random() * 0.68) * (Math.random() > 0.45 ? 1 : -1),
+      noiseScale: 0.0024 + Math.random() * 0.0025,
+      strokeColor,
+      lineWidth: strokeWidth,
+      opacity,
+      isHatch: Math.random() > 0.50,
       history: [],
       maxDist: maxCorner,
       age: 0
@@ -871,20 +903,22 @@ class BookTunnel {
     if (!this.initialized) return;
 
     this.time += dt * speedMult;
+    this.tunnelAge += dt * speedMult;
     const cx = this.width / 2;
     const cy = this.height / 2;
     const offCtx = this.offCtx;
 
-    // 1. Maintain and spawn spiral text streamers
+    // 1. Progressive Tunnel Word Streamers:
+    // Pace streamer appearance so the tunnel of words builds steadily from the center
     if (this.textStreamers.length < this.maxStreamers) {
       this.nextStreamerTime -= dt * speedMult;
       if (this.nextStreamerTime <= 0) {
         this.spawnTextStreamer();
-        this.nextStreamerTime = (1.5 + Math.random() * 1.5) / Math.max(1, speedMult * 0.8);
+        this.nextStreamerTime = (1.4 + Math.random() * 1.4) / Math.max(1, speedMult * 0.85);
       }
     }
 
-    // 2. Progressively stamp words along expanding spirals
+    // Advance word streamers along spirals
     for (let i = this.textStreamers.length - 1; i >= 0; i--) {
       const st = this.textStreamers[i];
       st.charTimer += dt * speedMult;
@@ -895,38 +929,38 @@ class BookTunnel {
         st.wordIndex++;
 
         // Advance along spiral
-        const dAngle = 0.28;
+        const dAngle = 0.27;
         st.currentAngle += dAngle;
         st.currentR += (st.spiralPitch / (Math.PI * 2)) * dAngle;
 
-        // Coordinates on spiral
+        // Position on spiral
         const px = cx + Math.cos(st.currentAngle) * st.currentR;
         const py = cy + Math.sin(st.currentAngle) * st.currentR;
 
-        // Font scaling with distance from vanishing point
-        const fontSize = Math.max(9, Math.min(26, Math.floor(10 + (st.currentR / 380) * 14)));
+        // Dynamic font size scaling with radius (perspective depth)
+        // Starts small near center, grows larger towards corners
+        const fontSize = Math.max(9, Math.min(26, Math.floor(10 + (st.currentR / 360) * 14)));
 
         offCtx.save();
         offCtx.translate(px, py);
-        // Tangent rotation to follow the curve of the spiral
+        // Tangent rotation to follow the curve of the tunnel spiral
         offCtx.rotate(st.currentAngle + Math.PI / 2);
 
-        // High-contrast pure black ink serif typography
+        // High contrast black ink typography
         offCtx.font = `700 ${fontSize}px "Cormorant Garamond", "Cinzel", "Times New Roman", serif`;
-        offCtx.fillStyle = '#080808';
+        offCtx.fillStyle = '#0a0a0c';
         offCtx.textAlign = 'center';
         offCtx.textBaseline = 'middle';
         offCtx.fillText(currentWord, 0, 0);
 
-        // Subtle ink underline connecting spiral words
-        if (Math.random() > 0.45) {
-          const wMetrics = offCtx.measureText(currentWord);
-          const wWidth = wMetrics.width;
+        // Subtle connecting ligature / pen underline
+        if (Math.random() > 0.48) {
+          const wWidth = offCtx.measureText(currentWord).width;
           offCtx.beginPath();
           offCtx.moveTo(-wWidth / 2, fontSize * 0.48);
-          offCtx.lineTo(wWidth / 2 + 5, fontSize * 0.48);
-          offCtx.strokeStyle = 'rgba(10, 10, 10, 0.65)';
-          offCtx.lineWidth = 0.9;
+          offCtx.lineTo(wWidth / 2 + 4, fontSize * 0.48);
+          offCtx.strokeStyle = 'rgba(14, 14, 16, 0.65)';
+          offCtx.lineWidth = 0.85;
           offCtx.stroke();
         }
 
@@ -937,7 +971,7 @@ class BookTunnel {
           st.wordIndex = 0;
         }
 
-        // Record recent path for light wave traversal
+        // Record recent path for subtle light wave shimmer
         this.recentPaths.push([{ x: px, y: py, r: st.currentR }]);
         if (this.recentPaths.length > this.maxRecentPaths) {
           this.recentPaths.shift();
@@ -954,11 +988,11 @@ class BookTunnel {
       }
     }
 
-    // 3. Spawning concentric paper rings
+    // 2. Structural Concentric Cut-Paper Rings
     this.nextRingTime -= dt * speedMult;
     if (this.nextRingTime <= 0) {
       this.spawnPaperRing();
-      this.nextRingTime = this.ringInterval / Math.max(1, speedMult * 0.8);
+      this.nextRingTime = this.ringInterval / Math.max(1, speedMult * 0.85);
     }
 
     for (let i = this.paperRings.length - 1; i >= 0; i--) {
@@ -966,7 +1000,7 @@ class BookTunnel {
       ring.currentRadius += ring.expansionSpeed * dt * speedMult;
       ring.rotationAngle += ring.rotationSpeed * dt * speedMult;
 
-      const numPts = 100;
+      const numPts = 90;
       const pts = [];
       for (let s = 0; s <= numPts; s++) {
         const theta = (s / numPts) * Math.PI * 2;
@@ -978,9 +1012,7 @@ class BookTunnel {
         const r = ring.currentRadius * (1.0 + n * ring.irregularity);
         pts.push({
           x: cx + Math.cos(theta) * r,
-          y: cy + Math.sin(theta) * r,
-          theta,
-          r
+          y: cy + Math.sin(theta) * r
         });
       }
 
@@ -993,21 +1025,21 @@ class BookTunnel {
       offCtx.closePath();
 
       // Sharp shadow & paper cut edge
-      offCtx.shadowColor = 'rgba(0, 0, 0, 0.22)';
+      offCtx.shadowColor = 'rgba(0, 0, 0, 0.20)';
       offCtx.shadowBlur = ring.shadowBlur;
       offCtx.shadowOffsetX = 0;
       offCtx.shadowOffsetY = 4;
-      offCtx.strokeStyle = 'rgba(10, 10, 10, 0.85)';
+      offCtx.strokeStyle = 'rgba(12, 12, 14, 0.80)';
       offCtx.lineWidth = ring.lineWidth;
       offCtx.stroke();
       offCtx.restore();
 
       // Stamp typography along paper ring edges
-      if (ring.currentRadius > 60 && !ring.isStamped) {
+      if (ring.currentRadius > 62 && !ring.isStamped) {
         offCtx.save();
-        const fontSize = Math.max(10, Math.min(26, Math.floor(ring.currentRadius * 0.058)));
+        const fontSize = Math.max(10, Math.min(26, Math.floor(ring.currentRadius * 0.056)));
         offCtx.font = `700 ${fontSize}px "Cormorant Garamond", "Cinzel", "Times New Roman", serif`;
-        offCtx.fillStyle = '#080808';
+        offCtx.fillStyle = '#08080a';
         offCtx.textAlign = 'center';
         offCtx.textBaseline = 'middle';
 
@@ -1037,7 +1069,7 @@ class BookTunnel {
       }
     }
 
-    // 4. Maintain active ink pen agents
+    // 3. Multi-Tone Pen Agents (Grayscale & Charcoal Depth)
     while (this.penAgents.length < this.maxPenAgents) {
       this.spawnPenAgent();
     }
@@ -1050,31 +1082,31 @@ class BookTunnel {
       const prevY = p.y;
 
       const nAngle = noise.noise2D(p.x * p.noiseScale, p.y * p.noiseScale + this.time * 0.05) * Math.PI * 2;
-      p.angle += p.speedTheta * dt * speedMult + Math.sin(nAngle) * 0.38 * dt * speedMult;
+      p.angle += p.speedTheta * dt * speedMult + Math.sin(nAngle) * 0.36 * dt * speedMult;
       p.r += p.speedR * dt * speedMult;
 
       p.x = cx + Math.cos(p.angle) * p.r;
       p.y = cy + Math.sin(p.angle) * p.r;
 
-      // Draw progressive stroke with solid black ink
+      // Draw progressive stroke with assigned tone
       offCtx.save();
       offCtx.beginPath();
       offCtx.moveTo(prevX, prevY);
       offCtx.lineTo(p.x, p.y);
-      offCtx.strokeStyle = `rgba(10, 10, 10, ${p.opacity})`;
+      offCtx.strokeStyle = `rgba(${p.strokeColor}, ${p.opacity})`;
       offCtx.lineWidth = p.lineWidth;
       offCtx.lineCap = 'round';
       offCtx.stroke();
 
-      // Cross-hatching ticks on some strokes (Victorian engraving style)
+      // Cross-hatching ticks (Victorian engraving style)
       if (p.isHatch && Math.random() > 0.58) {
-        const hLen = 5 + Math.random() * 10;
+        const hLen = 4 + Math.random() * 9;
         const normAngle = p.angle + Math.PI / 2 + (Math.random() - 0.5) * 0.5;
         offCtx.beginPath();
         offCtx.moveTo(p.x, p.y);
         offCtx.lineTo(p.x + Math.cos(normAngle) * hLen, p.y + Math.sin(normAngle) * hLen);
-        offCtx.strokeStyle = `rgba(15, 15, 15, ${p.opacity * 0.85})`;
-        offCtx.lineWidth = 0.7;
+        offCtx.strokeStyle = `rgba(${p.strokeColor}, ${p.opacity * 0.8})`;
+        offCtx.lineWidth = Math.max(0.5, p.lineWidth * 0.6);
         offCtx.stroke();
       }
       offCtx.restore();
@@ -1106,7 +1138,7 @@ class BookTunnel {
 
     // Subtle paper grain light wave highlight (no neon)
     if (lightWaves && lightWaves.waves.length > 0) {
-      const maxR = Math.hypot(width, height) * 0.75;
+      const maxR = Math.hypot(width, height) * 0.78;
 
       ctx.save();
       for (const wave of lightWaves.waves) {
@@ -1129,7 +1161,7 @@ class BookTunnel {
             }
           }
           if (hasPoints) {
-            ctx.strokeStyle = `rgba(255, 255, 255, ${0.35 * wave.intensity})`;
+            ctx.strokeStyle = `rgba(255, 255, 255, ${0.32 * wave.intensity})`;
             ctx.lineWidth = 1.8;
             ctx.stroke();
           }
@@ -1138,14 +1170,14 @@ class BookTunnel {
       ctx.restore();
     }
 
-    // Central dark core
-    const coreGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 34);
+    // Defined, deep central vanishing point core
+    const coreGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 36);
     coreGrad.addColorStop(0, '#000000');
-    coreGrad.addColorStop(0.6, '#0a0a0a');
-    coreGrad.addColorStop(1, 'rgba(250, 248, 245, 0)');
+    coreGrad.addColorStop(0.62, '#0c0c0e');
+    coreGrad.addColorStop(1, 'rgba(250, 248, 244, 0)');
     ctx.fillStyle = coreGrad;
     ctx.beginPath();
-    ctx.arc(cx, cy, 34, 0, Math.PI * 2);
+    ctx.arc(cx, cy, 36, 0, Math.PI * 2);
     ctx.fill();
 
     ctx.restore();
@@ -1157,9 +1189,10 @@ class BookTunnel {
 /**
  * Scene 2: Movie Tunnel (1951 Animated Film)
  * Authentic Soft Watercolor & Diluted Pigment on Paper (ESTÉTICA DE ACUARELA).
- * Powdery blues, grayish celestes, soft turquoise, lavenders, lilacs, muted violets, powdery rose.
- * Driven by ColorGrid pigment simulation, autonomous BrushAgents, and multi-layer FlowField.
- * Expanded to cover full screen from center to corners.
+ * Slower, languid, expressive watercolor ribbons with persistent pigment trails,
+ * multi-scale strokes (broad washes, medium ribbons, sinuous filigrees),
+ * and center-to-corner radial depth (deep midnight & prussian blues at center,
+ * blossoming into luminous powdery blues, soft turquoises, and lilacs at corners).
  */
 
 
@@ -1172,44 +1205,51 @@ class MovieTunnel {
     this.width = 0;
     this.height = 0;
 
-    // Persistent offscreen canvas buffer for cumulative watercolor painting
+    // Persistent offscreen canvas buffer for accumulated watercolor layers
     this.offscreenCanvas = document.createElement('canvas');
     this.offCtx = this.offscreenCanvas.getContext('2d');
 
-    // Soft powdery watercolor palette (strictly non-neon, non-phosphorescent)
-    this.palette = [
-      { r: 132, g: 168, b: 206 },  // Azul empolvado (powdery blue)
-      { r: 164, g: 198, b: 218 },  // Celeste grisáceo (grayish sky blue)
-      { r: 118, g: 192, b: 196 },  // Turquesa suave (soft turquoise)
-      { r: 178, g: 162, b: 204 },  // Lavanda (lavender)
-      { r: 196, g: 172, b: 212 },  // Lila (lilac)
-      { r: 138, g: 120, b: 168 },  // Violeta apagado (muted violet)
-      { r: 214, g: 166, b: 178 },  // Rosa empolvado (powdery rose)
-      { r: 48,  g: 82,  b: 124 }   // Acento azul mineral más intenso (deep muted Prussian)
+    // Rich Watercolor Palette with Deep Center Tones & Luminous Outer Tones
+    this.centerColors = [
+      { r: 16, g: 28, b: 56 },  // Azul Prusia profundo
+      { r: 24, g: 22, b: 54 },  // Índigo abisal
+      { r: 38, g: 18, b: 46 },  // Ciruela / violeta oscuro
+      { r: 18, g: 46, b: 62 },  // Azul petróleo denso
+      { r: 32, g: 24, b: 42 }   // Sombra berenjena suave
     ];
 
-    // FlowField configuration for broad organic watercolor spirals reaching corners
+    this.outerColors = [
+      { r: 135, g: 172, b: 212 }, // Azul empolvado clásico Disney
+      { r: 168, g: 205, b: 232 }, // Celeste cielo acuarelado
+      { r: 115, g: 198, b: 195 }, // Turquesa suave luminoso
+      { r: 178, g: 162, b: 212 }, // Lavanda suave
+      { r: 202, g: 178, b: 222 }, // Lila empolvado
+      { r: 218, g: 168, b: 182 }, // Rosa empolvado
+      { r: 142, g: 218, b: 214 }  // Menta translúcido
+    ];
+
+    // FlowField for organic, sweeping watercolor vortex curves
     this.flowField = new FlowField({
-      vortexStrength: 0.82,
-      radialExpansion: 0.44, // Generous radial expansion towards corners
-      noiseScale: 0.0016,
-      noiseStrength: 0.75,
-      turbulence: 0.28,
+      vortexStrength: 0.78,
+      radialExpansion: 0.38, // Gentle, fluid radial expansion outward
+      noiseScale: 0.0018,
+      noiseStrength: 0.72,
+      turbulence: 0.26,
       spiralDirection: 1
     });
 
-    // Pigment simulation & spatial coverage map
+    // Low-res pigment simulation & spatial coverage map
     this.colorGrid = new ColorGrid(64, 48);
 
     // Active autonomous brush agents
     this.agents = [];
-    this.maxAgents = 28; // Increased for richer corner coverage
+    this.maxAgents = 32;
 
-    // Soft pigment wash drips / stains
+    // Soft pigment wash drips & stains
     this.washStains = [];
     this.nextStainTime = 0;
 
-    // Completed paths for gentle surface light shimmers
+    // Completed paths for light wave glazes
     this.recentPaths = [];
     this.maxRecentPaths = 45;
   }
@@ -1224,14 +1264,14 @@ class MovieTunnel {
 
     const cx = width / 2;
     const cy = height / 2;
-    const maxR = Math.hypot(width, height) * 0.78;
+    const maxR = Math.hypot(width, height) * 0.82;
 
-    // Soft watercolor paper ground: subtle muted slate-indigo paper wash
-    const bgGrad = this.offCtx.createRadialGradient(cx, cy, 15, cx, cy, maxR);
-    bgGrad.addColorStop(0.0, '#0c101a');
-    bgGrad.addColorStop(0.35, '#121724');
-    bgGrad.addColorStop(0.75, '#182030');
-    bgGrad.addColorStop(1.0, '#0e121e');
+    // Deep luminous indigo-slate paper ground with darker center
+    const bgGrad = this.offCtx.createRadialGradient(cx, cy, 12, cx, cy, maxR);
+    bgGrad.addColorStop(0.0, '#060810');
+    bgGrad.addColorStop(0.30, '#0d111c');
+    bgGrad.addColorStop(0.65, '#141a28');
+    bgGrad.addColorStop(1.0, '#0a0e18');
     this.offCtx.fillStyle = bgGrad;
     this.offCtx.fillRect(0, 0, width, height);
 
@@ -1239,10 +1279,10 @@ class MovieTunnel {
     this.recentPaths = [];
     this.washStains = [];
     this.time = 0;
-    this.nextStainTime = 0.4;
+    this.nextStainTime = 0.3;
 
-    // Spawn initial watercolor strokes across center and mid-radii
-    for (let i = 0; i < 10; i++) {
+    // Seed initial diverse watercolor ribbons
+    for (let i = 0; i < 14; i++) {
       this.spawnAgent();
     }
 
@@ -1279,25 +1319,67 @@ class MovieTunnel {
     }
   }
 
+  /**
+   * Samples color dynamically based on distance from center:
+   * Dark deep tones near vanishing point, blossoming to luminous tones at edges
+   */
+  getColorForRadius(r) {
+    const maxCorner = Math.hypot(this.width, this.height) * 0.75;
+    const normDist = Math.min(1.0, r / Math.max(100, maxCorner));
+
+    // Choose base color from center or outer palette
+    const centerCol = this.centerColors[Math.floor(Math.random() * this.centerColors.length)];
+    const outerCol = this.outerColors[Math.floor(Math.random() * this.outerColors.length)];
+
+    return FastMath.blendRGB(centerCol, outerCol, Math.pow(normDist, 0.75));
+  }
+
   spawnAgent() {
     const cx = this.width / 2;
     const cy = this.height / 2;
-    const maxCorner = Math.hypot(this.width, this.height) * 0.78;
+    const maxCorner = Math.hypot(this.width, this.height) * 0.82;
 
-    // Vary spawn radius: mostly from center, occasionally from mid-radius to seed corners
-    const isMidSpawn = Math.random() > 0.75;
-    const baseR = isMidSpawn ? (50 + Math.random() * (maxCorner * 0.45)) : (10 + Math.random() * 26);
+    // Spawning: 65% near center, 35% seeded at mid radii for continuous stratified coverage
+    const isMidSpawn = Math.random() > 0.65;
+    const baseR = isMidSpawn ? (45 + Math.random() * (maxCorner * 0.42)) : (10 + Math.random() * 26);
 
     const spawnAngle = this.colorGrid.findLeastCoveredAngle(cx, cy, baseR);
     const x = cx + Math.cos(spawnAngle) * baseR;
     const y = cy + Math.sin(spawnAngle) * baseR;
 
-    const col = this.palette[Math.floor(Math.random() * this.palette.length)];
-    const thickness = 12 + Math.random() * 28;
-    const opacity = 0.22 + Math.random() * 0.28;
+    const col = this.getColorForRadius(baseR);
+
+    // 3 Distinct Brush Categories for High Visual Richness (Reference Painting)
+    const category = Math.random();
+    let thickness, opacity, speed, maxLife, numPasses, bristleSpread;
+
+    if (category < 0.35) {
+      // 1. Broad translucent watercolor washes (soft billowing strata)
+      thickness = 24 + Math.random() * 22;
+      opacity = 0.16 + Math.random() * 0.14;
+      speed = 18 + Math.random() * 14; // very languid, fluid
+      maxLife = 18.0 + Math.random() * 8.0;
+      numPasses = 4;
+      bristleSpread = 0.52;
+    } else if (category < 0.75) {
+      // 2. Medium expressive pigment ribbons (defined curving bands)
+      thickness = 10 + Math.random() * 14;
+      opacity = 0.28 + Math.random() * 0.22;
+      speed = 24 + Math.random() * 18;
+      maxLife = 14.0 + Math.random() * 7.0;
+      numPasses = 3;
+      bristleSpread = 0.40;
+    } else {
+      // 3. Delicate sinuous filigrees (vein-like interconnecting lines)
+      thickness = 2.5 + Math.random() * 4.0;
+      opacity = 0.48 + Math.random() * 0.30;
+      speed = 30 + Math.random() * 20;
+      maxLife = 12.0 + Math.random() * 6.0;
+      numPasses = 2;
+      bristleSpread = 0.25;
+    }
 
     const initForce = this.flowField.getForce(x, y, cx, cy, this.time);
-    const speed = 46 + Math.random() * 55;
 
     this.agents.push(new BrushAgent({
       x,
@@ -1305,13 +1387,13 @@ class MovieTunnel {
       vx: initForce.x * speed,
       vy: initForce.y * speed,
       speed,
-      maxSteerForce: 3.4,
+      maxSteerForce: 3.2,
       thickness,
       opacity,
       color: col,
-      maxLife: 7.5 + Math.random() * 5.0, // Long life to reach full corners
-      numPasses: 3,
-      bristleSpread: 0.42,
+      maxLife,
+      numPasses,
+      bristleSpread,
       isWet: true,
       isGothic: false
     }));
@@ -1321,16 +1403,15 @@ class MovieTunnel {
     const cx = this.width / 2;
     const cy = this.height / 2;
     const angle = Math.random() * Math.PI * 2;
-    // Puddles distributed across entire viewport
-    const r = 35 + Math.random() * (Math.hypot(this.width, this.height) * 0.55);
-    const col = this.palette[Math.floor(Math.random() * this.palette.length)];
+    const r = 25 + Math.random() * (Math.hypot(this.width, this.height) * 0.55);
+    const col = this.getColorForRadius(r);
 
     this.washStains.push({
       x: cx + Math.cos(angle) * r,
       y: cy + Math.sin(angle) * r,
-      radius: 25 + Math.random() * 65,
+      radius: 28 + Math.random() * 75,
       color: col,
-      opacity: 0.08 + Math.random() * 0.14,
+      opacity: 0.08 + Math.random() * 0.12,
       drawn: false
     });
   }
@@ -1342,13 +1423,13 @@ class MovieTunnel {
     const cx = this.width / 2;
     const cy = this.height / 2;
     const offCtx = this.offCtx;
-    const maxCorner = Math.hypot(this.width, this.height) * 0.78;
+    const maxCorner = Math.hypot(this.width, this.height) * 0.82;
 
-    // Watercolor bloom puddles
+    // Soft watercolor bloom stains
     this.nextStainTime -= dt * speedMult;
     if (this.nextStainTime <= 0) {
       this.spawnWashStain();
-      this.nextStainTime = 1.5 / Math.max(1, speedMult * 0.8);
+      this.nextStainTime = 1.6 / Math.max(1, speedMult * 0.85);
     }
 
     for (let i = this.washStains.length - 1; i >= 0; i--) {
@@ -1357,7 +1438,7 @@ class MovieTunnel {
         offCtx.save();
         const radGrad = offCtx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.radius);
         radGrad.addColorStop(0, `rgba(${s.color.r}, ${s.color.g}, ${s.color.b}, ${s.opacity})`);
-        radGrad.addColorStop(0.7, `rgba(${s.color.r}, ${s.color.g}, ${s.color.b}, ${s.opacity * 0.5})`);
+        radGrad.addColorStop(0.65, `rgba(${s.color.r}, ${s.color.g}, ${s.color.b}, ${s.opacity * 0.45})`);
         radGrad.addColorStop(1, 'rgba(0,0,0,0)');
         offCtx.fillStyle = radGrad;
         offCtx.beginPath();
@@ -1365,7 +1446,7 @@ class MovieTunnel {
         offCtx.fill();
         offCtx.restore();
 
-        this.colorGrid.depositPigment(s.x, s.y, s.color, s.opacity * 0.8);
+        this.colorGrid.depositPigment(s.x, s.y, s.color, s.opacity * 0.75);
         s.drawn = true;
       }
       this.washStains.splice(i, 1);
@@ -1379,11 +1460,16 @@ class MovieTunnel {
     // Step agents & paint onto persistent canvas buffer
     for (let i = this.agents.length - 1; i >= 0; i--) {
       const agent = this.agents[i];
+
+      // Dynamically blend agent color toward outward tone as it journeys away from center
+      const currentR = Math.hypot(agent.x - cx, agent.y - cy);
+      const targetCol = this.getColorForRadius(currentR);
+      agent.currentColor = FastMath.blendRGB(agent.currentColor, targetCol, 0.04);
+
       agent.update(dt, this.flowField, this.colorGrid, cx, cy, this.time, speedMult);
       agent.drawSegment(offCtx);
 
-      const dist = Math.hypot(agent.x - cx, agent.y - cy);
-      if (agent.isDead || dist > maxCorner) {
+      if (agent.isDead || currentR > maxCorner) {
         if (agent.history.length > 5) {
           this.recentPaths.push(agent.history);
           if (this.recentPaths.length > this.maxRecentPaths) {
@@ -1394,8 +1480,8 @@ class MovieTunnel {
       }
     }
 
-    // Diffuse pigment in low-res buffer
-    this.colorGrid.diffuse(0.02 * dt * speedMult);
+    // Gentle pigment diffusion in ColorGrid
+    this.colorGrid.diffuse(0.016 * dt * speedMult);
   }
 
   render(ctx, width, height, cx, cy, lightWaves, alpha = 1.0) {
@@ -1410,18 +1496,16 @@ class MovieTunnel {
 
     // Subtle light wave glazes over existing strokes
     if (lightWaves && lightWaves.waves.length > 0) {
-      const maxR = Math.hypot(width, height) * 0.75;
+      const maxR = Math.hypot(width, height) * 0.78;
 
       ctx.save();
       for (const wave of lightWaves.waves) {
         const waveRadius = (wave.direction > 0 ? (1.0 - wave.progress) : wave.progress) * maxR;
-        const waveBand = wave.width * maxR * 0.9;
+        const waveBand = wave.width * maxR;
 
         for (const path of this.recentPaths) {
           ctx.beginPath();
           let hasPoints = false;
-          let strokeCol = null;
-
           for (let k = 0; k < path.length; k++) {
             const pt = path[k];
             const dist = Math.abs(pt.r - waveRadius);
@@ -1429,16 +1513,14 @@ class MovieTunnel {
               if (!hasPoints) {
                 ctx.moveTo(pt.x, pt.y);
                 hasPoints = true;
-                strokeCol = pt.color;
               } else {
                 ctx.lineTo(pt.x, pt.y);
               }
             }
           }
-
-          if (hasPoints && strokeCol) {
-            ctx.strokeStyle = `rgba(${Math.min(255, strokeCol.r + 35)}, ${Math.min(255, strokeCol.g + 35)}, ${Math.min(255, strokeCol.b + 35)}, ${(0.32 * wave.intensity).toFixed(3)})`;
-            ctx.lineWidth = 3.8;
+          if (hasPoints) {
+            ctx.strokeStyle = `rgba(185, 220, 255, ${0.30 * wave.intensity})`;
+            ctx.lineWidth = 2.0;
             ctx.stroke();
           }
         }
@@ -1446,14 +1528,14 @@ class MovieTunnel {
       ctx.restore();
     }
 
-    // Central aperture eye
-    const coreGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 38);
-    coreGrad.addColorStop(0, '#060910');
-    coreGrad.addColorStop(0.65, '#0e121c');
-    coreGrad.addColorStop(1, 'rgba(14, 18, 28, 0)');
+    // Deep luminous center core gradient (Reference painting eye)
+    const coreGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 32);
+    coreGrad.addColorStop(0, '#04060c');
+    coreGrad.addColorStop(0.65, '#0a0e18');
+    coreGrad.addColorStop(1, 'rgba(10, 14, 24, 0)');
     ctx.fillStyle = coreGrad;
     ctx.beginPath();
-    ctx.arc(cx, cy, 38, 0, Math.PI * 2);
+    ctx.arc(cx, cy, 32, 0, Math.PI * 2);
     ctx.fill();
 
     ctx.restore();
@@ -1463,11 +1545,11 @@ class MovieTunnel {
 
 // --- js/systems/gameTunnel.js ---
 /**
- * Scene 3: Game Tunnel (American McGee's Alice, 2000)
+ * Scene 3: Game Tunnel (American McGee's Alice, 2000 / Alice Madness)
  * Authentic Dark Watercolor & Dense Gothic Pigment (ACUARELA OSCURA).
- * Burgundy, muted crimson, wine red, petrol blue, indigo, dark violet, deep purple, bluish gray.
- * Twisted asymmetric spirals, interlocking thorny roots, dense concentrated stains.
- * Expanded to cover full screen from center to corners.
+ * Dominated by midnight blue, dark petrol, deep indigo, burgundy, dark wine, and dark violet,
+ * balanced with luminous steel-blue and crimson contrast highlights towards corners.
+ * Features organic abstract crimson pigment splatters, elongated droplets, and branching tendrils.
  */
 
 
@@ -1484,26 +1566,34 @@ class GameTunnel {
     this.offscreenCanvas = document.createElement('canvas');
     this.offCtx = this.offscreenCanvas.getContext('2d');
 
-    // Deep gothic watercolor palette (strictly non-neon, matte dense pigments)
-    this.palette = [
-      { r: 115, g: 25, b: 45 },   // Borgoña (burgundy)
-      { r: 145, g: 30, b: 48 },   // Carmesí apagado (muted crimson)
-      { r: 90,  g: 18, b: 32 },   // Rojo vino (wine red)
-      { r: 28,  g: 62, b: 78 },   // Azul petróleo (petrol blue)
-      { r: 32,  g: 42, b: 85 },   // Índigo (indigo)
-      { r: 68,  g: 28, b: 75 },   // Violeta oscuro (dark violet)
-      { r: 48,  g: 18, b: 56 },   // Morado profundo (deep purple)
-      { r: 75,  g: 88, b: 102 }   // Gris azulado (bluish gray)
+    // Deep Gothic Palette: Midnight Blues, Dark Petrol, Indigo, Burgundy, Wine
+    this.centerColors = [
+      { r: 10, g: 15, b: 34 },  // Azul noche profundo
+      { r: 12, g: 34, b: 46 },  // Azul petróleo oscuro
+      { r: 18, g: 16, b: 52 },  // Índigo abisal
+      { r: 68, g: 12, b: 24 },  // Borgoña denso
+      { r: 85, g: 16, b: 28 },  // Rojo vino oscuro
+      { r: 38, g: 14, b: 48 }   // Violeta oscuro
+    ];
+
+    this.outerColors = [
+      { r: 35,  g: 82,  b: 108 }, // Azul petróleo
+      { r: 52,  g: 68,  b: 124 }, // Índigo rico
+      { r: 145, g: 26,  b: 46  }, // Carmesí apagado
+      { r: 188, g: 46,  b: 72  }, // Carmesí luminoso / rosa oscuro
+      { r: 112, g: 162, b: 198 }, // Azul acero luminoso (contraste)
+      { r: 135, g: 178, b: 210 }, // Celeste grisáceo
+      { r: 128, g: 112, b: 164 }  // Violeta grisáceo
     ];
 
     // FlowField for turbulent, twisted asymmetric curves reaching corners
     this.flowField = new FlowField({
-      vortexStrength: 0.76,
-      radialExpansion: 0.46, // Expands fully into corners
-      noiseScale: 0.0028,
-      noiseStrength: 1.15,
-      turbulence: 0.52,
-      spiralDirection: -1 // counter-swirl
+      vortexStrength: 0.82,
+      radialExpansion: 0.40, // Expands fully into corners
+      noiseScale: 0.0025,
+      noiseStrength: 1.10,
+      turbulence: 0.46,
+      spiralDirection: -1 // counter-swirl for unsettling asymmetric tension
     });
 
     // Pigment simulation & spatial coverage map
@@ -1511,13 +1601,16 @@ class GameTunnel {
 
     // Active autonomous brush agents
     this.agents = [];
-    this.maxAgents = 30; // Increased for rich corner coverage
+    this.maxAgents = 34;
+
+    // Organic Abstract Crimson Splatters & Droplets
+    this.nextSplatterTime = 0;
 
     // Dense pigment puddles / dark concentrated blotches
     this.denseBlotches = [];
     this.nextBlotchTime = 0;
 
-    // Completed paths for subtle surface light shimmers
+    // Completed paths for surface light shimmers
     this.recentPaths = [];
     this.maxRecentPaths = 45;
   }
@@ -1532,14 +1625,14 @@ class GameTunnel {
 
     const cx = width / 2;
     const cy = height / 2;
-    const maxR = Math.hypot(width, height) * 0.78;
+    const maxR = Math.hypot(width, height) * 0.82;
 
-    // Deep blackened charcoal & raw umber paper background
+    // Deep blackened charcoal & midnight umber paper background
     const bgGrad = this.offCtx.createRadialGradient(cx, cy, 10, cx, cy, maxR);
-    bgGrad.addColorStop(0.0, '#040206');
-    bgGrad.addColorStop(0.35, '#0d040a');
-    bgGrad.addColorStop(0.75, '#120714');
-    bgGrad.addColorStop(1.0, '#07020a');
+    bgGrad.addColorStop(0.0, '#020306');
+    bgGrad.addColorStop(0.30, '#060912');
+    bgGrad.addColorStop(0.65, '#0c121e');
+    bgGrad.addColorStop(1.0, '#04060c');
     this.offCtx.fillStyle = bgGrad;
     this.offCtx.fillRect(0, 0, width, height);
 
@@ -1547,10 +1640,11 @@ class GameTunnel {
     this.recentPaths = [];
     this.denseBlotches = [];
     this.time = 0;
-    this.nextBlotchTime = 0.3;
+    this.nextBlotchTime = 0.4;
+    this.nextSplatterTime = 0.6;
 
-    // Spawn initial dark watercolor strokes near center and mid-radii
-    for (let i = 0; i < 10; i++) {
+    // Spawn initial dark strokes across center and mid radii
+    for (let i = 0; i < 14; i++) {
       this.spawnAgent();
     }
 
@@ -1587,24 +1681,66 @@ class GameTunnel {
     }
   }
 
+  /**
+   * Radial Color Depth:
+   * Midnight blues, dark petrol, and deep wine near the central abyss,
+   * transitioning outwards into rich indigo, crimson, and luminous steel-blue highlights
+   */
+  getColorForRadius(r) {
+    const maxCorner = Math.hypot(this.width, this.height) * 0.75;
+    const normDist = Math.min(1.0, r / Math.max(100, maxCorner));
+
+    const centerCol = this.centerColors[Math.floor(Math.random() * this.centerColors.length)];
+    const outerCol = this.outerColors[Math.floor(Math.random() * this.outerColors.length)];
+
+    return FastMath.blendRGB(centerCol, outerCol, Math.pow(normDist, 0.70));
+  }
+
   spawnAgent() {
     const cx = this.width / 2;
     const cy = this.height / 2;
-    const maxCorner = Math.hypot(this.width, this.height) * 0.78;
+    const maxCorner = Math.hypot(this.width, this.height) * 0.82;
 
-    const isMidSpawn = Math.random() > 0.72;
-    const baseR = isMidSpawn ? (45 + Math.random() * (maxCorner * 0.45)) : (10 + Math.random() * 24);
+    const isMidSpawn = Math.random() > 0.68;
+    const baseR = isMidSpawn ? (45 + Math.random() * (maxCorner * 0.42)) : (10 + Math.random() * 26);
 
     const spawnAngle = this.colorGrid.findLeastCoveredAngle(cx, cy, baseR);
     const x = cx + Math.cos(spawnAngle) * baseR;
     const y = cy + Math.sin(spawnAngle) * baseR;
 
-    const col = this.palette[Math.floor(Math.random() * this.palette.length)];
-    const thickness = 9 + Math.random() * 28;
-    const opacity = 0.28 + Math.random() * 0.35; // concentrated dark pigment
+    const col = this.getColorForRadius(baseR);
+
+    // Varied Brush Hierarchy (Inspired by reference painting strata)
+    const category = Math.random();
+    let thickness, opacity, speed, maxLife, numPasses, bristleSpread;
+
+    if (category < 0.35) {
+      // 1. Broad deep midnight blue and wine strata
+      thickness = 22 + Math.random() * 20;
+      opacity = 0.24 + Math.random() * 0.16;
+      speed = 22 + Math.random() * 16;
+      maxLife = 16.0 + Math.random() * 7.0;
+      numPasses = 4;
+      bristleSpread = 0.48;
+    } else if (category < 0.75) {
+      // 2. Dense twisted asymmetrical gothic ribbons
+      thickness = 9 + Math.random() * 13;
+      opacity = 0.35 + Math.random() * 0.25;
+      speed = 28 + Math.random() * 20;
+      maxLife = 13.0 + Math.random() * 6.0;
+      numPasses = 3;
+      bristleSpread = 0.38;
+    } else {
+      // 3. Sharp carmine and petrol thorn filigrees
+      thickness = 2.4 + Math.random() * 3.8;
+      opacity = 0.55 + Math.random() * 0.30;
+      speed = 34 + Math.random() * 22;
+      maxLife = 11.0 + Math.random() * 5.0;
+      numPasses = 2;
+      bristleSpread = 0.22;
+    }
 
     const initForce = this.flowField.getForce(x, y, cx, cy, this.time);
-    const speed = 48 + Math.random() * 55;
 
     this.agents.push(new BrushAgent({
       x,
@@ -1612,31 +1748,117 @@ class GameTunnel {
       vx: initForce.x * speed,
       vy: initForce.y * speed,
       speed,
-      maxSteerForce: 4.8,
+      maxSteerForce: 4.2,
       thickness,
       opacity,
       color: col,
-      maxLife: 7.2 + Math.random() * 4.5, // Extended life to explore corners
-      numPasses: 3,
-      bristleSpread: 0.38,
+      maxLife,
+      numPasses,
+      bristleSpread,
       isWet: true,
       isGothic: true
     }));
+  }
+
+  /**
+   * Spawns an abstract, artistic crimson splatter & elongated droplet cluster
+   * Treated strictly as watercolor pigment dispersion (non-gore, artistic abstract expression)
+   */
+  spawnAbstractSplatter(atX = null, atY = null) {
+    const cx = this.width / 2;
+    const cy = this.height / 2;
+    const offCtx = this.offCtx;
+
+    let sx = atX;
+    let sy = atY;
+
+    if (sx === null || sy === null) {
+      const angle = Math.random() * Math.PI * 2;
+      const r = 35 + Math.random() * (Math.hypot(this.width, this.height) * 0.48);
+      sx = cx + Math.cos(angle) * r;
+      sy = cy + Math.sin(angle) * r;
+    }
+
+    // Rich crimson / wine watercolor pigments
+    const crimsonColors = [
+      { r: 145, g: 24, b: 42 }, // Carmesí rico
+      { r: 110, g: 18, b: 32 }, // Vino tinto
+      { r: 175, g: 32, b: 54 }, // Carmín vibrante
+      { r: 78,  g: 12, b: 24 }  // Borgoña oscuro
+    ];
+    const col = crimsonColors[Math.floor(Math.random() * crimsonColors.length)];
+
+    offCtx.save();
+
+    // 1. Central teardrop / elongated droplet aligned with flow
+    const flow = this.flowField.getForce(sx, sy, cx, cy, this.time);
+    const flowAngle = Math.atan2(flow.y, flow.x);
+    const dropLen = 12 + Math.random() * 24;
+    const dropRadius = 3 + Math.random() * 6;
+
+    offCtx.translate(sx, sy);
+    offCtx.rotate(flowAngle);
+
+    // Translucent bleeding watercolor body
+    const dropGrad = offCtx.createRadialGradient(0, 0, 0, 0, 0, dropLen);
+    dropGrad.addColorStop(0, `rgba(${col.r}, ${col.g}, ${col.b}, 0.65)`);
+    dropGrad.addColorStop(0.5, `rgba(${col.r}, ${col.g}, ${col.b}, 0.35)`);
+    dropGrad.addColorStop(1, 'rgba(0,0,0,0)');
+    offCtx.fillStyle = dropGrad;
+
+    offCtx.beginPath();
+    offCtx.ellipse(dropLen * 0.4, 0, dropLen * 0.6, dropRadius, 0, 0, Math.PI * 2);
+    offCtx.fill();
+
+    // 2. Organic satellite micro-droplets flung along trajectory
+    const numSatellites = 3 + Math.floor(Math.random() * 5);
+    for (let s = 0; s < numSatellites; s++) {
+      const satDist = dropLen + 6 + Math.random() * 28;
+      const satSpread = (Math.random() - 0.5) * 14;
+      const satR = 1.0 + Math.random() * 2.5;
+      const satAlpha = 0.30 + Math.random() * 0.45;
+
+      offCtx.beginPath();
+      offCtx.arc(satDist, satSpread, satR, 0, Math.PI * 2);
+      offCtx.fillStyle = `rgba(${col.r}, ${col.g}, ${col.b}, ${satAlpha})`;
+      offCtx.fill();
+    }
+
+    // 3. Fine branching capillary tendrils (organic dispersion)
+    if (Math.random() > 0.45) {
+      offCtx.beginPath();
+      offCtx.moveTo(0, 0);
+      let tx = 0;
+      let ty = 0;
+      const steps = 4 + Math.floor(Math.random() * 4);
+      for (let st = 0; st < steps; st++) {
+        tx += 4 + Math.random() * 8;
+        ty += (Math.random() - 0.5) * 8;
+        offCtx.lineTo(tx, ty);
+      }
+      offCtx.strokeStyle = `rgba(${col.r}, ${col.g}, ${col.b}, 0.50)`;
+      offCtx.lineWidth = 1.0;
+      offCtx.stroke();
+    }
+
+    offCtx.restore();
+
+    this.colorGrid.depositPigment(sx, sy, col, 0.22);
   }
 
   spawnDenseBlotch() {
     const cx = this.width / 2;
     const cy = this.height / 2;
     const angle = Math.random() * Math.PI * 2;
-    const r = 30 + Math.random() * (Math.hypot(this.width, this.height) * 0.52);
-    const col = this.palette[Math.floor(Math.random() * this.palette.length)];
+    const r = 20 + Math.random() * (Math.hypot(this.width, this.height) * 0.50);
+    const col = this.getColorForRadius(r);
 
     this.denseBlotches.push({
       x: cx + Math.cos(angle) * r,
       y: cy + Math.sin(angle) * r,
-      radius: 18 + Math.random() * 50,
+      radius: 20 + Math.random() * 55,
       color: col,
-      opacity: 0.12 + Math.random() * 0.18,
+      opacity: 0.12 + Math.random() * 0.16,
       drawn: false
     });
   }
@@ -1648,13 +1870,20 @@ class GameTunnel {
     const cx = this.width / 2;
     const cy = this.height / 2;
     const offCtx = this.offCtx;
-    const maxCorner = Math.hypot(this.width, this.height) * 0.78;
+    const maxCorner = Math.hypot(this.width, this.height) * 0.82;
 
-    // Dark concentrated pigment blotches
+    // Organic Abstract Crimson Splatters
+    this.nextSplatterTime -= dt * speedMult;
+    if (this.nextSplatterTime <= 0) {
+      this.spawnAbstractSplatter();
+      this.nextSplatterTime = (2.2 + Math.random() * 2.2) / Math.max(1, speedMult * 0.85);
+    }
+
+    // Dark dense watercolor blotches
     this.nextBlotchTime -= dt * speedMult;
     if (this.nextBlotchTime <= 0) {
       this.spawnDenseBlotch();
-      this.nextBlotchTime = 1.4 / Math.max(1, speedMult * 0.8);
+      this.nextBlotchTime = 1.4 / Math.max(1, speedMult * 0.85);
     }
 
     for (let i = this.denseBlotches.length - 1; i >= 0; i--) {
@@ -1663,7 +1892,7 @@ class GameTunnel {
         offCtx.save();
         const radGrad = offCtx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.radius);
         radGrad.addColorStop(0, `rgba(${b.color.r}, ${b.color.g}, ${b.color.b}, ${b.opacity})`);
-        radGrad.addColorStop(0.65, `rgba(${b.color.r}, ${b.color.g}, ${b.color.b}, ${b.opacity * 0.5})`);
+        radGrad.addColorStop(0.6, `rgba(${b.color.r}, ${b.color.g}, ${b.color.b}, ${b.opacity * 0.45})`);
         radGrad.addColorStop(1, 'rgba(0,0,0,0)');
         offCtx.fillStyle = radGrad;
         offCtx.beginPath();
@@ -1671,13 +1900,13 @@ class GameTunnel {
         offCtx.fill();
         offCtx.restore();
 
-        this.colorGrid.depositPigment(b.x, b.y, b.color, b.opacity * 1.2);
+        this.colorGrid.depositPigment(b.x, b.y, b.color, b.opacity * 0.85);
         b.drawn = true;
       }
       this.denseBlotches.splice(i, 1);
     }
 
-    // Maintain active dark brush agents
+    // Maintain active brush agents
     while (this.agents.length < this.maxAgents) {
       this.spawnAgent();
     }
@@ -1685,11 +1914,21 @@ class GameTunnel {
     // Step agents & paint onto persistent canvas buffer
     for (let i = this.agents.length - 1; i >= 0; i--) {
       const agent = this.agents[i];
+
+      // Dynamically blend agent color toward outward tone as it journeys away from center
+      const currentR = Math.hypot(agent.x - cx, agent.y - cy);
+      const targetCol = this.getColorForRadius(currentR);
+      agent.currentColor = FastMath.blendRGB(agent.currentColor, targetCol, 0.04);
+
       agent.update(dt, this.flowField, this.colorGrid, cx, cy, this.time, speedMult);
       agent.drawSegment(offCtx);
 
-      const dist = Math.hypot(agent.x - cx, agent.y - cy);
-      if (agent.isDead || dist > maxCorner) {
+      // Occasional organic splatter spawned along high-curvature turns of dark agents
+      if (Math.random() > 0.985 && agent.currentColor.r > 100) {
+        this.spawnAbstractSplatter(agent.x, agent.y);
+      }
+
+      if (agent.isDead || currentR > maxCorner) {
         if (agent.history.length > 5) {
           this.recentPaths.push(agent.history);
           if (this.recentPaths.length > this.maxRecentPaths) {
@@ -1700,7 +1939,7 @@ class GameTunnel {
       }
     }
 
-    // Diffuse pigment in low-res buffer
+    // Pigment diffusion
     this.colorGrid.diffuse(0.018 * dt * speedMult);
   }
 
@@ -1714,20 +1953,18 @@ class GameTunnel {
 
     ctx.drawImage(this.offscreenCanvas, 0, 0);
 
-    // Subtle wine/petrol shimmer over existing twisted roots
+    // Subtle dark wine / petrol surface shimmers
     if (lightWaves && lightWaves.waves.length > 0) {
-      const maxR = Math.hypot(width, height) * 0.75;
+      const maxR = Math.hypot(width, height) * 0.78;
 
       ctx.save();
       for (const wave of lightWaves.waves) {
         const waveRadius = (wave.direction > 0 ? (1.0 - wave.progress) : wave.progress) * maxR;
-        const waveBand = wave.width * maxR * 0.9;
+        const waveBand = wave.width * maxR;
 
         for (const path of this.recentPaths) {
           ctx.beginPath();
           let hasPoints = false;
-          let strokeCol = null;
-
           for (let k = 0; k < path.length; k++) {
             const pt = path[k];
             const dist = Math.abs(pt.r - waveRadius);
@@ -1735,16 +1972,14 @@ class GameTunnel {
               if (!hasPoints) {
                 ctx.moveTo(pt.x, pt.y);
                 hasPoints = true;
-                strokeCol = pt.color;
               } else {
                 ctx.lineTo(pt.x, pt.y);
               }
             }
           }
-
-          if (hasPoints && strokeCol) {
-            ctx.strokeStyle = `rgba(${Math.min(255, strokeCol.r + 40)}, ${strokeCol.g}, ${strokeCol.b}, ${(0.35 * wave.intensity).toFixed(3)})`;
-            ctx.lineWidth = 3.4;
+          if (hasPoints) {
+            ctx.strokeStyle = `rgba(185, 45, 68, ${0.35 * wave.intensity})`;
+            ctx.lineWidth = 1.8;
             ctx.stroke();
           }
         }
@@ -1752,14 +1987,14 @@ class GameTunnel {
       ctx.restore();
     }
 
-    // Central abyss aperture
-    const coreGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 38);
+    // Deep blackened abyss core gradient
+    const coreGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 32);
     coreGrad.addColorStop(0, '#000000');
-    coreGrad.addColorStop(0.65, '#0e030a');
-    coreGrad.addColorStop(1, 'rgba(14, 3, 10, 0)');
+    coreGrad.addColorStop(0.60, '#040208');
+    coreGrad.addColorStop(1, 'rgba(4, 2, 8, 0)');
     ctx.fillStyle = coreGrad;
     ctx.beginPath();
-    ctx.arc(cx, cy, 38, 0, Math.PI * 2);
+    ctx.arc(cx, cy, 32, 0, Math.PI * 2);
     ctx.fill();
 
     ctx.restore();
@@ -2367,7 +2602,7 @@ class PocketWatch {
  * Palette: Rich purples & violets, warm golden yellows, deep & sky blues, turquoises,
  * lavenders, and rose accents.
  * Autonomous multi-agent organic system influenced by cursor forces (deflection, vortex wells, flick branchings).
- * Features Contemplate mode to stabilize the work into a finished presentation.
+ * Features gradual acceleration after ~15s and Contemplate mode to stabilize the work.
  */
 
 
@@ -2381,6 +2616,10 @@ class CreateStage {
     this.width = 0;
     this.height = 0;
     this.emergenceAlpha = 0; // Gradually emerges from darkness (0 -> 1)
+
+    // Gradual acceleration state (15s timer)
+    this.timeInCreate = 0;
+    this.speedBoost = 1.0;
 
     // Persistent canvas buffer for accumulated generative artwork
     this.offscreenCanvas = document.createElement('canvas');
@@ -2452,6 +2691,10 @@ class CreateStage {
     this.cursor.isDown = false;
     this.cursor.active = false;
     this.cursor.holdTime = 0;
+
+    // Reset 15s acceleration timer fresh on entry
+    this.timeInCreate = 0;
+    this.speedBoost = 1.0;
 
     // Distribute wandering foci across the canvas
     this.foci.forEach((f, idx) => {
@@ -2669,7 +2912,16 @@ class CreateStage {
   update(dt, speedMult = 1.0) {
     if (!this.isActive) return;
 
-    this.time += dt * speedMult;
+    // Track active time in CREATE stage
+    this.timeInCreate += dt;
+
+    // Gradual acceleration after ~15 seconds: gently ramps up to 1.35x
+    if (this.timeInCreate >= 15.0) {
+      this.speedBoost += (1.35 - this.speedBoost) * Math.min(1.0, dt * 0.35);
+    }
+
+    const currentSpeedMult = speedMult * this.speedBoost;
+    this.time += dt * currentSpeedMult;
     const offCtx = this.offCtx;
 
     // Gradual emergence from darkness into visibility
@@ -2708,7 +2960,7 @@ class CreateStage {
 
     // Update wandering foci with smooth Lissajous & Simplex motion
     this.foci.forEach((f, idx) => {
-      f.angle += f.speed * dt;
+      f.angle += f.speed * dt * currentSpeedMult;
       const baseR = Math.min(this.width, this.height) * (0.24 + (idx % 2) * 0.14);
       const wanderX = noise.noise2D(idx * 15 + this.time * 0.07, idx * 8) * 110;
       const wanderY = noise.noise2D(idx * 8, idx * 15 + this.time * 0.07) * 110;
@@ -2732,7 +2984,7 @@ class CreateStage {
     // Update and draw agents
     for (let i = this.agents.length - 1; i >= 0; i--) {
       const agent = this.agents[i];
-      agent.update(dt, adapterFlow, this.colorGrid, this.width / 2, this.height / 2, this.time, speedMult);
+      agent.update(dt, adapterFlow, this.colorGrid, this.width / 2, this.height / 2, this.time, currentSpeedMult);
       agent.drawSegment(offCtx);
 
       // Branching when cursor flicks or during high energy
@@ -2750,7 +3002,7 @@ class CreateStage {
     }
 
     // Gentle pigment diffusion
-    this.colorGrid.diffuse(0.018 * dt * speedMult);
+    this.colorGrid.diffuse(0.018 * dt * currentSpeedMult);
   }
 
   render(ctx) {
@@ -3112,23 +3364,24 @@ const watchContainer = document.getElementById('watch-container');
 const watchHintEl = document.getElementById('watch-hint');
 const mainUi = document.getElementById('main-ui');
 
-// Narrative DOM Elements
+// Narrative Book Opening DOM Elements
 const narrativeOverlay = document.getElementById('narrative-overlay');
 const openingBookContainer = document.getElementById('opening-book-container');
 const bookTextBody = document.getElementById('book-text-body');
-const transitionTextContainer = document.getElementById('transition-text-container');
-const transitionEraTag = document.getElementById('transition-era-tag');
-const transitionTextBody = document.getElementById('transition-text-body');
 const narrativeContinueHint = document.getElementById('narrative-continue-hint');
+
+// Cinematic Phrase-by-Phrase Transition Screen
+const cinematicOverlay = document.getElementById('cinematic-overlay');
+const cinematicPhraseText = document.getElementById('cinematic-phrase-text');
 
 // Create Stage Controls
 const createControlsPanel = document.getElementById('create-controls-panel');
 const btnContemplate = document.getElementById('btn-contemplate');
 
-// Final Contemplation & Reflection Overlay
-const finalOverlay = document.getElementById('final-contemplation-overlay');
-const finalClosingPhrase = document.getElementById('final-closing-phrase');
-const btnDownloadArt = document.getElementById('btn-download-art');
+// Final Reflection (Over the living artwork)
+const finalReflectionOverlay = document.getElementById('final-reflection-overlay');
+const finalPhraseElement = document.getElementById('final-phrase-element');
+const finalControls = document.getElementById('final-controls');
 const btnResumeCreating = document.getElementById('btn-resume-creating');
 const btnRestartExperience = document.getElementById('btn-restart-experience');
 
@@ -3151,202 +3404,137 @@ const createStage = new CreateStage();
 let pocketWatch;
 let transitionManager;
 
-// Web Audio Ambiance Synthesizer
-class AmbianceAudio {
+// Primary Audio Player: Assets/Alice in Wonderland.mp3
+class ExperienceAudio {
   constructor() {
-    this.ctx = null;
-    this.isPlaying = false;
-    this.tickInterval = null;
-    this.droneOsc = null;
-    this.droneGain = null;
+    this.bgMusic = new Audio('assets/Alice in Wonderland.mp3');
+    this.bgMusic.loop = true;
+    this.bgMusic.volume = 0.38; // Elegant, atmospheric, non-invasive volume
+    this.isStarted = false;
   }
 
-  init() {
-    if (this.ctx) return;
-    try {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      this.ctx = new AudioContext();
-
-      this.masterGain = this.ctx.createGain();
-      this.masterGain.gain.setValueAtTime(0.2, this.ctx.currentTime);
-      this.masterGain.connect(this.ctx.destination);
-
-      this.droneOsc = this.ctx.createOscillator();
-      this.droneGain = this.ctx.createGain();
-      this.droneGain.gain.setValueAtTime(0.04, this.ctx.currentTime);
-      this.droneOsc.type = 'sine';
-      this.droneOsc.frequency.setValueAtTime(55, this.ctx.currentTime);
-      this.droneOsc.connect(this.droneGain);
-      this.droneGain.connect(this.masterGain);
-      this.droneOsc.start();
-
-      this.startTickLoop();
-      this.isPlaying = true;
-    } catch (e) {
-      console.warn('Web Audio not allowed or failed:', e);
+  start() {
+    if (this.isStarted) return;
+    const playPromise = this.bgMusic.play();
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        this.isStarted = true;
+      }).catch(() => {
+        // Autoplay policy: will trigger on next user click or keypress
+      });
     }
   }
 
-  startTickLoop() {
-    let tickCount = 0;
-    this.tickInterval = setInterval(() => {
-      if (!this.ctx || this.ctx.state !== 'running') return;
-      tickCount++;
-      const now = this.ctx.currentTime;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-
-      osc.type = tickCount % 2 === 0 ? 'sine' : 'triangle';
-      osc.frequency.setValueAtTime(tickCount % 2 === 0 ? 980 : 720, now);
-      gain.gain.setValueAtTime(0.05, now);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
-
-      osc.connect(gain);
-      gain.connect(this.masterGain);
-      osc.start(now);
-      osc.stop(now + 0.06);
-    }, 550);
-  }
-
   triggerTransitionWhoosh() {
-    if (!this.ctx || this.ctx.state !== 'running') return;
+    // Subtle volume dip & swell during era shift to reinforce passage through time
+    if (!this.isStarted) return;
     try {
-      const now = this.ctx.currentTime;
-      const bufferSize = this.ctx.sampleRate * 1.5;
-      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-      const data = buffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) {
-        data[i] = Math.random() * 2 - 1;
-      }
-
-      const noiseSource = this.ctx.createBufferSource();
-      noiseSource.buffer = buffer;
-
-      const filter = this.ctx.createBiquadFilter();
-      filter.type = 'bandpass';
-      filter.frequency.setValueAtTime(180, now);
-      filter.frequency.exponentialRampToValueAtTime(1400, now + 0.7);
-      filter.frequency.exponentialRampToValueAtTime(120, now + 1.4);
-      filter.Q.setValueAtTime(3.5, now);
-
-      const gain = this.ctx.createGain();
-      gain.gain.setValueAtTime(0.01, now);
-      gain.gain.linearRampToValueAtTime(0.18, now + 0.7);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
-
-      noiseSource.connect(filter);
-      filter.connect(gain);
-      gain.connect(this.masterGain);
-
-      noiseSource.start(now);
-      noiseSource.stop(now + 1.6);
+      const origVol = this.bgMusic.volume;
+      this.bgMusic.volume = Math.max(0.15, origVol * 0.7);
+      setTimeout(() => {
+        this.bgMusic.volume = origVol;
+      }, 1200);
     } catch (e) {
-      // Audio sweep fallback
+      // Ignore audio volume glitches
     }
   }
 
   setEra(era) {
-    if (!this.ctx) return;
-    const now = this.ctx.currentTime;
-    if (era === 0) {
-      this.droneOsc.frequency.exponentialRampToValueAtTime(55, now + 1.0);
-    } else if (era === 1) {
-      this.droneOsc.frequency.exponentialRampToValueAtTime(110, now + 1.0);
-    } else if (era === 2) {
-      this.droneOsc.frequency.exponentialRampToValueAtTime(42, now + 1.0);
-    } else {
-      this.droneOsc.frequency.exponentialRampToValueAtTime(88, now + 1.0);
-    }
+    // Music plays continuously across eras and CREATE without resetting
+  }
+
+  init() {
+    this.start();
   }
 }
 
-const audio = new AmbianceAudio();
+const audio = new ExperienceAudio();
 
 // ==========================================================================
-// NARRATIVE TEXT DEFINITIONS
+// CINEMATIC SENTENCE-BY-SENTENCE DEFINITIONS
 // ==========================================================================
-const NARRATIVES = {
-  // Opening: El Libro Original
-  0: {
-    isBook: true,
-    paragraphs: [
-      "Pero cuando el conejo se sacó un reloj de bolsillo del chaleco, lo miró y echó a correr, Alicia se levantó de un salto, porque comprendió de golpe que ella nunca había visto un conejo con chaleco, ni con reloj que sacarse de él, y, ardiendo de curiosidad, se puso a correr tras el conejo por la pradera, y llegó justo a tiempo para ver cómo se precipitaba en una madriguera que se abría al pie del seto.",
-      "Un momento más tarde, Alicia se metía también en la madriguera, sin pararse a considerar cómo se las arreglaría después para salir."
-    ]
-  },
+const CINEMATIC_PHRASES = {
   // Transición hacia Disney: 1951
-  1: {
-    isBook: false,
-    tag: "1951 · La Película Animada",
-    paragraphs: [
-      "Ochenta y seis años habían pasado desde que aquella historia fuera escrita. El mundo había cambiado, y las historias comenzaban a encontrar nuevas maneras de existir. Ya no vivían solamente entre las páginas de un libro. Ahora podían cobrar vida a través de ilustraciones en movimiento, colores que parecían salirse del papel y melodías que acompañaban cada aventura.",
-      "En una de aquellas versiones, otra pequeña Alicia cantaba entre flores que hablaban, mientras se despedía de su gata Diana antes de seguir al conejo. El mundo que antes había sido imaginado con palabras ahora podía verse, escucharse y moverse ante nuestros ojos.",
-      "Pero la curiosidad seguía siendo la misma. Y, sin embargo, un momento más tarde, Alicia se metía también en la madriguera, sin pararse a considerar cómo se las arreglaría después para salir."
-    ]
-  },
+  1: [
+    "Ochenta y seis años habían pasado desde que aquella historia fuera escrita.",
+    "El mundo había cambiado, y las historias comenzaban a encontrar nuevas maneras de existir.",
+    "Ya no vivían solamente entre las páginas de un libro.",
+    "Ahora podían cobrar vida a través de ilustraciones en movimiento, colores que parecían salirse del papel y melodías que acompañaban cada aventura.",
+    "En una de aquellas versiones, otra pequeña Alicia cantaba entre flores que hablaban, mientras se despedía de su gata Diana antes de seguir al conejo.",
+    "El mundo que antes había sido imaginado con palabras ahora podía verse, escucharse y moverse ante nuestros ojos.",
+    "Pero la curiosidad seguía siendo la misma.",
+    "Y, sin embargo, un momento más tarde, Alicia se metía también en la madriguera, sin pararse a considerar cómo se las arreglaría después para salir."
+  ],
+
   // Transición hacia el Videojuego: 2011
-  2: {
-    isBook: false,
-    tag: "2011 · El Videojuego",
-    paragraphs: [
-      "Sesenta años más tarde, el mundo de Alicia era muy diferente. Las historias ya no se limitaban a ser leídas o contempladas. Ahora podían recorrerse, explorarse e incluso alterarse. Aquello que antes exigía miles y miles de dibujos podía tomar forma mediante herramientas digitales, y los mundos imaginados podían convertirse en lugares que cualquiera podía habitar.",
-      "Pero no todos los Países de las Maravillas conservaban la inocencia de aquel primero. En una nueva historia, Alicia Liddell regresaba a un mundo deformado por sus propios recuerdos. Los colores se habían vuelto más sombríos, los caminos más inquietantes y los personajes, mucho menos familiares. Ya no bastaba con observar cómo se desarrollaba la aventura. Esta vez, había que atravesarla.",
-      "Y aunque el mundo al otro lado fuera irreconocible, algo permanecía intacto. Un momento más tarde, Alicia se metía también en la madriguera, sin pararse a considerar cómo se las arreglaría después para salir."
-    ]
-  },
+  2: [
+    "Sesenta años más tarde, el mundo de Alicia era muy diferente.",
+    "Las historias ya no se limitaban a ser leídas o contempladas.",
+    "Ahora podían recorrerse, explorarse e incluso alterarse.",
+    "Aquello que antes exigía miles y miles de dibujos podía tomar forma mediante herramientas digitales, y los mundos imaginados podían convertirse en lugares que cualquiera podía habitar.",
+    "Pero no todos los Países de las Maravillas conservaban la inocencia de aquel primero.",
+    "En una nueva historia, Alicia Liddell regresaba a un mundo deformado por sus propios recuerdos.",
+    "Los colores se habían vuelto más sombríos, los caminos más inquietantes y los personajes, mucho menos familiares.",
+    "Ya no bastaba con observar cómo se desarrollaba la aventura.",
+    "Esta vez, había que atravesarla.",
+    "Y aunque el mundo al otro lado fuera irreconocible, algo permanecía intacto.",
+    "Un momento más tarde, Alicia se metía también en la madriguera, sin pararse a considerar cómo se las arreglaría después para salir."
+  ],
+
   // Transición hacia CREATE
-  3: {
-    isBook: false,
-    tag: "El Tiempo Presente · Creación",
-    paragraphs: [
-      "Más de cien años habían pasado.",
-      "Cientos de Alicias habían existido desde entonces. Algunas habían sido dibujadas, otras pintadas, animadas, actuadas, reconstruidas y transformadas. Cada una había encontrado su propia forma de caer, y cada una había llevado consigo algo de quien la imaginó.",
-      "Las herramientas habían cambiado. Las posibilidades parecían no tener fin. Ahora, bastaba una instrucción para obtener imágenes de mundos que antes habrían requerido incontables horas de trabajo.",
-      "Y entonces...",
-      "¿qué quedaba por imaginar?"
-    ]
-  }
+  3: [
+    "Más de cien años habían pasado.",
+    "Cientos de Alicias habían existido desde entonces.",
+    "Algunas habían sido dibujadas, otras pintadas, animadas, actuadas, reconstruidas y transformadas.",
+    "Cada una había encontrado su propia forma de caer, y cada una había llevado consigo algo de quien la imaginó.",
+    "Las herramientas habían cambiado.",
+    "Las posibilidades parecían no tener fin.",
+    "Ahora, bastaba una instrucción para obtener imágenes de mundos que antes habrían requerido incontables horas de trabajo.",
+    "Y entonces...",
+    "¿qué quedaba por imaginar?"
+  ]
 };
 
-// Progressive Typing Engine
-class NarrativeTypewriter {
+// Final Reflection Sentences (Presented one by one over the living artwork)
+const FINAL_REFLECTION_SEQUENCE = [
+  { text: "WHY BOTHER?", type: "title-phrase" },
+  { text: "¿Por qué molestarse?", type: "subtitle-phrase" },
+  { text: "Porque crear nunca ha consistido únicamente en producir algo.", type: "normal" },
+  { text: "Ha consistido en imaginar lo que todavía no existe, en explorar caminos que no siempre llevan a donde esperábamos y en encontrar algo propio entre todas las posibilidades.", type: "normal" },
+  { text: "Porque ninguna herramienta puede decidir por nosotros qué nos conmueve, qué despierta nuestra curiosidad o qué queremos expresar.", type: "normal" },
+  { text: "Las herramientas pueden cambiar, multiplicarse e incluso hacer posible lo que antes parecía inalcanzable.", type: "normal" },
+  { text: "Pero siempre habrá tantas maneras de imaginar como personas dispuestas a hacerlo.", type: "normal" },
+  { text: "Y porque, después de tantos años, de tantas historias y de tantas formas de contarla, Alicia siempre encontrará una madriguera en la que meterse.", type: "closing-phrase" }
+];
+
+// ==========================================================================
+// BOOK OPENING TYPEWRITER
+// ==========================================================================
+class BookTypewriter {
   constructor() {
     this.isTyping = false;
     this.isComplete = false;
     this.typeInterval = null;
-    this.currentNarrative = null;
-    this.targetElement = null;
-    this.fullHtml = '';
+    this.paragraphs = [
+      "Pero cuando el conejo se sacó un reloj de bolsillo del chaleco, lo miró y echó a correr, Alicia se levantó de un salto, porque comprendió de golpe que ella nunca había visto un conejo con chaleco, ni con reloj que sacarse de él, y, ardiendo de curiosidad, se puso a correr tras el conejo por la pradera, y llegó justo a tiempo para ver cómo se precipitaba en una madriguera que se abría al pie del seto.",
+      "Un momento más tarde, Alicia se metía también en la madriguera, sin pararse a considerar cómo se las arreglaría después para salir."
+    ];
   }
 
-  start(narrativeConfig, onComplete) {
-    this.currentNarrative = narrativeConfig;
+  start(onComplete) {
     this.onComplete = onComplete;
     this.isComplete = false;
     this.isTyping = true;
     narrativeContinueHint.classList.remove('visible');
+    bookTextBody.innerHTML = '';
 
-    if (narrativeConfig.isBook) {
-      openingBookContainer.style.display = 'block';
-      transitionTextContainer.style.display = 'none';
-      this.targetElement = bookTextBody;
-    } else {
-      openingBookContainer.style.display = 'none';
-      transitionTextContainer.style.display = 'block';
-      transitionEraTag.textContent = narrativeConfig.tag || '';
-      this.targetElement = transitionTextBody;
-    }
-
-    this.targetElement.innerHTML = '';
-
-    // Build array of tokens (words and paragraph breaks)
     const tokens = [];
-    narrativeConfig.paragraphs.forEach((pText, pIdx) => {
+    this.paragraphs.forEach((pText, pIdx) => {
       const words = pText.split(/\s+/);
-      words.forEach((w, wIdx) => {
+      words.forEach((w) => {
         tokens.push({ text: w + ' ', pIdx });
       });
-      if (pIdx < narrativeConfig.paragraphs.length - 1) {
+      if (pIdx < this.paragraphs.length - 1) {
         tokens.push({ text: '\n\n', pIdx });
       }
     });
@@ -3355,8 +3543,7 @@ class NarrativeTypewriter {
     let currentParagraphIndex = -1;
     let currentPElement = null;
 
-    // Build full text for fast-skip
-    this.fullHtml = narrativeConfig.paragraphs.map(p => `<p>${p}</p>`).join('');
+    this.fullHtml = this.paragraphs.map(p => `<p>${p}</p>`).join('');
 
     this.typeInterval = setInterval(() => {
       if (currentTokenIndex >= tokens.length) {
@@ -3370,21 +3557,19 @@ class NarrativeTypewriter {
       if (tok.pIdx !== currentParagraphIndex) {
         currentParagraphIndex = tok.pIdx;
         currentPElement = document.createElement('p');
-        this.targetElement.appendChild(currentPElement);
+        bookTextBody.appendChild(currentPElement);
       }
 
-      if (tok.text === '\n\n') {
-        // Next paragraph
-      } else {
+      if (tok.text !== '\n\n') {
         currentPElement.textContent += tok.text;
       }
-    }, 42); // Comfortable, fluid literary typing cadence
+    }, 40);
   }
 
   fastForward() {
     if (!this.isTyping) return;
     clearInterval(this.typeInterval);
-    this.targetElement.innerHTML = this.fullHtml;
+    bookTextBody.innerHTML = this.fullHtml;
     this.finish();
   }
 
@@ -3399,46 +3584,195 @@ class NarrativeTypewriter {
   }
 }
 
-const narrativeTypewriter = new NarrativeTypewriter();
+const bookTypewriter = new BookTypewriter();
 
-// Show narrative stage
-function displayNarrative(narrativeIndex) {
+// ==========================================================================
+// CINEMATIC PHRASE-BY-PHRASE CONTROLLER (DISNEY, GAME, CREATE)
+// ==========================================================================
+class CinematicPhrasePresenter {
+  constructor() {
+    this.isActive = false;
+    this.phrases = [];
+    this.currentIndex = 0;
+    this.isTransitioning = false;
+    this.onAllFinished = null;
+  }
+
+  start(phrasesList, onAllFinished) {
+    this.phrases = phrasesList;
+    this.currentIndex = 0;
+    this.onAllFinished = onAllFinished;
+    this.isActive = true;
+    this.isTransitioning = false;
+
+    cinematicOverlay.style.display = 'flex';
+    cinematicOverlay.style.opacity = '1';
+    this.showCurrentPhrase();
+  }
+
+  showCurrentPhrase() {
+    if (this.currentIndex >= this.phrases.length) {
+      this.finish();
+      return;
+    }
+
+    const text = this.phrases[this.currentIndex];
+    cinematicPhraseText.classList.remove('visible');
+
+    setTimeout(() => {
+      cinematicPhraseText.textContent = text;
+      cinematicPhraseText.classList.add('visible');
+      this.isTransitioning = false;
+    }, 280);
+  }
+
+  advance() {
+    if (!this.isActive || this.isTransitioning) return;
+    this.isTransitioning = true;
+
+    cinematicPhraseText.classList.remove('visible');
+
+    setTimeout(() => {
+      this.currentIndex++;
+      if (this.currentIndex >= this.phrases.length) {
+        this.finish();
+      } else {
+        this.showCurrentPhrase();
+      }
+    }, 320);
+  }
+
+  finish() {
+    this.isActive = false;
+    cinematicOverlay.style.opacity = '0';
+    setTimeout(() => {
+      cinematicOverlay.style.display = 'none';
+      if (this.onAllFinished) {
+        this.onAllFinished();
+      }
+    }, 500);
+  }
+}
+
+const cinematicPresenter = new CinematicPhrasePresenter();
+
+// ==========================================================================
+// FINAL LIVING REFLECTION CONTROLLER (OVER THE ACTIVE ARTWORK)
+// ==========================================================================
+class FinalReflectionPresenter {
+  constructor() {
+    this.isActive = false;
+    this.currentIndex = 0;
+    this.isTransitioning = false;
+  }
+
+  start() {
+    this.isActive = true;
+    this.currentIndex = 0;
+    this.isTransitioning = false;
+
+    finalReflectionOverlay.style.display = 'flex';
+    finalControls.style.display = 'none';
+    this.showCurrentPhrase();
+  }
+
+  showCurrentPhrase() {
+    if (this.currentIndex >= FINAL_REFLECTION_SEQUENCE.length) {
+      this.finish();
+      return;
+    }
+
+    const item = FINAL_REFLECTION_SEQUENCE[this.currentIndex];
+    finalPhraseElement.classList.remove('visible');
+
+    setTimeout(() => {
+      finalPhraseElement.className = 'final-phrase-badge ' + (item.type || '');
+      finalPhraseElement.textContent = item.text;
+      finalPhraseElement.classList.add('visible');
+      this.isTransitioning = false;
+    }, 280);
+  }
+
+  advance() {
+    if (!this.isActive || this.isTransitioning) return;
+
+    if (this.currentIndex >= FINAL_REFLECTION_SEQUENCE.length - 1) {
+      // Last phrase already shown, display controls
+      this.finish();
+      return;
+    }
+
+    this.isTransitioning = true;
+    finalPhraseElement.classList.remove('visible');
+
+    setTimeout(() => {
+      this.currentIndex++;
+      this.showCurrentPhrase();
+    }, 320);
+  }
+
+  finish() {
+    this.isActive = false;
+    finalControls.style.display = 'flex';
+  }
+
+  hide() {
+    this.isActive = false;
+    finalReflectionOverlay.style.display = 'none';
+    finalPhraseElement.classList.remove('visible');
+    finalControls.style.display = 'none';
+  }
+}
+
+const finalReflectionPresenter = new FinalReflectionPresenter();
+
+// ==========================================================================
+// NARRATIVE DISPATCHER
+// ==========================================================================
+function startOpeningBook() {
   narrativeOverlay.classList.remove('hidden');
   narrativeOverlay.style.display = 'flex';
+  cinematicOverlay.style.display = 'none';
   mainUi.style.display = 'none';
   createControlsPanel.style.display = 'none';
-  finalOverlay.style.display = 'none';
+  finalReflectionOverlay.style.display = 'none';
 
-  narrativeTypewriter.start(NARRATIVES[narrativeIndex], () => {
-    // Narrative fully rendered
+  bookTypewriter.start(() => {});
+}
+
+function startCinematicEraTransition(eraIndex) {
+  narrativeOverlay.classList.add('hidden');
+  narrativeOverlay.style.display = 'none';
+  mainUi.style.display = 'none';
+  createControlsPanel.style.display = 'none';
+  finalReflectionOverlay.style.display = 'none';
+
+  cinematicPresenter.start(CINEMATIC_PHRASES[eraIndex], () => {
+    transitionManager.onNarrativeFinished();
   });
 }
 
-function hideNarrativeOverlay() {
-  narrativeOverlay.classList.add('hidden');
-  setTimeout(() => {
-    narrativeOverlay.style.display = 'none';
-  }, 800);
-}
-
-// User action to advance narrative (SPACE key or mouse click)
-function handleNarrativeUserAction() {
+// User action handler for Book Opening
+function handleBookOpeningAction() {
   audio.init();
 
-  if (narrativeTypewriter.isTyping) {
-    // If still typing: instantly reveal complete text
-    narrativeTypewriter.fastForward();
+  if (bookTypewriter.isTyping) {
+    bookTypewriter.fastForward();
     return;
   }
 
-  if (narrativeTypewriter.isComplete) {
-    // If text finished: advance to next phase!
-    hideNarrativeOverlay();
-    transitionManager.onNarrativeFinished();
+  if (bookTypewriter.isComplete) {
+    narrativeOverlay.classList.add('hidden');
+    setTimeout(() => {
+      narrativeOverlay.style.display = 'none';
+      transitionManager.onNarrativeFinished();
+    }, 600);
   }
 }
 
-// Initialize Pocket Watch & Transition Manager
+// ==========================================================================
+// SUBSYSTEM INITIALIZATION & TRANSITION MANAGER
+// ==========================================================================
 pocketWatch = new PocketWatch(watchCanvas, (direction) => {
   audio.triggerTransitionWhoosh();
   transitionManager.triggerWatchTransition(direction);
@@ -3457,13 +3791,13 @@ transitionManager = new TransitionManager(
       audio.setEra(activeEra);
 
       if (state === States.OPENING_BOOK) {
-        displayNarrative(0);
+        startOpeningBook();
       } else if (state === States.TEXT_1_DISNEY) {
-        displayNarrative(1);
+        startCinematicEraTransition(1);
       } else if (state === States.TEXT_2_GAME) {
-        displayNarrative(2);
+        startCinematicEraTransition(2);
       } else if (state === States.TEXT_3_CREATE) {
-        displayNarrative(3);
+        startCinematicEraTransition(3);
       }
     },
     onShowWatch: (era) => {
@@ -3491,16 +3825,10 @@ transitionManager = new TransitionManager(
     onContemplate: () => {
       createControlsPanel.style.display = 'none';
       watchContainer.classList.remove('visible');
-      finalOverlay.style.display = 'flex';
-      finalClosingPhrase.classList.remove('revealed');
-
-      // Dramatic pause before revealing the final Alice sentence
-      setTimeout(() => {
-        finalClosingPhrase.classList.add('revealed');
-      }, 1400);
+      finalReflectionPresenter.start();
     },
     onResumeCreate: () => {
-      finalOverlay.style.display = 'none';
+      finalReflectionPresenter.hide();
       createControlsPanel.style.display = 'flex';
       watchContainer.classList.add('visible');
     }
@@ -3519,19 +3847,10 @@ btnResumeCreating.addEventListener('click', (e) => {
   transitionManager.resumeCreating();
 });
 
-// Download Art as PNG
-btnDownloadArt.addEventListener('click', (e) => {
-  e.stopPropagation();
-  const link = document.createElement('a');
-  link.download = `WhyBother-ObraGenerativa-${Date.now()}.png`;
-  link.href = canvas.toDataURL('image/png');
-  link.click();
-});
-
 // Restart Experience
 btnRestartExperience.addEventListener('click', (e) => {
   e.stopPropagation();
-  finalOverlay.style.display = 'none';
+  finalReflectionPresenter.hide();
   createControlsPanel.style.display = 'none';
   watchContainer.classList.remove('visible');
   transitionManager.setState(States.OPENING_BOOK);
@@ -3555,19 +3874,48 @@ function handleResize() {
 window.addEventListener('resize', handleResize);
 handleResize();
 
-// Keyboard interaction (SPACE key for narrative)
+// ==========================================================================
+// INPUT HANDLING: KEYBOARD & CLICKS
+// ==========================================================================
+let lastKeySpaceTime = 0;
+
 window.addEventListener('keydown', (e) => {
   if (e.code === 'Space') {
     e.preventDefault();
-    if (!narrativeOverlay.classList.contains('hidden') && narrativeOverlay.style.display !== 'none') {
-      handleNarrativeUserAction();
+    const now = performance.now();
+    // Guard against rapid key repeat
+    if (now - lastKeySpaceTime < 280) return;
+    lastKeySpaceTime = now;
+
+    if (cinematicPresenter.isActive) {
+      cinematicPresenter.advance();
+    } else if (finalReflectionPresenter.isActive) {
+      finalReflectionPresenter.advance();
+    } else if (!narrativeOverlay.classList.contains('hidden') && narrativeOverlay.style.display !== 'none') {
+      handleBookOpeningAction();
     }
   }
 });
 
-// Click interaction for narrative overlay
+// Click on Book Opening
 narrativeOverlay.addEventListener('click', () => {
-  handleNarrativeUserAction();
+  handleBookOpeningAction();
+});
+
+// Click on Cinematic Phrase Screen
+cinematicOverlay.addEventListener('click', () => {
+  audio.init();
+  if (cinematicPresenter.isActive) {
+    cinematicPresenter.advance();
+  }
+});
+
+// Click on Final Reflection Screen
+finalReflectionOverlay.addEventListener('click', (e) => {
+  if (e.target.closest('#final-controls')) return;
+  if (finalReflectionPresenter.isActive) {
+    finalReflectionPresenter.advance();
+  }
 });
 
 // Mouse & Touch interaction for CREATE Stage & Alice parallax
@@ -3575,7 +3923,7 @@ let isMouseDown = false;
 
 window.addEventListener('mousedown', (e) => {
   audio.init();
-  if (e.target.closest('#watch-container') || e.target.closest('#create-controls-panel') || e.target.closest('#final-contemplation-overlay')) {
+  if (e.target.closest('#watch-container') || e.target.closest('#create-controls-panel') || e.target.closest('#final-reflection-overlay')) {
     return;
   }
   isMouseDown = true;
@@ -3629,7 +3977,9 @@ window.addEventListener('touchend', () => {
   }
 });
 
-// Main Animation Loop with Delta Time
+// ==========================================================================
+// MAIN ANIMATION LOOP
+// ==========================================================================
 let lastTime = performance.now();
 
 function animate(currentTime) {

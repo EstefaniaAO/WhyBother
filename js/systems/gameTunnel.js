@@ -1,11 +1,11 @@
 /**
- * Scene 3: Game Tunnel (American McGee's Alice, 2000)
+ * Scene 3: Game Tunnel (American McGee's Alice, 2000 / Alice Madness)
  * Authentic Dark Watercolor & Dense Gothic Pigment (ACUARELA OSCURA).
- * Burgundy, muted crimson, wine red, petrol blue, indigo, dark violet, deep purple, bluish gray.
- * Twisted asymmetric spirals, interlocking thorny roots, dense concentrated stains.
- * Expanded to cover full screen from center to corners.
+ * Dominated by midnight blue, dark petrol, deep indigo, burgundy, dark wine, and dark violet,
+ * balanced with luminous steel-blue and crimson contrast highlights towards corners.
+ * Features organic abstract crimson pigment splatters, elongated droplets, and branching tendrils.
  */
-import { FastMath } from '../math/noise.js';
+import { FastMath, noise } from '../math/noise.js';
 import { FlowField } from './flowField.js';
 import { ColorGrid } from './colorGrid.js';
 import { BrushAgent } from './brushAgent.js';
@@ -21,26 +21,34 @@ export class GameTunnel {
     this.offscreenCanvas = document.createElement('canvas');
     this.offCtx = this.offscreenCanvas.getContext('2d');
 
-    // Deep gothic watercolor palette (strictly non-neon, matte dense pigments)
-    this.palette = [
-      { r: 115, g: 25, b: 45 },   // Borgoña (burgundy)
-      { r: 145, g: 30, b: 48 },   // Carmesí apagado (muted crimson)
-      { r: 90,  g: 18, b: 32 },   // Rojo vino (wine red)
-      { r: 28,  g: 62, b: 78 },   // Azul petróleo (petrol blue)
-      { r: 32,  g: 42, b: 85 },   // Índigo (indigo)
-      { r: 68,  g: 28, b: 75 },   // Violeta oscuro (dark violet)
-      { r: 48,  g: 18, b: 56 },   // Morado profundo (deep purple)
-      { r: 75,  g: 88, b: 102 }   // Gris azulado (bluish gray)
+    // Deep Gothic Palette: Midnight Blues, Dark Petrol, Indigo, Burgundy, Wine
+    this.centerColors = [
+      { r: 10, g: 15, b: 34 },  // Azul noche profundo
+      { r: 12, g: 34, b: 46 },  // Azul petróleo oscuro
+      { r: 18, g: 16, b: 52 },  // Índigo abisal
+      { r: 68, g: 12, b: 24 },  // Borgoña denso
+      { r: 85, g: 16, b: 28 },  // Rojo vino oscuro
+      { r: 38, g: 14, b: 48 }   // Violeta oscuro
+    ];
+
+    this.outerColors = [
+      { r: 35,  g: 82,  b: 108 }, // Azul petróleo
+      { r: 52,  g: 68,  b: 124 }, // Índigo rico
+      { r: 145, g: 26,  b: 46  }, // Carmesí apagado
+      { r: 188, g: 46,  b: 72  }, // Carmesí luminoso / rosa oscuro
+      { r: 112, g: 162, b: 198 }, // Azul acero luminoso (contraste)
+      { r: 135, g: 178, b: 210 }, // Celeste grisáceo
+      { r: 128, g: 112, b: 164 }  // Violeta grisáceo
     ];
 
     // FlowField for turbulent, twisted asymmetric curves reaching corners
     this.flowField = new FlowField({
-      vortexStrength: 0.76,
-      radialExpansion: 0.46, // Expands fully into corners
-      noiseScale: 0.0028,
-      noiseStrength: 1.15,
-      turbulence: 0.52,
-      spiralDirection: -1 // counter-swirl
+      vortexStrength: 0.82,
+      radialExpansion: 0.40, // Expands fully into corners
+      noiseScale: 0.0025,
+      noiseStrength: 1.10,
+      turbulence: 0.46,
+      spiralDirection: -1 // counter-swirl for unsettling asymmetric tension
     });
 
     // Pigment simulation & spatial coverage map
@@ -48,13 +56,16 @@ export class GameTunnel {
 
     // Active autonomous brush agents
     this.agents = [];
-    this.maxAgents = 30; // Increased for rich corner coverage
+    this.maxAgents = 34;
+
+    // Organic Abstract Crimson Splatters & Droplets
+    this.nextSplatterTime = 0;
 
     // Dense pigment puddles / dark concentrated blotches
     this.denseBlotches = [];
     this.nextBlotchTime = 0;
 
-    // Completed paths for subtle surface light shimmers
+    // Completed paths for surface light shimmers
     this.recentPaths = [];
     this.maxRecentPaths = 45;
   }
@@ -69,14 +80,14 @@ export class GameTunnel {
 
     const cx = width / 2;
     const cy = height / 2;
-    const maxR = Math.hypot(width, height) * 0.78;
+    const maxR = Math.hypot(width, height) * 0.82;
 
-    // Deep blackened charcoal & raw umber paper background
+    // Deep blackened charcoal & midnight umber paper background
     const bgGrad = this.offCtx.createRadialGradient(cx, cy, 10, cx, cy, maxR);
-    bgGrad.addColorStop(0.0, '#040206');
-    bgGrad.addColorStop(0.35, '#0d040a');
-    bgGrad.addColorStop(0.75, '#120714');
-    bgGrad.addColorStop(1.0, '#07020a');
+    bgGrad.addColorStop(0.0, '#020306');
+    bgGrad.addColorStop(0.30, '#060912');
+    bgGrad.addColorStop(0.65, '#0c121e');
+    bgGrad.addColorStop(1.0, '#04060c');
     this.offCtx.fillStyle = bgGrad;
     this.offCtx.fillRect(0, 0, width, height);
 
@@ -84,10 +95,11 @@ export class GameTunnel {
     this.recentPaths = [];
     this.denseBlotches = [];
     this.time = 0;
-    this.nextBlotchTime = 0.3;
+    this.nextBlotchTime = 0.4;
+    this.nextSplatterTime = 0.6;
 
-    // Spawn initial dark watercolor strokes near center and mid-radii
-    for (let i = 0; i < 10; i++) {
+    // Spawn initial dark strokes across center and mid radii
+    for (let i = 0; i < 14; i++) {
       this.spawnAgent();
     }
 
@@ -124,24 +136,66 @@ export class GameTunnel {
     }
   }
 
+  /**
+   * Radial Color Depth:
+   * Midnight blues, dark petrol, and deep wine near the central abyss,
+   * transitioning outwards into rich indigo, crimson, and luminous steel-blue highlights
+   */
+  getColorForRadius(r) {
+    const maxCorner = Math.hypot(this.width, this.height) * 0.75;
+    const normDist = Math.min(1.0, r / Math.max(100, maxCorner));
+
+    const centerCol = this.centerColors[Math.floor(Math.random() * this.centerColors.length)];
+    const outerCol = this.outerColors[Math.floor(Math.random() * this.outerColors.length)];
+
+    return FastMath.blendRGB(centerCol, outerCol, Math.pow(normDist, 0.70));
+  }
+
   spawnAgent() {
     const cx = this.width / 2;
     const cy = this.height / 2;
-    const maxCorner = Math.hypot(this.width, this.height) * 0.78;
+    const maxCorner = Math.hypot(this.width, this.height) * 0.82;
 
-    const isMidSpawn = Math.random() > 0.72;
-    const baseR = isMidSpawn ? (45 + Math.random() * (maxCorner * 0.45)) : (10 + Math.random() * 24);
+    const isMidSpawn = Math.random() > 0.68;
+    const baseR = isMidSpawn ? (45 + Math.random() * (maxCorner * 0.42)) : (10 + Math.random() * 26);
 
     const spawnAngle = this.colorGrid.findLeastCoveredAngle(cx, cy, baseR);
     const x = cx + Math.cos(spawnAngle) * baseR;
     const y = cy + Math.sin(spawnAngle) * baseR;
 
-    const col = this.palette[Math.floor(Math.random() * this.palette.length)];
-    const thickness = 9 + Math.random() * 28;
-    const opacity = 0.28 + Math.random() * 0.35; // concentrated dark pigment
+    const col = this.getColorForRadius(baseR);
+
+    // Varied Brush Hierarchy (Inspired by reference painting strata)
+    const category = Math.random();
+    let thickness, opacity, speed, maxLife, numPasses, bristleSpread;
+
+    if (category < 0.35) {
+      // 1. Broad deep midnight blue and wine strata
+      thickness = 22 + Math.random() * 20;
+      opacity = 0.24 + Math.random() * 0.16;
+      speed = 22 + Math.random() * 16;
+      maxLife = 16.0 + Math.random() * 7.0;
+      numPasses = 4;
+      bristleSpread = 0.48;
+    } else if (category < 0.75) {
+      // 2. Dense twisted asymmetrical gothic ribbons
+      thickness = 9 + Math.random() * 13;
+      opacity = 0.35 + Math.random() * 0.25;
+      speed = 28 + Math.random() * 20;
+      maxLife = 13.0 + Math.random() * 6.0;
+      numPasses = 3;
+      bristleSpread = 0.38;
+    } else {
+      // 3. Sharp carmine and petrol thorn filigrees
+      thickness = 2.4 + Math.random() * 3.8;
+      opacity = 0.55 + Math.random() * 0.30;
+      speed = 34 + Math.random() * 22;
+      maxLife = 11.0 + Math.random() * 5.0;
+      numPasses = 2;
+      bristleSpread = 0.22;
+    }
 
     const initForce = this.flowField.getForce(x, y, cx, cy, this.time);
-    const speed = 48 + Math.random() * 55;
 
     this.agents.push(new BrushAgent({
       x,
@@ -149,31 +203,117 @@ export class GameTunnel {
       vx: initForce.x * speed,
       vy: initForce.y * speed,
       speed,
-      maxSteerForce: 4.8,
+      maxSteerForce: 4.2,
       thickness,
       opacity,
       color: col,
-      maxLife: 7.2 + Math.random() * 4.5, // Extended life to explore corners
-      numPasses: 3,
-      bristleSpread: 0.38,
+      maxLife,
+      numPasses,
+      bristleSpread,
       isWet: true,
       isGothic: true
     }));
+  }
+
+  /**
+   * Spawns an abstract, artistic crimson splatter & elongated droplet cluster
+   * Treated strictly as watercolor pigment dispersion (non-gore, artistic abstract expression)
+   */
+  spawnAbstractSplatter(atX = null, atY = null) {
+    const cx = this.width / 2;
+    const cy = this.height / 2;
+    const offCtx = this.offCtx;
+
+    let sx = atX;
+    let sy = atY;
+
+    if (sx === null || sy === null) {
+      const angle = Math.random() * Math.PI * 2;
+      const r = 35 + Math.random() * (Math.hypot(this.width, this.height) * 0.48);
+      sx = cx + Math.cos(angle) * r;
+      sy = cy + Math.sin(angle) * r;
+    }
+
+    // Rich crimson / wine watercolor pigments
+    const crimsonColors = [
+      { r: 145, g: 24, b: 42 }, // Carmesí rico
+      { r: 110, g: 18, b: 32 }, // Vino tinto
+      { r: 175, g: 32, b: 54 }, // Carmín vibrante
+      { r: 78,  g: 12, b: 24 }  // Borgoña oscuro
+    ];
+    const col = crimsonColors[Math.floor(Math.random() * crimsonColors.length)];
+
+    offCtx.save();
+
+    // 1. Central teardrop / elongated droplet aligned with flow
+    const flow = this.flowField.getForce(sx, sy, cx, cy, this.time);
+    const flowAngle = Math.atan2(flow.y, flow.x);
+    const dropLen = 12 + Math.random() * 24;
+    const dropRadius = 3 + Math.random() * 6;
+
+    offCtx.translate(sx, sy);
+    offCtx.rotate(flowAngle);
+
+    // Translucent bleeding watercolor body
+    const dropGrad = offCtx.createRadialGradient(0, 0, 0, 0, 0, dropLen);
+    dropGrad.addColorStop(0, `rgba(${col.r}, ${col.g}, ${col.b}, 0.65)`);
+    dropGrad.addColorStop(0.5, `rgba(${col.r}, ${col.g}, ${col.b}, 0.35)`);
+    dropGrad.addColorStop(1, 'rgba(0,0,0,0)');
+    offCtx.fillStyle = dropGrad;
+
+    offCtx.beginPath();
+    offCtx.ellipse(dropLen * 0.4, 0, dropLen * 0.6, dropRadius, 0, 0, Math.PI * 2);
+    offCtx.fill();
+
+    // 2. Organic satellite micro-droplets flung along trajectory
+    const numSatellites = 3 + Math.floor(Math.random() * 5);
+    for (let s = 0; s < numSatellites; s++) {
+      const satDist = dropLen + 6 + Math.random() * 28;
+      const satSpread = (Math.random() - 0.5) * 14;
+      const satR = 1.0 + Math.random() * 2.5;
+      const satAlpha = 0.30 + Math.random() * 0.45;
+
+      offCtx.beginPath();
+      offCtx.arc(satDist, satSpread, satR, 0, Math.PI * 2);
+      offCtx.fillStyle = `rgba(${col.r}, ${col.g}, ${col.b}, ${satAlpha})`;
+      offCtx.fill();
+    }
+
+    // 3. Fine branching capillary tendrils (organic dispersion)
+    if (Math.random() > 0.45) {
+      offCtx.beginPath();
+      offCtx.moveTo(0, 0);
+      let tx = 0;
+      let ty = 0;
+      const steps = 4 + Math.floor(Math.random() * 4);
+      for (let st = 0; st < steps; st++) {
+        tx += 4 + Math.random() * 8;
+        ty += (Math.random() - 0.5) * 8;
+        offCtx.lineTo(tx, ty);
+      }
+      offCtx.strokeStyle = `rgba(${col.r}, ${col.g}, ${col.b}, 0.50)`;
+      offCtx.lineWidth = 1.0;
+      offCtx.stroke();
+    }
+
+    offCtx.restore();
+
+    this.colorGrid.depositPigment(sx, sy, col, 0.22);
   }
 
   spawnDenseBlotch() {
     const cx = this.width / 2;
     const cy = this.height / 2;
     const angle = Math.random() * Math.PI * 2;
-    const r = 30 + Math.random() * (Math.hypot(this.width, this.height) * 0.52);
-    const col = this.palette[Math.floor(Math.random() * this.palette.length)];
+    const r = 20 + Math.random() * (Math.hypot(this.width, this.height) * 0.50);
+    const col = this.getColorForRadius(r);
 
     this.denseBlotches.push({
       x: cx + Math.cos(angle) * r,
       y: cy + Math.sin(angle) * r,
-      radius: 18 + Math.random() * 50,
+      radius: 20 + Math.random() * 55,
       color: col,
-      opacity: 0.12 + Math.random() * 0.18,
+      opacity: 0.12 + Math.random() * 0.16,
       drawn: false
     });
   }
@@ -185,13 +325,20 @@ export class GameTunnel {
     const cx = this.width / 2;
     const cy = this.height / 2;
     const offCtx = this.offCtx;
-    const maxCorner = Math.hypot(this.width, this.height) * 0.78;
+    const maxCorner = Math.hypot(this.width, this.height) * 0.82;
 
-    // Dark concentrated pigment blotches
+    // Organic Abstract Crimson Splatters
+    this.nextSplatterTime -= dt * speedMult;
+    if (this.nextSplatterTime <= 0) {
+      this.spawnAbstractSplatter();
+      this.nextSplatterTime = (2.2 + Math.random() * 2.2) / Math.max(1, speedMult * 0.85);
+    }
+
+    // Dark dense watercolor blotches
     this.nextBlotchTime -= dt * speedMult;
     if (this.nextBlotchTime <= 0) {
       this.spawnDenseBlotch();
-      this.nextBlotchTime = 1.4 / Math.max(1, speedMult * 0.8);
+      this.nextBlotchTime = 1.4 / Math.max(1, speedMult * 0.85);
     }
 
     for (let i = this.denseBlotches.length - 1; i >= 0; i--) {
@@ -200,7 +347,7 @@ export class GameTunnel {
         offCtx.save();
         const radGrad = offCtx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.radius);
         radGrad.addColorStop(0, `rgba(${b.color.r}, ${b.color.g}, ${b.color.b}, ${b.opacity})`);
-        radGrad.addColorStop(0.65, `rgba(${b.color.r}, ${b.color.g}, ${b.color.b}, ${b.opacity * 0.5})`);
+        radGrad.addColorStop(0.6, `rgba(${b.color.r}, ${b.color.g}, ${b.color.b}, ${b.opacity * 0.45})`);
         radGrad.addColorStop(1, 'rgba(0,0,0,0)');
         offCtx.fillStyle = radGrad;
         offCtx.beginPath();
@@ -208,13 +355,13 @@ export class GameTunnel {
         offCtx.fill();
         offCtx.restore();
 
-        this.colorGrid.depositPigment(b.x, b.y, b.color, b.opacity * 1.2);
+        this.colorGrid.depositPigment(b.x, b.y, b.color, b.opacity * 0.85);
         b.drawn = true;
       }
       this.denseBlotches.splice(i, 1);
     }
 
-    // Maintain active dark brush agents
+    // Maintain active brush agents
     while (this.agents.length < this.maxAgents) {
       this.spawnAgent();
     }
@@ -222,11 +369,21 @@ export class GameTunnel {
     // Step agents & paint onto persistent canvas buffer
     for (let i = this.agents.length - 1; i >= 0; i--) {
       const agent = this.agents[i];
+
+      // Dynamically blend agent color toward outward tone as it journeys away from center
+      const currentR = Math.hypot(agent.x - cx, agent.y - cy);
+      const targetCol = this.getColorForRadius(currentR);
+      agent.currentColor = FastMath.blendRGB(agent.currentColor, targetCol, 0.04);
+
       agent.update(dt, this.flowField, this.colorGrid, cx, cy, this.time, speedMult);
       agent.drawSegment(offCtx);
 
-      const dist = Math.hypot(agent.x - cx, agent.y - cy);
-      if (agent.isDead || dist > maxCorner) {
+      // Occasional organic splatter spawned along high-curvature turns of dark agents
+      if (Math.random() > 0.985 && agent.currentColor.r > 100) {
+        this.spawnAbstractSplatter(agent.x, agent.y);
+      }
+
+      if (agent.isDead || currentR > maxCorner) {
         if (agent.history.length > 5) {
           this.recentPaths.push(agent.history);
           if (this.recentPaths.length > this.maxRecentPaths) {
@@ -237,7 +394,7 @@ export class GameTunnel {
       }
     }
 
-    // Diffuse pigment in low-res buffer
+    // Pigment diffusion
     this.colorGrid.diffuse(0.018 * dt * speedMult);
   }
 
@@ -251,20 +408,18 @@ export class GameTunnel {
 
     ctx.drawImage(this.offscreenCanvas, 0, 0);
 
-    // Subtle wine/petrol shimmer over existing twisted roots
+    // Subtle dark wine / petrol surface shimmers
     if (lightWaves && lightWaves.waves.length > 0) {
-      const maxR = Math.hypot(width, height) * 0.75;
+      const maxR = Math.hypot(width, height) * 0.78;
 
       ctx.save();
       for (const wave of lightWaves.waves) {
         const waveRadius = (wave.direction > 0 ? (1.0 - wave.progress) : wave.progress) * maxR;
-        const waveBand = wave.width * maxR * 0.9;
+        const waveBand = wave.width * maxR;
 
         for (const path of this.recentPaths) {
           ctx.beginPath();
           let hasPoints = false;
-          let strokeCol = null;
-
           for (let k = 0; k < path.length; k++) {
             const pt = path[k];
             const dist = Math.abs(pt.r - waveRadius);
@@ -272,16 +427,14 @@ export class GameTunnel {
               if (!hasPoints) {
                 ctx.moveTo(pt.x, pt.y);
                 hasPoints = true;
-                strokeCol = pt.color;
               } else {
                 ctx.lineTo(pt.x, pt.y);
               }
             }
           }
-
-          if (hasPoints && strokeCol) {
-            ctx.strokeStyle = `rgba(${Math.min(255, strokeCol.r + 40)}, ${strokeCol.g}, ${strokeCol.b}, ${(0.35 * wave.intensity).toFixed(3)})`;
-            ctx.lineWidth = 3.4;
+          if (hasPoints) {
+            ctx.strokeStyle = `rgba(185, 45, 68, ${0.35 * wave.intensity})`;
+            ctx.lineWidth = 1.8;
             ctx.stroke();
           }
         }
@@ -289,14 +442,14 @@ export class GameTunnel {
       ctx.restore();
     }
 
-    // Central abyss aperture
-    const coreGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 38);
+    // Deep blackened abyss core gradient
+    const coreGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 32);
     coreGrad.addColorStop(0, '#000000');
-    coreGrad.addColorStop(0.65, '#0e030a');
-    coreGrad.addColorStop(1, 'rgba(14, 3, 10, 0)');
+    coreGrad.addColorStop(0.60, '#040208');
+    coreGrad.addColorStop(1, 'rgba(4, 2, 8, 0)');
     ctx.fillStyle = coreGrad;
     ctx.beginPath();
-    ctx.arc(cx, cy, 38, 0, Math.PI * 2);
+    ctx.arc(cx, cy, 32, 0, Math.PI * 2);
     ctx.fill();
 
     ctx.restore();

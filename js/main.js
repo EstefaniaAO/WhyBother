@@ -20,23 +20,24 @@ const watchContainer = document.getElementById('watch-container');
 const watchHintEl = document.getElementById('watch-hint');
 const mainUi = document.getElementById('main-ui');
 
-// Narrative DOM Elements
+// Narrative Book Opening DOM Elements
 const narrativeOverlay = document.getElementById('narrative-overlay');
 const openingBookContainer = document.getElementById('opening-book-container');
 const bookTextBody = document.getElementById('book-text-body');
-const transitionTextContainer = document.getElementById('transition-text-container');
-const transitionEraTag = document.getElementById('transition-era-tag');
-const transitionTextBody = document.getElementById('transition-text-body');
 const narrativeContinueHint = document.getElementById('narrative-continue-hint');
+
+// Cinematic Phrase-by-Phrase Transition Screen
+const cinematicOverlay = document.getElementById('cinematic-overlay');
+const cinematicPhraseText = document.getElementById('cinematic-phrase-text');
 
 // Create Stage Controls
 const createControlsPanel = document.getElementById('create-controls-panel');
 const btnContemplate = document.getElementById('btn-contemplate');
 
-// Final Contemplation & Reflection Overlay
-const finalOverlay = document.getElementById('final-contemplation-overlay');
-const finalClosingPhrase = document.getElementById('final-closing-phrase');
-const btnDownloadArt = document.getElementById('btn-download-art');
+// Final Reflection (Over the living artwork)
+const finalReflectionOverlay = document.getElementById('final-reflection-overlay');
+const finalPhraseElement = document.getElementById('final-phrase-element');
+const finalControls = document.getElementById('final-controls');
 const btnResumeCreating = document.getElementById('btn-resume-creating');
 const btnRestartExperience = document.getElementById('btn-restart-experience');
 
@@ -59,202 +60,137 @@ const createStage = new CreateStage();
 let pocketWatch;
 let transitionManager;
 
-// Web Audio Ambiance Synthesizer
-class AmbianceAudio {
+// Primary Audio Player: Assets/Alice in Wonderland.mp3
+class ExperienceAudio {
   constructor() {
-    this.ctx = null;
-    this.isPlaying = false;
-    this.tickInterval = null;
-    this.droneOsc = null;
-    this.droneGain = null;
+    this.bgMusic = new Audio('assets/Alice in Wonderland.mp3');
+    this.bgMusic.loop = true;
+    this.bgMusic.volume = 0.38; // Elegant, atmospheric, non-invasive volume
+    this.isStarted = false;
   }
 
-  init() {
-    if (this.ctx) return;
-    try {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      this.ctx = new AudioContext();
-
-      this.masterGain = this.ctx.createGain();
-      this.masterGain.gain.setValueAtTime(0.2, this.ctx.currentTime);
-      this.masterGain.connect(this.ctx.destination);
-
-      this.droneOsc = this.ctx.createOscillator();
-      this.droneGain = this.ctx.createGain();
-      this.droneGain.gain.setValueAtTime(0.04, this.ctx.currentTime);
-      this.droneOsc.type = 'sine';
-      this.droneOsc.frequency.setValueAtTime(55, this.ctx.currentTime);
-      this.droneOsc.connect(this.droneGain);
-      this.droneGain.connect(this.masterGain);
-      this.droneOsc.start();
-
-      this.startTickLoop();
-      this.isPlaying = true;
-    } catch (e) {
-      console.warn('Web Audio not allowed or failed:', e);
+  start() {
+    if (this.isStarted) return;
+    const playPromise = this.bgMusic.play();
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        this.isStarted = true;
+      }).catch(() => {
+        // Autoplay policy: will trigger on next user click or keypress
+      });
     }
   }
 
-  startTickLoop() {
-    let tickCount = 0;
-    this.tickInterval = setInterval(() => {
-      if (!this.ctx || this.ctx.state !== 'running') return;
-      tickCount++;
-      const now = this.ctx.currentTime;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-
-      osc.type = tickCount % 2 === 0 ? 'sine' : 'triangle';
-      osc.frequency.setValueAtTime(tickCount % 2 === 0 ? 980 : 720, now);
-      gain.gain.setValueAtTime(0.05, now);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
-
-      osc.connect(gain);
-      gain.connect(this.masterGain);
-      osc.start(now);
-      osc.stop(now + 0.06);
-    }, 550);
-  }
-
   triggerTransitionWhoosh() {
-    if (!this.ctx || this.ctx.state !== 'running') return;
+    // Subtle volume dip & swell during era shift to reinforce passage through time
+    if (!this.isStarted) return;
     try {
-      const now = this.ctx.currentTime;
-      const bufferSize = this.ctx.sampleRate * 1.5;
-      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-      const data = buffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) {
-        data[i] = Math.random() * 2 - 1;
-      }
-
-      const noiseSource = this.ctx.createBufferSource();
-      noiseSource.buffer = buffer;
-
-      const filter = this.ctx.createBiquadFilter();
-      filter.type = 'bandpass';
-      filter.frequency.setValueAtTime(180, now);
-      filter.frequency.exponentialRampToValueAtTime(1400, now + 0.7);
-      filter.frequency.exponentialRampToValueAtTime(120, now + 1.4);
-      filter.Q.setValueAtTime(3.5, now);
-
-      const gain = this.ctx.createGain();
-      gain.gain.setValueAtTime(0.01, now);
-      gain.gain.linearRampToValueAtTime(0.18, now + 0.7);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
-
-      noiseSource.connect(filter);
-      filter.connect(gain);
-      gain.connect(this.masterGain);
-
-      noiseSource.start(now);
-      noiseSource.stop(now + 1.6);
+      const origVol = this.bgMusic.volume;
+      this.bgMusic.volume = Math.max(0.15, origVol * 0.7);
+      setTimeout(() => {
+        this.bgMusic.volume = origVol;
+      }, 1200);
     } catch (e) {
-      // Audio sweep fallback
+      // Ignore audio volume glitches
     }
   }
 
   setEra(era) {
-    if (!this.ctx) return;
-    const now = this.ctx.currentTime;
-    if (era === 0) {
-      this.droneOsc.frequency.exponentialRampToValueAtTime(55, now + 1.0);
-    } else if (era === 1) {
-      this.droneOsc.frequency.exponentialRampToValueAtTime(110, now + 1.0);
-    } else if (era === 2) {
-      this.droneOsc.frequency.exponentialRampToValueAtTime(42, now + 1.0);
-    } else {
-      this.droneOsc.frequency.exponentialRampToValueAtTime(88, now + 1.0);
-    }
+    // Music plays continuously across eras and CREATE without resetting
+  }
+
+  init() {
+    this.start();
   }
 }
 
-const audio = new AmbianceAudio();
+const audio = new ExperienceAudio();
 
 // ==========================================================================
-// NARRATIVE TEXT DEFINITIONS
+// CINEMATIC SENTENCE-BY-SENTENCE DEFINITIONS
 // ==========================================================================
-const NARRATIVES = {
-  // Opening: El Libro Original
-  0: {
-    isBook: true,
-    paragraphs: [
-      "Pero cuando el conejo se sacó un reloj de bolsillo del chaleco, lo miró y echó a correr, Alicia se levantó de un salto, porque comprendió de golpe que ella nunca había visto un conejo con chaleco, ni con reloj que sacarse de él, y, ardiendo de curiosidad, se puso a correr tras el conejo por la pradera, y llegó justo a tiempo para ver cómo se precipitaba en una madriguera que se abría al pie del seto.",
-      "Un momento más tarde, Alicia se metía también en la madriguera, sin pararse a considerar cómo se las arreglaría después para salir."
-    ]
-  },
+const CINEMATIC_PHRASES = {
   // Transición hacia Disney: 1951
-  1: {
-    isBook: false,
-    tag: "1951 · La Película Animada",
-    paragraphs: [
-      "Ochenta y seis años habían pasado desde que aquella historia fuera escrita. El mundo había cambiado, y las historias comenzaban a encontrar nuevas maneras de existir. Ya no vivían solamente entre las páginas de un libro. Ahora podían cobrar vida a través de ilustraciones en movimiento, colores que parecían salirse del papel y melodías que acompañaban cada aventura.",
-      "En una de aquellas versiones, otra pequeña Alicia cantaba entre flores que hablaban, mientras se despedía de su gata Diana antes de seguir al conejo. El mundo que antes había sido imaginado con palabras ahora podía verse, escucharse y moverse ante nuestros ojos.",
-      "Pero la curiosidad seguía siendo la misma. Y, sin embargo, un momento más tarde, Alicia se metía también en la madriguera, sin pararse a considerar cómo se las arreglaría después para salir."
-    ]
-  },
+  1: [
+    "Ochenta y seis años habían pasado desde que aquella historia fuera escrita.",
+    "El mundo había cambiado, y las historias comenzaban a encontrar nuevas maneras de existir.",
+    "Ya no vivían solamente entre las páginas de un libro.",
+    "Ahora podían cobrar vida a través de ilustraciones en movimiento, colores que parecían salirse del papel y melodías que acompañaban cada aventura.",
+    "En una de aquellas versiones, otra pequeña Alicia cantaba entre flores que hablaban, mientras se despedía de su gata Diana antes de seguir al conejo.",
+    "El mundo que antes había sido imaginado con palabras ahora podía verse, escucharse y moverse ante nuestros ojos.",
+    "Pero la curiosidad seguía siendo la misma.",
+    "Y, sin embargo, un momento más tarde, Alicia se metía también en la madriguera, sin pararse a considerar cómo se las arreglaría después para salir."
+  ],
+
   // Transición hacia el Videojuego: 2011
-  2: {
-    isBook: false,
-    tag: "2011 · El Videojuego",
-    paragraphs: [
-      "Sesenta años más tarde, el mundo de Alicia era muy diferente. Las historias ya no se limitaban a ser leídas o contempladas. Ahora podían recorrerse, explorarse e incluso alterarse. Aquello que antes exigía miles y miles de dibujos podía tomar forma mediante herramientas digitales, y los mundos imaginados podían convertirse en lugares que cualquiera podía habitar.",
-      "Pero no todos los Países de las Maravillas conservaban la inocencia de aquel primero. En una nueva historia, Alicia Liddell regresaba a un mundo deformado por sus propios recuerdos. Los colores se habían vuelto más sombríos, los caminos más inquietantes y los personajes, mucho menos familiares. Ya no bastaba con observar cómo se desarrollaba la aventura. Esta vez, había que atravesarla.",
-      "Y aunque el mundo al otro lado fuera irreconocible, algo permanecía intacto. Un momento más tarde, Alicia se metía también en la madriguera, sin pararse a considerar cómo se las arreglaría después para salir."
-    ]
-  },
+  2: [
+    "Sesenta años más tarde, el mundo de Alicia era muy diferente.",
+    "Las historias ya no se limitaban a ser leídas o contempladas.",
+    "Ahora podían recorrerse, explorarse e incluso alterarse.",
+    "Aquello que antes exigía miles y miles de dibujos podía tomar forma mediante herramientas digitales, y los mundos imaginados podían convertirse en lugares que cualquiera podía habitar.",
+    "Pero no todos los Países de las Maravillas conservaban la inocencia de aquel primero.",
+    "En una nueva historia, Alicia Liddell regresaba a un mundo deformado por sus propios recuerdos.",
+    "Los colores se habían vuelto más sombríos, los caminos más inquietantes y los personajes, mucho menos familiares.",
+    "Ya no bastaba con observar cómo se desarrollaba la aventura.",
+    "Esta vez, había que atravesarla.",
+    "Y aunque el mundo al otro lado fuera irreconocible, algo permanecía intacto.",
+    "Un momento más tarde, Alicia se metía también en la madriguera, sin pararse a considerar cómo se las arreglaría después para salir."
+  ],
+
   // Transición hacia CREATE
-  3: {
-    isBook: false,
-    tag: "El Tiempo Presente · Creación",
-    paragraphs: [
-      "Más de cien años habían pasado.",
-      "Cientos de Alicias habían existido desde entonces. Algunas habían sido dibujadas, otras pintadas, animadas, actuadas, reconstruidas y transformadas. Cada una había encontrado su propia forma de caer, y cada una había llevado consigo algo de quien la imaginó.",
-      "Las herramientas habían cambiado. Las posibilidades parecían no tener fin. Ahora, bastaba una instrucción para obtener imágenes de mundos que antes habrían requerido incontables horas de trabajo.",
-      "Y entonces...",
-      "¿qué quedaba por imaginar?"
-    ]
-  }
+  3: [
+    "Más de cien años habían pasado.",
+    "Cientos de Alicias habían existido desde entonces.",
+    "Algunas habían sido dibujadas, otras pintadas, animadas, actuadas, reconstruidas y transformadas.",
+    "Cada una había encontrado su propia forma de caer, y cada una había llevado consigo algo de quien la imaginó.",
+    "Las herramientas habían cambiado.",
+    "Las posibilidades parecían no tener fin.",
+    "Ahora, bastaba una instrucción para obtener imágenes de mundos que antes habrían requerido incontables horas de trabajo.",
+    "Y entonces...",
+    "¿qué quedaba por imaginar?"
+  ]
 };
 
-// Progressive Typing Engine
-class NarrativeTypewriter {
+// Final Reflection Sentences (Presented one by one over the living artwork)
+const FINAL_REFLECTION_SEQUENCE = [
+  { text: "WHY BOTHER?", type: "title-phrase" },
+  { text: "¿Por qué molestarse?", type: "subtitle-phrase" },
+  { text: "Porque crear nunca ha consistido únicamente en producir algo.", type: "normal" },
+  { text: "Ha consistido en imaginar lo que todavía no existe, en explorar caminos que no siempre llevan a donde esperábamos y en encontrar algo propio entre todas las posibilidades.", type: "normal" },
+  { text: "Porque ninguna herramienta puede decidir por nosotros qué nos conmueve, qué despierta nuestra curiosidad o qué queremos expresar.", type: "normal" },
+  { text: "Las herramientas pueden cambiar, multiplicarse e incluso hacer posible lo que antes parecía inalcanzable.", type: "normal" },
+  { text: "Pero siempre habrá tantas maneras de imaginar como personas dispuestas a hacerlo.", type: "normal" },
+  { text: "Y porque, después de tantos años, de tantas historias y de tantas formas de contarla, Alicia siempre encontrará una madriguera en la que meterse.", type: "closing-phrase" }
+];
+
+// ==========================================================================
+// BOOK OPENING TYPEWRITER
+// ==========================================================================
+class BookTypewriter {
   constructor() {
     this.isTyping = false;
     this.isComplete = false;
     this.typeInterval = null;
-    this.currentNarrative = null;
-    this.targetElement = null;
-    this.fullHtml = '';
+    this.paragraphs = [
+      "Pero cuando el conejo se sacó un reloj de bolsillo del chaleco, lo miró y echó a correr, Alicia se levantó de un salto, porque comprendió de golpe que ella nunca había visto un conejo con chaleco, ni con reloj que sacarse de él, y, ardiendo de curiosidad, se puso a correr tras el conejo por la pradera, y llegó justo a tiempo para ver cómo se precipitaba en una madriguera que se abría al pie del seto.",
+      "Un momento más tarde, Alicia se metía también en la madriguera, sin pararse a considerar cómo se las arreglaría después para salir."
+    ];
   }
 
-  start(narrativeConfig, onComplete) {
-    this.currentNarrative = narrativeConfig;
+  start(onComplete) {
     this.onComplete = onComplete;
     this.isComplete = false;
     this.isTyping = true;
     narrativeContinueHint.classList.remove('visible');
+    bookTextBody.innerHTML = '';
 
-    if (narrativeConfig.isBook) {
-      openingBookContainer.style.display = 'block';
-      transitionTextContainer.style.display = 'none';
-      this.targetElement = bookTextBody;
-    } else {
-      openingBookContainer.style.display = 'none';
-      transitionTextContainer.style.display = 'block';
-      transitionEraTag.textContent = narrativeConfig.tag || '';
-      this.targetElement = transitionTextBody;
-    }
-
-    this.targetElement.innerHTML = '';
-
-    // Build array of tokens (words and paragraph breaks)
     const tokens = [];
-    narrativeConfig.paragraphs.forEach((pText, pIdx) => {
+    this.paragraphs.forEach((pText, pIdx) => {
       const words = pText.split(/\s+/);
-      words.forEach((w, wIdx) => {
+      words.forEach((w) => {
         tokens.push({ text: w + ' ', pIdx });
       });
-      if (pIdx < narrativeConfig.paragraphs.length - 1) {
+      if (pIdx < this.paragraphs.length - 1) {
         tokens.push({ text: '\n\n', pIdx });
       }
     });
@@ -263,8 +199,7 @@ class NarrativeTypewriter {
     let currentParagraphIndex = -1;
     let currentPElement = null;
 
-    // Build full text for fast-skip
-    this.fullHtml = narrativeConfig.paragraphs.map(p => `<p>${p}</p>`).join('');
+    this.fullHtml = this.paragraphs.map(p => `<p>${p}</p>`).join('');
 
     this.typeInterval = setInterval(() => {
       if (currentTokenIndex >= tokens.length) {
@@ -278,21 +213,19 @@ class NarrativeTypewriter {
       if (tok.pIdx !== currentParagraphIndex) {
         currentParagraphIndex = tok.pIdx;
         currentPElement = document.createElement('p');
-        this.targetElement.appendChild(currentPElement);
+        bookTextBody.appendChild(currentPElement);
       }
 
-      if (tok.text === '\n\n') {
-        // Next paragraph
-      } else {
+      if (tok.text !== '\n\n') {
         currentPElement.textContent += tok.text;
       }
-    }, 42); // Comfortable, fluid literary typing cadence
+    }, 40);
   }
 
   fastForward() {
     if (!this.isTyping) return;
     clearInterval(this.typeInterval);
-    this.targetElement.innerHTML = this.fullHtml;
+    bookTextBody.innerHTML = this.fullHtml;
     this.finish();
   }
 
@@ -307,46 +240,195 @@ class NarrativeTypewriter {
   }
 }
 
-const narrativeTypewriter = new NarrativeTypewriter();
+const bookTypewriter = new BookTypewriter();
 
-// Show narrative stage
-function displayNarrative(narrativeIndex) {
+// ==========================================================================
+// CINEMATIC PHRASE-BY-PHRASE CONTROLLER (DISNEY, GAME, CREATE)
+// ==========================================================================
+class CinematicPhrasePresenter {
+  constructor() {
+    this.isActive = false;
+    this.phrases = [];
+    this.currentIndex = 0;
+    this.isTransitioning = false;
+    this.onAllFinished = null;
+  }
+
+  start(phrasesList, onAllFinished) {
+    this.phrases = phrasesList;
+    this.currentIndex = 0;
+    this.onAllFinished = onAllFinished;
+    this.isActive = true;
+    this.isTransitioning = false;
+
+    cinematicOverlay.style.display = 'flex';
+    cinematicOverlay.style.opacity = '1';
+    this.showCurrentPhrase();
+  }
+
+  showCurrentPhrase() {
+    if (this.currentIndex >= this.phrases.length) {
+      this.finish();
+      return;
+    }
+
+    const text = this.phrases[this.currentIndex];
+    cinematicPhraseText.classList.remove('visible');
+
+    setTimeout(() => {
+      cinematicPhraseText.textContent = text;
+      cinematicPhraseText.classList.add('visible');
+      this.isTransitioning = false;
+    }, 280);
+  }
+
+  advance() {
+    if (!this.isActive || this.isTransitioning) return;
+    this.isTransitioning = true;
+
+    cinematicPhraseText.classList.remove('visible');
+
+    setTimeout(() => {
+      this.currentIndex++;
+      if (this.currentIndex >= this.phrases.length) {
+        this.finish();
+      } else {
+        this.showCurrentPhrase();
+      }
+    }, 320);
+  }
+
+  finish() {
+    this.isActive = false;
+    cinematicOverlay.style.opacity = '0';
+    setTimeout(() => {
+      cinematicOverlay.style.display = 'none';
+      if (this.onAllFinished) {
+        this.onAllFinished();
+      }
+    }, 500);
+  }
+}
+
+const cinematicPresenter = new CinematicPhrasePresenter();
+
+// ==========================================================================
+// FINAL LIVING REFLECTION CONTROLLER (OVER THE ACTIVE ARTWORK)
+// ==========================================================================
+class FinalReflectionPresenter {
+  constructor() {
+    this.isActive = false;
+    this.currentIndex = 0;
+    this.isTransitioning = false;
+  }
+
+  start() {
+    this.isActive = true;
+    this.currentIndex = 0;
+    this.isTransitioning = false;
+
+    finalReflectionOverlay.style.display = 'flex';
+    finalControls.style.display = 'none';
+    this.showCurrentPhrase();
+  }
+
+  showCurrentPhrase() {
+    if (this.currentIndex >= FINAL_REFLECTION_SEQUENCE.length) {
+      this.finish();
+      return;
+    }
+
+    const item = FINAL_REFLECTION_SEQUENCE[this.currentIndex];
+    finalPhraseElement.classList.remove('visible');
+
+    setTimeout(() => {
+      finalPhraseElement.className = 'final-phrase-badge ' + (item.type || '');
+      finalPhraseElement.textContent = item.text;
+      finalPhraseElement.classList.add('visible');
+      this.isTransitioning = false;
+    }, 280);
+  }
+
+  advance() {
+    if (!this.isActive || this.isTransitioning) return;
+
+    if (this.currentIndex >= FINAL_REFLECTION_SEQUENCE.length - 1) {
+      // Last phrase already shown, display controls
+      this.finish();
+      return;
+    }
+
+    this.isTransitioning = true;
+    finalPhraseElement.classList.remove('visible');
+
+    setTimeout(() => {
+      this.currentIndex++;
+      this.showCurrentPhrase();
+    }, 320);
+  }
+
+  finish() {
+    this.isActive = false;
+    finalControls.style.display = 'flex';
+  }
+
+  hide() {
+    this.isActive = false;
+    finalReflectionOverlay.style.display = 'none';
+    finalPhraseElement.classList.remove('visible');
+    finalControls.style.display = 'none';
+  }
+}
+
+const finalReflectionPresenter = new FinalReflectionPresenter();
+
+// ==========================================================================
+// NARRATIVE DISPATCHER
+// ==========================================================================
+function startOpeningBook() {
   narrativeOverlay.classList.remove('hidden');
   narrativeOverlay.style.display = 'flex';
+  cinematicOverlay.style.display = 'none';
   mainUi.style.display = 'none';
   createControlsPanel.style.display = 'none';
-  finalOverlay.style.display = 'none';
+  finalReflectionOverlay.style.display = 'none';
 
-  narrativeTypewriter.start(NARRATIVES[narrativeIndex], () => {
-    // Narrative fully rendered
+  bookTypewriter.start(() => {});
+}
+
+function startCinematicEraTransition(eraIndex) {
+  narrativeOverlay.classList.add('hidden');
+  narrativeOverlay.style.display = 'none';
+  mainUi.style.display = 'none';
+  createControlsPanel.style.display = 'none';
+  finalReflectionOverlay.style.display = 'none';
+
+  cinematicPresenter.start(CINEMATIC_PHRASES[eraIndex], () => {
+    transitionManager.onNarrativeFinished();
   });
 }
 
-function hideNarrativeOverlay() {
-  narrativeOverlay.classList.add('hidden');
-  setTimeout(() => {
-    narrativeOverlay.style.display = 'none';
-  }, 800);
-}
-
-// User action to advance narrative (SPACE key or mouse click)
-function handleNarrativeUserAction() {
+// User action handler for Book Opening
+function handleBookOpeningAction() {
   audio.init();
 
-  if (narrativeTypewriter.isTyping) {
-    // If still typing: instantly reveal complete text
-    narrativeTypewriter.fastForward();
+  if (bookTypewriter.isTyping) {
+    bookTypewriter.fastForward();
     return;
   }
 
-  if (narrativeTypewriter.isComplete) {
-    // If text finished: advance to next phase!
-    hideNarrativeOverlay();
-    transitionManager.onNarrativeFinished();
+  if (bookTypewriter.isComplete) {
+    narrativeOverlay.classList.add('hidden');
+    setTimeout(() => {
+      narrativeOverlay.style.display = 'none';
+      transitionManager.onNarrativeFinished();
+    }, 600);
   }
 }
 
-// Initialize Pocket Watch & Transition Manager
+// ==========================================================================
+// SUBSYSTEM INITIALIZATION & TRANSITION MANAGER
+// ==========================================================================
 pocketWatch = new PocketWatch(watchCanvas, (direction) => {
   audio.triggerTransitionWhoosh();
   transitionManager.triggerWatchTransition(direction);
@@ -365,13 +447,13 @@ transitionManager = new TransitionManager(
       audio.setEra(activeEra);
 
       if (state === States.OPENING_BOOK) {
-        displayNarrative(0);
+        startOpeningBook();
       } else if (state === States.TEXT_1_DISNEY) {
-        displayNarrative(1);
+        startCinematicEraTransition(1);
       } else if (state === States.TEXT_2_GAME) {
-        displayNarrative(2);
+        startCinematicEraTransition(2);
       } else if (state === States.TEXT_3_CREATE) {
-        displayNarrative(3);
+        startCinematicEraTransition(3);
       }
     },
     onShowWatch: (era) => {
@@ -399,16 +481,10 @@ transitionManager = new TransitionManager(
     onContemplate: () => {
       createControlsPanel.style.display = 'none';
       watchContainer.classList.remove('visible');
-      finalOverlay.style.display = 'flex';
-      finalClosingPhrase.classList.remove('revealed');
-
-      // Dramatic pause before revealing the final Alice sentence
-      setTimeout(() => {
-        finalClosingPhrase.classList.add('revealed');
-      }, 1400);
+      finalReflectionPresenter.start();
     },
     onResumeCreate: () => {
-      finalOverlay.style.display = 'none';
+      finalReflectionPresenter.hide();
       createControlsPanel.style.display = 'flex';
       watchContainer.classList.add('visible');
     }
@@ -427,19 +503,10 @@ btnResumeCreating.addEventListener('click', (e) => {
   transitionManager.resumeCreating();
 });
 
-// Download Art as PNG
-btnDownloadArt.addEventListener('click', (e) => {
-  e.stopPropagation();
-  const link = document.createElement('a');
-  link.download = `WhyBother-ObraGenerativa-${Date.now()}.png`;
-  link.href = canvas.toDataURL('image/png');
-  link.click();
-});
-
 // Restart Experience
 btnRestartExperience.addEventListener('click', (e) => {
   e.stopPropagation();
-  finalOverlay.style.display = 'none';
+  finalReflectionPresenter.hide();
   createControlsPanel.style.display = 'none';
   watchContainer.classList.remove('visible');
   transitionManager.setState(States.OPENING_BOOK);
@@ -463,19 +530,48 @@ function handleResize() {
 window.addEventListener('resize', handleResize);
 handleResize();
 
-// Keyboard interaction (SPACE key for narrative)
+// ==========================================================================
+// INPUT HANDLING: KEYBOARD & CLICKS
+// ==========================================================================
+let lastKeySpaceTime = 0;
+
 window.addEventListener('keydown', (e) => {
   if (e.code === 'Space') {
     e.preventDefault();
-    if (!narrativeOverlay.classList.contains('hidden') && narrativeOverlay.style.display !== 'none') {
-      handleNarrativeUserAction();
+    const now = performance.now();
+    // Guard against rapid key repeat
+    if (now - lastKeySpaceTime < 280) return;
+    lastKeySpaceTime = now;
+
+    if (cinematicPresenter.isActive) {
+      cinematicPresenter.advance();
+    } else if (finalReflectionPresenter.isActive) {
+      finalReflectionPresenter.advance();
+    } else if (!narrativeOverlay.classList.contains('hidden') && narrativeOverlay.style.display !== 'none') {
+      handleBookOpeningAction();
     }
   }
 });
 
-// Click interaction for narrative overlay
+// Click on Book Opening
 narrativeOverlay.addEventListener('click', () => {
-  handleNarrativeUserAction();
+  handleBookOpeningAction();
+});
+
+// Click on Cinematic Phrase Screen
+cinematicOverlay.addEventListener('click', () => {
+  audio.init();
+  if (cinematicPresenter.isActive) {
+    cinematicPresenter.advance();
+  }
+});
+
+// Click on Final Reflection Screen
+finalReflectionOverlay.addEventListener('click', (e) => {
+  if (e.target.closest('#final-controls')) return;
+  if (finalReflectionPresenter.isActive) {
+    finalReflectionPresenter.advance();
+  }
 });
 
 // Mouse & Touch interaction for CREATE Stage & Alice parallax
@@ -483,7 +579,7 @@ let isMouseDown = false;
 
 window.addEventListener('mousedown', (e) => {
   audio.init();
-  if (e.target.closest('#watch-container') || e.target.closest('#create-controls-panel') || e.target.closest('#final-contemplation-overlay')) {
+  if (e.target.closest('#watch-container') || e.target.closest('#create-controls-panel') || e.target.closest('#final-reflection-overlay')) {
     return;
   }
   isMouseDown = true;
@@ -537,7 +633,9 @@ window.addEventListener('touchend', () => {
   }
 });
 
-// Main Animation Loop with Delta Time
+// ==========================================================================
+// MAIN ANIMATION LOOP
+// ==========================================================================
 let lastTime = performance.now();
 
 function animate(currentTime) {
