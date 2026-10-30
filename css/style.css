@@ -1,0 +1,307 @@
+/* ==========================================================================
+   WHY BOTHER? — GENERATIVE RABBIT HOLE STYLING
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Montserrat:wght@300;400;500;600&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #050406;
+  font-family: 'Cormorant Garamond', 'Cinzel', serif;
+  color: #f0e6d6;
+}
+
+#canvas-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+#tunnel-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ==========================================================================
+   UI OVERLAY
+   ========================================================================== */
+.ui-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 32px 40px;
+}
+
+/* Top Header */
+.top-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  opacity: 0.92;
+  transition: opacity 0.5s ease;
+}
+
+.brand-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  font-family: 'Cinzel', serif;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: #f7eedf;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.85), 0 0 30px rgba(255, 230, 200, 0.2);
+}
+
+.subtitle {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #bdae98;
+  margin-top: 6px;
+}
+
+/* Era Badge */
+.era-badge-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  max-width: 440px;
+}
+
+.era-number {
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  letter-spacing: 0.3em;
+  color: #cca462;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.era-title {
+  font-family: 'Cinzel', serif;
+  font-size: 20px;
+  letter-spacing: 0.12em;
+  color: #fdfaf3;
+  margin-top: 2px;
+  transition: color 0.6s ease;
+}
+
+.era-desc {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 14px;
+  font-style: italic;
+  color: #b8a892;
+  margin-top: 4px;
+  line-height: 1.35;
+  transition: opacity 0.5s ease;
+}
+
+/* Bottom Controls & Pocket Watch */
+.bottom-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  width: 100%;
+}
+
+.manifesto-quote {
+  max-width: 420px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 15px;
+  font-style: italic;
+  line-height: 1.45;
+  color: #9e8e79;
+  border-left: 2px solid rgba(200, 165, 110, 0.35);
+  padding-left: 16px;
+  opacity: 0.85;
+}
+
+.manifesto-bold {
+  display: block;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #dfc8a5;
+  margin-top: 6px;
+}
+
+/* Pocket Watch Container */
+.watch-widget-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: auto;
+  position: relative;
+  cursor: grab;
+}
+
+.watch-widget-container:active {
+  cursor: grabbing;
+}
+
+#pocket-watch-canvas {
+  width: 175px;
+  height: 175px;
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.75));
+  transition: transform 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+
+.watch-widget-container:hover #pocket-watch-canvas {
+  transform: scale(1.04);
+}
+
+.watch-hint {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #cebca2;
+  text-align: center;
+  margin-top: 8px;
+  opacity: 0.8;
+  transition: opacity 0.6s ease;
+  background: rgba(18, 14, 12, 0.6);
+  padding: 4px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(200, 170, 120, 0.2);
+}
+
+/* Audio & Fullscreen Buttons */
+.extra-tools {
+  position: absolute;
+  top: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  pointer-events: auto;
+}
+
+.tool-btn {
+  background: rgba(20, 18, 16, 0.55);
+  border: 1px solid rgba(210, 180, 130, 0.25);
+  color: #d6c6af;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.tool-btn:hover {
+  background: rgba(45, 38, 30, 0.8);
+  border-color: rgba(240, 200, 140, 0.6);
+  color: #fff6e8;
+  transform: translateY(-1px);
+}
+
+/* Era Specific Accents */
+body.era-0 .title {
+  color: #161514;
+  text-shadow: 0 1px 15px rgba(255, 255, 255, 0.95);
+}
+body.era-0 .subtitle {
+  color: #48433d;
+}
+body.era-0 .era-number {
+  color: #38332c;
+}
+body.era-0 .era-title {
+  color: #111111;
+  text-shadow: none;
+}
+body.era-0 .era-desc {
+  color: #403b35;
+}
+body.era-0 .manifesto-quote {
+  color: #2e2b26;
+  border-left-color: rgba(20, 20, 20, 0.5);
+}
+body.era-0 .manifesto-bold {
+  color: #111111;
+}
+body.era-0 .tool-btn {
+  background: rgba(250, 248, 245, 0.85);
+  border-color: rgba(20, 20, 20, 0.35);
+  color: #1f1d1a;
+}
+body.era-0 .watch-hint {
+  background: rgba(255, 255, 255, 0.9);
+  color: #161514;
+  border-color: rgba(20, 20, 20, 0.25);
+}
+
+body.era-1 .era-title {
+  color: #b0cbe8;
+  text-shadow: 0 0 15px rgba(176, 203, 232, 0.3);
+}
+body.era-2 .era-title {
+  color: #cc5266;
+  text-shadow: 0 0 15px rgba(185, 60, 80, 0.35);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .ui-overlay {
+    padding: 20px 20px;
+  }
+  .title {
+    font-size: 19px;
+  }
+  .subtitle {
+    font-size: 9px;
+  }
+  .era-title {
+    font-size: 16px;
+  }
+  .era-desc, .manifesto-quote {
+    display: none;
+  }
+  #pocket-watch-canvas {
+    width: 140px;
+    height: 140px;
+  }
+  .watch-hint {
+    font-size: 8px;
+  }
+}

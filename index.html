@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>WHY BOTHER? — Generative Rabbit Hole</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="era-0">
+  <!-- Rabbit Hole Canvas -->
+  <div id="canvas-container">
+    <canvas id="tunnel-canvas"></canvas>
+  </div>
+
+  <!-- UI Overlay -->
+  <main class="ui-overlay">
+    <!-- Top Header -->
+    <header class="top-header">
+      <div class="brand-block">
+        <h1 class="title">Why Bother?</h1>
+        <p class="subtitle">The Generative Rabbit Hole</p>
+      </div>
+
+      <!-- Extra Controls (Audio Ambiance / Fullscreen) -->
+      <div class="extra-tools">
+        <button id="btn-sound" class="tool-btn" title="Alternar audio atmosférico">
+          <span id="sound-icon">🔈</span>
+          <span id="sound-label">Sonido</span>
+        </button>
+        <button id="btn-fullscreen" class="tool-btn" title="Pantalla Completa">
+          <span>⛶</span>
+          <span>Expandir</span>
+        </button>
+      </div>
+
+      <!-- Era Badge Info -->
+      <div class="era-badge-container">
+        <span class="era-number" id="era-number">Capítulo I · 1865</span>
+        <h2 class="era-title" id="era-title">El Libro Original</h2>
+        <p class="era-desc" id="era-desc">Lewis Carroll &amp; John Tenniel — Grabado, tinta, tipografía y papel envejecido.</p>
+      </div>
+    </header>
+
+    <!-- Bottom Footer -->
+    <footer class="bottom-footer">
+      <div class="manifesto-quote">
+        <p id="manifesto-text">"Al principio, la madriguera del conejo se extendía en línea recta como un túnel, y después torció bruscamente hacia abajo..."</p>
+        <span class="manifesto-bold">Different tools. Different worlds. The same imagination.</span>
+      </div>
+
+      <!-- Pocket Watch Interactive Widget -->
+      <div class="watch-widget-container" id="watch-container">
+        <canvas id="pocket-watch-canvas"></canvas>
+        <div class="watch-hint" id="watch-hint">Gira o mantén el reloj para caer</div>
+      </div>
+    </footer>
+  </main>
+
+  <!-- Standalone script: works with both direct double-click (file:///) and web server -->
+  <script src="js/bundle.js"></script>
+</body>
+</html>

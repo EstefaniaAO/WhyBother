@@ -1,0 +1,20 @@
+{
+  "name": "why-bother-generative-rabbit-hole",
+  "version": "1.0.0",
+  "description": "Experiencia web interactiva de arte generativo inspirada en Alicia en el País de las Maravillas",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "build": "node build.js"
+  },
+  "keywords": [
+    "generative-art",
+    "alice-in-wonderland",
+    "creative-coding",
+    "canvas",
+    "perlin-noise",
+    "interactive"
+  ],
+  "author": "",
+  "license": "MIT"
+}
