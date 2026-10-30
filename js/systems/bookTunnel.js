@@ -3,6 +3,7 @@
  * Pure Monochromatic Antique Ink on Cut Paper (SOLO BLANCO Y NEGRO).
  * Concentric paper rings, deep cut shadows, hand-drawn ink pen spirals,
  * and typographic literary fragments stamped along organic spiral curves.
+ * Expanded to cover full screen from center into every corner with maximum contrast.
  */
 import { noise, FastMath } from '../math/noise.js';
 
@@ -35,12 +36,12 @@ export class BookTunnel {
 
     // Active progressive ink pen agents
     this.penAgents = [];
-    this.maxPenAgents = 26;
+    this.maxPenAgents = 32; // Increased for richer corner-to-corner coverage
 
     // Concentric paper ring growth queue
     this.paperRings = [];
     this.nextRingTime = 0;
-    this.ringInterval = 1.4;
+    this.ringInterval = 1.2;
 
     // Spiral text arms that stream words into the rabbit hole
     this.spiralTextArms = [];
@@ -48,7 +49,7 @@ export class BookTunnel {
 
     // Completed paths for subtle light wave traversal
     this.recentPaths = [];
-    this.maxRecentPaths = 45;
+    this.maxRecentPaths = 50;
   }
 
   init(width, height) {
@@ -57,20 +58,20 @@ export class BookTunnel {
     this.offscreenCanvas.width = width;
     this.offscreenCanvas.height = height;
 
-    // Initial white paper ground
+    // Initial crisp white paper ground
     this.offCtx.fillStyle = '#faf8f5';
     this.offCtx.fillRect(0, 0, width, height);
 
     // Initial deep center aperture (black hole at center)
     const cx = width / 2;
     const cy = height / 2;
-    const coreGrad = this.offCtx.createRadialGradient(cx, cy, 0, cx, cy, 35);
+    const coreGrad = this.offCtx.createRadialGradient(cx, cy, 0, cx, cy, 38);
     coreGrad.addColorStop(0, '#000000');
-    coreGrad.addColorStop(0.7, '#1a1a1a');
+    coreGrad.addColorStop(0.7, '#0a0a0a');
     coreGrad.addColorStop(1, 'rgba(250, 248, 245, 0)');
     this.offCtx.fillStyle = coreGrad;
     this.offCtx.beginPath();
-    this.offCtx.arc(cx, cy, 35, 0, Math.PI * 2);
+    this.offCtx.arc(cx, cy, 38, 0, Math.PI * 2);
     this.offCtx.fill();
 
     this.penAgents = [];
@@ -78,11 +79,11 @@ export class BookTunnel {
     this.spiralTextArms = [];
     this.recentPaths = [];
     this.time = 0;
-    this.nextRingTime = 0.3;
-    this.nextSpiralTextTime = 0.6;
+    this.nextRingTime = 0.2;
+    this.nextSpiralTextTime = 0.4;
 
     // Spawn initial pen agents near the center
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < 10; i++) {
       this.spawnPenAgent();
     }
 
@@ -122,21 +123,24 @@ export class BookTunnel {
     const cx = this.width / 2;
     const cy = this.height / 2;
     const angle = Math.random() * Math.PI * 2;
-    const startR = 10 + Math.random() * 24;
+    const startR = 8 + Math.random() * 22;
+
+    // Coverage to the farthest corners: 0.78 * hypot(w, h)
+    const maxCornerDist = Math.hypot(this.width, this.height) * 0.78;
 
     this.penAgents.push({
       x: cx + Math.cos(angle) * startR,
       y: cy + Math.sin(angle) * startR,
       angle: angle,
       r: startR,
-      speedR: 42 + Math.random() * 60,
-      speedTheta: (0.45 + Math.random() * 0.75) * (Math.random() > 0.4 ? 1 : -1),
-      noiseScale: 0.0028 + Math.random() * 0.0035,
-      lineWidth: 0.7 + Math.random() * 2.2,
-      opacity: 0.45 + Math.random() * 0.45,
-      isHatch: Math.random() > 0.6,
+      speedR: 45 + Math.random() * 65, // Outward speed
+      speedTheta: (0.42 + Math.random() * 0.75) * (Math.random() > 0.4 ? 1 : -1),
+      noiseScale: 0.0022 + Math.random() * 0.003,
+      lineWidth: 0.8 + Math.random() * 2.4,
+      opacity: 0.65 + Math.random() * 0.35, // High contrast pure black ink
+      isHatch: Math.random() > 0.55,
       history: [],
-      maxDist: Math.hypot(this.width, this.height) * 0.60,
+      maxDist: maxCornerDist,
       age: 0
     });
   }
@@ -144,24 +148,27 @@ export class BookTunnel {
   spawnPaperRing() {
     const cx = this.width / 2;
     const cy = this.height / 2;
-    const wordCount = 14 + Math.floor(Math.random() * 18);
+    const wordCount = 16 + Math.floor(Math.random() * 22);
     const ringWords = [];
     const startIdx = Math.floor(Math.random() * (this.words.length - wordCount));
     for (let i = 0; i < wordCount; i++) {
       ringWords.push(this.words[(startIdx + i) % this.words.length]);
     }
 
+    // Rings now expand all the way out to screen borders and corners
+    const maxScreenRadius = Math.hypot(this.width, this.height) * (0.25 + Math.random() * 0.52);
+
     this.paperRings.push({
-      currentRadius: 26 + Math.random() * 20,
-      targetRadius: Math.hypot(this.width, this.height) * (0.12 + Math.random() * 0.46),
-      expansionSpeed: 24 + Math.random() * 32,
+      currentRadius: 24 + Math.random() * 20,
+      targetRadius: maxScreenRadius,
+      expansionSpeed: 28 + Math.random() * 36,
       rotationAngle: Math.random() * Math.PI * 2,
-      rotationSpeed: (0.04 + Math.random() * 0.05) * (Math.random() > 0.5 ? 1 : -1),
-      irregularity: 0.04 + Math.random() * 0.05,
+      rotationSpeed: (0.035 + Math.random() * 0.045) * (Math.random() > 0.5 ? 1 : -1),
+      irregularity: 0.035 + Math.random() * 0.045,
       words: ringWords,
       isStamped: false,
-      shadowBlur: 10 + Math.random() * 16,
-      lineWidth: 1.2 + Math.random() * 1.8
+      shadowBlur: 12 + Math.random() * 18,
+      lineWidth: 1.4 + Math.random() * 1.8
     });
   }
 
@@ -172,11 +179,11 @@ export class BookTunnel {
       chars: phrase.split(''),
       currentIndex: 0,
       baseAngle: Math.random() * Math.PI * 2,
-      currentR: 20 + Math.random() * 25,
-      spiralGrowth: 28 + Math.random() * 24, // radius expansion per turn
+      currentR: 18 + Math.random() * 25,
+      spiralGrowth: 32 + Math.random() * 30, // Expands broad spiral reaching corners
       charStepTimer: 0,
-      charInterval: 0.06 + Math.random() * 0.04,
-      fontSize: 10 + Math.floor(Math.random() * 14),
+      charInterval: 0.05 + Math.random() * 0.03,
+      fontSize: 11 + Math.floor(Math.random() * 15),
       isDone: false
     });
   }
@@ -200,7 +207,7 @@ export class BookTunnel {
     this.nextSpiralTextTime -= dt * speedMult;
     if (this.nextSpiralTextTime <= 0) {
       this.spawnSpiralText();
-      this.nextSpiralTextTime = (2.2 + Math.random() * 1.8) / Math.max(1, speedMult * 0.8);
+      this.nextSpiralTextTime = (1.8 + Math.random() * 1.6) / Math.max(1, speedMult * 0.8);
     }
 
     // 3. Progressively stamp spiral text streams
@@ -213,21 +220,20 @@ export class BookTunnel {
         const ch = arm.chars[arm.currentIndex];
         arm.currentIndex++;
 
-        // Spiral coordinates
-        const turns = (arm.currentIndex * 0.095);
+        const turns = (arm.currentIndex * 0.09);
         const theta = arm.baseAngle + turns * Math.PI * 2;
         const r = arm.currentR + turns * arm.spiralGrowth;
 
-        // Stamp character along spiral curve
         const px = cx + Math.cos(theta) * r;
         const py = cy + Math.sin(theta) * r;
 
+        // Render with high black ink contrast
         offCtx.save();
         offCtx.translate(px, py);
         offCtx.rotate(theta + Math.PI / 2);
-        const dynamicSize = Math.max(9, Math.min(24, Math.floor(arm.fontSize * (0.6 + (r / 350)))));
-        offCtx.font = `600 ${dynamicSize}px "Cormorant Garamond", "Cinzel", "Times New Roman", serif`;
-        offCtx.fillStyle = 'rgba(18, 18, 18, 0.88)';
+        const dynamicSize = Math.max(10, Math.min(26, Math.floor(arm.fontSize * (0.7 + (r / 400)))));
+        offCtx.font = `700 ${dynamicSize}px "Cormorant Garamond", "Cinzel", "Times New Roman", serif`;
+        offCtx.fillStyle = '#0a0a0a'; // Pure black ink contrast
         offCtx.textAlign = 'center';
         offCtx.textBaseline = 'middle';
         offCtx.fillText(ch, 0, 0);
@@ -245,12 +251,12 @@ export class BookTunnel {
       ring.currentRadius += ring.expansionSpeed * dt * speedMult;
       ring.rotationAngle += ring.rotationSpeed * dt * speedMult;
 
-      const numPts = 90;
+      const numPts = 100;
       const pts = [];
       for (let s = 0; s <= numPts; s++) {
         const theta = (s / numPts) * Math.PI * 2;
         const n = noise.fbm2D(
-          Math.cos(theta) * 2.2 + ring.targetRadius * 0.01,
+          Math.cos(theta) * 2.2 + ring.targetRadius * 0.008,
           Math.sin(theta) * 2.2 + this.time * 0.02,
           2, 0.5
         );
@@ -271,21 +277,22 @@ export class BookTunnel {
       }
       offCtx.closePath();
 
-      offCtx.shadowColor = 'rgba(0, 0, 0, 0.16)';
+      // Sharp shadow & defined paper cut edge
+      offCtx.shadowColor = 'rgba(0, 0, 0, 0.22)';
       offCtx.shadowBlur = ring.shadowBlur;
       offCtx.shadowOffsetX = 0;
-      offCtx.shadowOffsetY = 3;
-      offCtx.strokeStyle = 'rgba(15, 15, 15, 0.75)';
+      offCtx.shadowOffsetY = 4;
+      offCtx.strokeStyle = 'rgba(10, 10, 10, 0.85)';
       offCtx.lineWidth = ring.lineWidth;
       offCtx.stroke();
       offCtx.restore();
 
       // Stamp typography along the ring perimeters
-      if (ring.currentRadius > 60 && !ring.isStamped) {
+      if (ring.currentRadius > 65 && !ring.isStamped) {
         offCtx.save();
-        const fontSize = Math.max(9, Math.min(26, Math.floor(ring.currentRadius * 0.065)));
-        offCtx.font = `600 ${fontSize}px "Cormorant Garamond", "Cinzel", "Times New Roman", serif`;
-        offCtx.fillStyle = '#111111';
+        const fontSize = Math.max(10, Math.min(28, Math.floor(ring.currentRadius * 0.06)));
+        offCtx.font = `700 ${fontSize}px "Cormorant Garamond", "Cinzel", "Times New Roman", serif`;
+        offCtx.fillStyle = '#080808'; // Deepest black ink
         offCtx.textAlign = 'center';
         offCtx.textBaseline = 'middle';
 
@@ -295,7 +302,7 @@ export class BookTunnel {
 
         for (let c = 0; c < chars.length; c++) {
           const charAngle = ring.rotationAngle + c * stepAngle;
-          const charR = ring.currentRadius + 3;
+          const charR = ring.currentRadius + 4;
           const px = cx + Math.cos(charAngle) * charR;
           const py = cy + Math.sin(charAngle) * charR;
 
@@ -328,29 +335,31 @@ export class BookTunnel {
       const prevY = p.y;
 
       const nAngle = noise.noise2D(p.x * p.noiseScale, p.y * p.noiseScale + this.time * 0.05) * Math.PI * 2;
-      p.angle += p.speedTheta * dt * speedMult + Math.sin(nAngle) * 0.35 * dt * speedMult;
+      p.angle += p.speedTheta * dt * speedMult + Math.sin(nAngle) * 0.38 * dt * speedMult;
       p.r += p.speedR * dt * speedMult;
 
       p.x = cx + Math.cos(p.angle) * p.r;
       p.y = cy + Math.sin(p.angle) * p.r;
 
+      // Draw progressive stroke with solid black ink
       offCtx.save();
       offCtx.beginPath();
       offCtx.moveTo(prevX, prevY);
       offCtx.lineTo(p.x, p.y);
-      offCtx.strokeStyle = `rgba(18, 18, 18, ${p.opacity})`;
+      offCtx.strokeStyle = `rgba(10, 10, 10, ${p.opacity})`;
       offCtx.lineWidth = p.lineWidth;
       offCtx.lineCap = 'round';
       offCtx.stroke();
 
-      if (p.isHatch && Math.random() > 0.6) {
-        const hLen = 4 + Math.random() * 8;
+      // Cross-hatching ticks on some strokes (Victorian engraving style)
+      if (p.isHatch && Math.random() > 0.58) {
+        const hLen = 5 + Math.random() * 10;
         const normAngle = p.angle + Math.PI / 2 + (Math.random() - 0.5) * 0.5;
         offCtx.beginPath();
         offCtx.moveTo(p.x, p.y);
         offCtx.lineTo(p.x + Math.cos(normAngle) * hLen, p.y + Math.sin(normAngle) * hLen);
-        offCtx.strokeStyle = `rgba(30, 30, 30, ${p.opacity * 0.65})`;
-        offCtx.lineWidth = 0.6;
+        offCtx.strokeStyle = `rgba(15, 15, 15, ${p.opacity * 0.85})`;
+        offCtx.lineWidth = 0.7;
         offCtx.stroke();
       }
       offCtx.restore();
@@ -358,7 +367,7 @@ export class BookTunnel {
       p.history.push({ x: p.x, y: p.y, r: p.r });
 
       const distFromCenter = Math.hypot(p.x - cx, p.y - cy);
-      if (distFromCenter >= p.maxDist || p.age > 8.0) {
+      if (distFromCenter >= p.maxDist || p.age > 10.0) {
         if (p.history.length > 5) {
           this.recentPaths.push(p.history);
           if (this.recentPaths.length > this.maxRecentPaths) {
@@ -382,7 +391,7 @@ export class BookTunnel {
 
     // Subtle paper grain light wave highlight (no neon)
     if (lightWaves && lightWaves.waves.length > 0) {
-      const maxR = Math.hypot(width, height) * 0.55;
+      const maxR = Math.hypot(width, height) * 0.75;
 
       ctx.save();
       for (const wave of lightWaves.waves) {
@@ -415,13 +424,13 @@ export class BookTunnel {
     }
 
     // Central dark core
-    const coreGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 32);
+    const coreGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 34);
     coreGrad.addColorStop(0, '#000000');
-    coreGrad.addColorStop(0.6, '#181818');
+    coreGrad.addColorStop(0.6, '#0a0a0a');
     coreGrad.addColorStop(1, 'rgba(250, 248, 245, 0)');
     ctx.fillStyle = coreGrad;
     ctx.beginPath();
-    ctx.arc(cx, cy, 32, 0, Math.PI * 2);
+    ctx.arc(cx, cy, 34, 0, Math.PI * 2);
     ctx.fill();
 
     ctx.restore();

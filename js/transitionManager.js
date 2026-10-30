@@ -19,12 +19,13 @@ export const States = {
 };
 
 export class TransitionManager {
-  constructor(aliceController, bookTunnel, movieTunnel, gameTunnel, lightWaves, pocketWatch, onEraChanged) {
+  constructor(aliceController, bookTunnel, movieTunnel, gameTunnel, lightWaves, pocketWatch, onEraChanged, onTransitionsMilestone) {
     this.alice = aliceController;
     this.tunnels = [bookTunnel, movieTunnel, gameTunnel];
     this.lightWaves = lightWaves;
     this.watch = pocketWatch;
     this.onEraChanged = onEraChanged;
+    this.onTransitionsMilestone = onTransitionsMilestone;
 
     this.state = States.INITIALIZING;
     this.currentEra = 0; // 0: Book, 1: Movie, 2: Game
@@ -42,6 +43,9 @@ export class TransitionManager {
     // Tunnel speed multiplier
     this.tunnelSpeedMultiplier = 1.0;
 
+    // Total transitions counter to prompt decision
+    this.transitionsCount = 0;
+
     // Start in intro animation
     this.startIntro();
   }
@@ -49,7 +53,7 @@ export class TransitionManager {
   startIntro() {
     this.state = States.INTRO_ANIMATION;
     this.phaseTime = 0;
-    this.phaseDuration = 3.2;
+    this.phaseDuration = 3.6; // Coupled to Alice dramatic perspective fall
     this.tunnelSpeedMultiplier = 1.0;
   }
 
@@ -101,10 +105,14 @@ export class TransitionManager {
     if (this.subPhase === 'PHASE_A') {
       // Phase A: Acceleration (Tunnel speed accelerates, watch spins fast)
       const t = Math.min(1.0, this.phaseTime / this.phaseDuration);
-      this.tunnelSpeedMultiplier = 1.0 + t * 2.8; // Ramps up to 3.8x
+      this.tunnelSpeedMultiplier = 1.0 + t * 2.8;
+
+      // Start gentle rotation acceleration
+      const startSpin = this.direction * (t * t) * Math.PI * 0.8;
+      this.alice.setTransitionTransform(1.0, startSpin, 1.0, 0, 0);
 
       if (this.phaseTime >= this.phaseDuration) {
-        // Move to Phase B: Descent (Alice spins & shrinks into depth)
+        // Move to Phase B: Descent (Alice spins & physically plunges into depth)
         this.subPhase = 'PHASE_B';
         this.phaseTime = 0;
         this.phaseDuration = 1.4;
@@ -114,20 +122,24 @@ export class TransitionManager {
       // Ease in cubic for falling acceleration
       const ease = t * t * t;
 
-      this.tunnelSpeedMultiplier = 3.8 + t * 1.5; // High speed
+      this.tunnelSpeedMultiplier = 3.8 + t * 1.5;
 
-      const scale = Math.max(0.01, 1.0 - ease * 0.98);
-      const spin = this.direction * ease * Math.PI * 6.0; // 3 full rapid spins
-      const alpha = Math.max(0.0, 1.0 - ease * 0.95);
+      // Physical scale plunge down to 0.005 at vanishing point
+      const scale = Math.max(0.005, 1.0 - ease * 0.995);
+      const spin = this.direction * (Math.PI * 0.8 + ease * Math.PI * 6.5);
 
-      this.alice.setTransitionTransform(scale, spin, alpha, 0, ease * 25);
+      // NO early opacity fades! Remains solid until it enters the tiny core aperture
+      const alpha = scale > 0.04 ? 1.0 : (scale / 0.04);
+      const offsetY = ease * 18;
+
+      this.alice.setTransitionTransform(scale, spin, alpha, 0, offsetY);
 
       if (this.phaseTime >= this.phaseDuration) {
-        // Phase C: Complete disappearance at center
+        // Phase C: Complete disappearance inside the central hole
         this.subPhase = 'PHASE_C';
         this.phaseTime = 0;
         this.phaseDuration = 0.25;
-        this.alice.setTransitionTransform(0.0, spin, 0.0, 0, 0);
+        this.alice.setTransitionTransform(0.001, spin, 0.0, 0, 0);
       }
     } else if (this.subPhase === 'PHASE_C') {
       this.alice.setTransitionTransform(0.0, 0, 0.0, 0, 0);
@@ -136,7 +148,7 @@ export class TransitionManager {
         // Switch to TRANSFORMING (Phase D)
         this.state = States.TRANSFORMING;
         this.phaseTime = 0;
-        this.phaseDuration = 2.0; // Duration for generative cross-morph
+        this.phaseDuration = 2.0;
         this.morphProgress = 0;
 
         // Reset target era tunnel so it progressively draws fresh from center
@@ -150,11 +162,10 @@ export class TransitionManager {
   handleTransforming(dt) {
     // Phase D: Generative system transformation
     const t = Math.min(1.0, this.phaseTime / this.phaseDuration);
-    // Smooth step for organic morphing
     this.morphProgress = t * t * (3 - 2 * t);
-    this.tunnelSpeedMultiplier = 4.5 - t * 1.5; // Stays energetic then begins easing
+    this.tunnelSpeedMultiplier = 4.5 - t * 1.5;
 
-    // Keep Alice invisible during tunnel transformation
+    // Keep Alice in the depths during tunnel transformation
     this.alice.setTransitionTransform(0.0, 0, 0.0, 0, 0);
 
     if (this.phaseTime >= this.phaseDuration) {
@@ -168,7 +179,7 @@ export class TransitionManager {
         this.onEraChanged(this.currentEra);
       }
 
-      // Enter TRANSITION_IN (Phase E: New Alice emergence)
+      // Enter TRANSITION_IN (Phase E: New Alice emerges from central hole)
       this.state = States.TRANSITION_IN;
       this.subPhase = 'PHASE_E';
       this.phaseTime = 0;
@@ -178,31 +189,30 @@ export class TransitionManager {
 
   handleTransitionIn(dt) {
     if (this.subPhase === 'PHASE_E') {
-      // Phase E: New Alice emerges from vanishing point
+      // Phase E: New Alice emerges directly from central vanishing point (scale ~0.01 -> 1.0)
       const t = Math.min(1.0, this.phaseTime / this.phaseDuration);
-      // Ease out cubic: rapidly grows then decelerates
-      const ease = 1 - Math.pow(1 - t, 3);
+      const ease = 1 - Math.pow(1 - t, 3); // Ease out cubic
 
-      this.tunnelSpeedMultiplier = 3.0 - ease * 1.8; // Easing back down
+      this.tunnelSpeedMultiplier = 3.0 - ease * 1.8;
 
       const scale = 0.01 + ease * 0.99;
-      const spin = this.direction * (1 - ease) * Math.PI * 4.5; // Decelerating spin
-      const alpha = Math.min(1.0, ease * 1.2);
+      const spin = this.direction * (1 - ease) * Math.PI * 5.0; // Decelerating spin
+      const alpha = scale > 0.04 ? 1.0 : (scale / 0.04);
+      const offsetY = (1 - ease) * -12;
 
-      this.alice.setTransitionTransform(scale, spin, alpha, 0, (1 - ease) * -15);
+      this.alice.setTransitionTransform(scale, spin, alpha, 0, offsetY);
 
       if (this.phaseTime >= this.phaseDuration) {
         // Move to Phase F: Stabilization
         this.subPhase = 'PHASE_F';
         this.phaseTime = 0;
-        this.phaseDuration = 0.9;
+        this.phaseDuration = 0.8;
       }
     } else if (this.subPhase === 'PHASE_F') {
       // Phase F: Stabilization
       const t = Math.min(1.0, this.phaseTime / this.phaseDuration);
-      this.tunnelSpeedMultiplier = 1.2 - t * 0.2; // Return to 1.0
+      this.tunnelSpeedMultiplier = 1.2 - t * 0.2;
 
-      // Blend smoothly to natural idle float
       const scale = 1.0;
       const spin = 0;
       const alpha = 1.0;
@@ -212,27 +222,25 @@ export class TransitionManager {
         this.state = States.IDLE;
         this.tunnelSpeedMultiplier = 1.0;
         this.watch.setTransitionState(false);
+        this.alice.releaseTransitionTransform();
+
+        this.transitionsCount++;
+        if (this.onTransitionsMilestone) {
+          this.onTransitionsMilestone(this.transitionsCount);
+        }
       }
     }
   }
 
-  /**
-   * Renders the active generative tunnel systems, handling morphing cross-fade in Phase D.
-   */
   renderTunnels(ctx, width, height, cx, cy) {
     if (this.state === States.TRANSFORMING) {
-      // Dual rendering with cross-morph weights
       const fromEra = this.currentEra;
       const toEra = this.targetEra;
       const blend = this.morphProgress;
 
-      // Render outgoing tunnel fading out
       this.tunnels[fromEra].render(ctx, width, height, cx, cy, this.lightWaves, 1.0 - blend);
-
-      // Render incoming tunnel fading in and asserting its forms
       this.tunnels[toEra].render(ctx, width, height, cx, cy, this.lightWaves, blend);
     } else {
-      // Single tunnel rendering
       this.tunnels[this.currentEra].render(ctx, width, height, cx, cy, this.lightWaves, 1.0);
     }
   }

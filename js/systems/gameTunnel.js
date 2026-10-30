@@ -3,7 +3,7 @@
  * Authentic Dark Watercolor & Dense Gothic Pigment (ACUARELA OSCURA).
  * Burgundy, muted crimson, wine red, petrol blue, indigo, dark violet, deep purple, bluish gray.
  * Twisted asymmetric spirals, interlocking thorny roots, dense concentrated stains.
- * Strictly non-neon, non-electric, traditional pigment aesthetic.
+ * Expanded to cover full screen from center to corners.
  */
 import { FastMath } from '../math/noise.js';
 import { FlowField } from './flowField.js';
@@ -33,14 +33,14 @@ export class GameTunnel {
       { r: 75,  g: 88, b: 102 }   // Gris azulado (bluish gray)
     ];
 
-    // FlowField for turbulent, twisted asymmetric curves
+    // FlowField for turbulent, twisted asymmetric curves reaching corners
     this.flowField = new FlowField({
-      vortexStrength: 0.72,
-      radialExpansion: 0.42,
-      noiseScale: 0.0032,
+      vortexStrength: 0.76,
+      radialExpansion: 0.46, // Expands fully into corners
+      noiseScale: 0.0028,
       noiseStrength: 1.15,
-      turbulence: 0.55,
-      spiralDirection: -1 // counter-swirl for sinister tension
+      turbulence: 0.52,
+      spiralDirection: -1 // counter-swirl
     });
 
     // Pigment simulation & spatial coverage map
@@ -48,7 +48,7 @@ export class GameTunnel {
 
     // Active autonomous brush agents
     this.agents = [];
-    this.maxAgents = 24;
+    this.maxAgents = 30; // Increased for rich corner coverage
 
     // Dense pigment puddles / dark concentrated blotches
     this.denseBlotches = [];
@@ -69,14 +69,14 @@ export class GameTunnel {
 
     const cx = width / 2;
     const cy = height / 2;
-    const maxR = Math.hypot(width, height) * 0.65;
+    const maxR = Math.hypot(width, height) * 0.78;
 
     // Deep blackened charcoal & raw umber paper background
     const bgGrad = this.offCtx.createRadialGradient(cx, cy, 10, cx, cy, maxR);
     bgGrad.addColorStop(0.0, '#040206');
     bgGrad.addColorStop(0.35, '#0d040a');
     bgGrad.addColorStop(0.75, '#120714');
-    bgGrad.addColorStop(1.0, '#060209');
+    bgGrad.addColorStop(1.0, '#07020a');
     this.offCtx.fillStyle = bgGrad;
     this.offCtx.fillRect(0, 0, width, height);
 
@@ -84,10 +84,10 @@ export class GameTunnel {
     this.recentPaths = [];
     this.denseBlotches = [];
     this.time = 0;
-    this.nextBlotchTime = 0.4;
+    this.nextBlotchTime = 0.3;
 
-    // Spawn initial dark watercolor strokes near center
-    for (let i = 0; i < 7; i++) {
+    // Spawn initial dark watercolor strokes near center and mid-radii
+    for (let i = 0; i < 10; i++) {
       this.spawnAgent();
     }
 
@@ -127,19 +127,21 @@ export class GameTunnel {
   spawnAgent() {
     const cx = this.width / 2;
     const cy = this.height / 2;
+    const maxCorner = Math.hypot(this.width, this.height) * 0.78;
 
-    const spawnAngle = this.colorGrid.findLeastCoveredAngle(cx, cy, 50);
-    const startR = 10 + Math.random() * 24;
-    const x = cx + Math.cos(spawnAngle) * startR;
-    const y = cy + Math.sin(spawnAngle) * startR;
+    const isMidSpawn = Math.random() > 0.72;
+    const baseR = isMidSpawn ? (45 + Math.random() * (maxCorner * 0.45)) : (10 + Math.random() * 24);
+
+    const spawnAngle = this.colorGrid.findLeastCoveredAngle(cx, cy, baseR);
+    const x = cx + Math.cos(spawnAngle) * baseR;
+    const y = cy + Math.sin(spawnAngle) * baseR;
 
     const col = this.palette[Math.floor(Math.random() * this.palette.length)];
-    // Denser, slightly thicker twisted watercolor strokes
-    const thickness = 8 + Math.random() * 28;
-    const opacity = 0.25 + Math.random() * 0.32; // concentrated dark pigment
+    const thickness = 9 + Math.random() * 28;
+    const opacity = 0.28 + Math.random() * 0.35; // concentrated dark pigment
 
     const initForce = this.flowField.getForce(x, y, cx, cy, this.time);
-    const speed = 44 + Math.random() * 52;
+    const speed = 48 + Math.random() * 55;
 
     this.agents.push(new BrushAgent({
       x,
@@ -147,15 +149,15 @@ export class GameTunnel {
       vx: initForce.x * speed,
       vy: initForce.y * speed,
       speed,
-      maxSteerForce: 4.8, // more aggressive steering for twisted roots
+      maxSteerForce: 4.8,
       thickness,
       opacity,
       color: col,
-      maxLife: 5.0 + Math.random() * 3.8,
+      maxLife: 7.2 + Math.random() * 4.5, // Extended life to explore corners
       numPasses: 3,
       bristleSpread: 0.38,
       isWet: true,
-      isGothic: true // adds organic thorns and barbed irregularities
+      isGothic: true
     }));
   }
 
@@ -163,15 +165,15 @@ export class GameTunnel {
     const cx = this.width / 2;
     const cy = this.height / 2;
     const angle = Math.random() * Math.PI * 2;
-    const r = 35 + Math.random() * (Math.hypot(this.width, this.height) * 0.35);
+    const r = 30 + Math.random() * (Math.hypot(this.width, this.height) * 0.52);
     const col = this.palette[Math.floor(Math.random() * this.palette.length)];
 
     this.denseBlotches.push({
       x: cx + Math.cos(angle) * r,
       y: cy + Math.sin(angle) * r,
-      radius: 12 + Math.random() * 35,
+      radius: 18 + Math.random() * 50,
       color: col,
-      opacity: 0.12 + Math.random() * 0.16,
+      opacity: 0.12 + Math.random() * 0.18,
       drawn: false
     });
   }
@@ -183,12 +185,13 @@ export class GameTunnel {
     const cx = this.width / 2;
     const cy = this.height / 2;
     const offCtx = this.offCtx;
+    const maxCorner = Math.hypot(this.width, this.height) * 0.78;
 
-    // Dark concentrated pigment blotches (wet wine & indigo drops)
+    // Dark concentrated pigment blotches
     this.nextBlotchTime -= dt * speedMult;
     if (this.nextBlotchTime <= 0) {
       this.spawnDenseBlotch();
-      this.nextBlotchTime = 1.6 / Math.max(1, speedMult * 0.8);
+      this.nextBlotchTime = 1.4 / Math.max(1, speedMult * 0.8);
     }
 
     for (let i = this.denseBlotches.length - 1; i >= 0; i--) {
@@ -222,7 +225,8 @@ export class GameTunnel {
       agent.update(dt, this.flowField, this.colorGrid, cx, cy, this.time, speedMult);
       agent.drawSegment(offCtx);
 
-      if (agent.isDead) {
+      const dist = Math.hypot(agent.x - cx, agent.y - cy);
+      if (agent.isDead || dist > maxCorner) {
         if (agent.history.length > 5) {
           this.recentPaths.push(agent.history);
           if (this.recentPaths.length > this.maxRecentPaths) {
@@ -245,12 +249,11 @@ export class GameTunnel {
     ctx.save();
     ctx.globalAlpha = alpha;
 
-    // 1. Draw persistent accumulated dark watercolor painting
     ctx.drawImage(this.offscreenCanvas, 0, 0);
 
-    // 2. Subtle wine/petrol shimmer over existing twisted roots (strictly no neon)
+    // Subtle wine/petrol shimmer over existing twisted roots
     if (lightWaves && lightWaves.waves.length > 0) {
-      const maxR = Math.hypot(width, height) * 0.55;
+      const maxR = Math.hypot(width, height) * 0.75;
 
       ctx.save();
       for (const wave of lightWaves.waves) {
@@ -277,7 +280,6 @@ export class GameTunnel {
           }
 
           if (hasPoints && strokeCol) {
-            // Muted wine red / deep indigo glaze highlight
             ctx.strokeStyle = `rgba(${Math.min(255, strokeCol.r + 40)}, ${strokeCol.g}, ${strokeCol.b}, ${(0.35 * wave.intensity).toFixed(3)})`;
             ctx.lineWidth = 3.4;
             ctx.stroke();
@@ -287,7 +289,7 @@ export class GameTunnel {
       ctx.restore();
     }
 
-    // 3. Central abyss aperture (darkest pit of the rabbit hole)
+    // Central abyss aperture
     const coreGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 38);
     coreGrad.addColorStop(0, '#000000');
     coreGrad.addColorStop(0.65, '#0e030a');
