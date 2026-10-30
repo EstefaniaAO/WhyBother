@@ -41,6 +41,15 @@ export class GameTunnel {
       { r: 128, g: 112, b: 164 }  // Violeta grisáceo
     ];
 
+    // High-contrast luminous accent colors that pop strikingly against dark gothic tones
+    this.luminousAccents = [
+      { r: 245, g: 48,  b: 82  }, // Carmesí eléctrico llamativo
+      { r: 125, g: 218, b: 252 }, // Cian / acero glacial luminoso
+      { r: 220, g: 140, b: 245 }, // Orquídea / violeta eléctrico
+      { r: 225, g: 236, b: 250 }, // Plata / acero frío luminoso
+      { r: 255, g: 180, b: 75  }  // Carmín ambarino incandescente
+    ];
+
     // FlowField for turbulent, twisted asymmetric curves reaching corners
     this.flowField = new FlowField({
       vortexStrength: 0.82,
@@ -163,41 +172,51 @@ export class GameTunnel {
     const x = cx + Math.cos(spawnAngle) * baseR;
     const y = cy + Math.sin(spawnAngle) * baseR;
 
-    const col = this.getColorForRadius(baseR);
+    // ~30% chance for striking luminous high-contrast strokes that pop over the dark ground
+    const isLuminousAccent = Math.random() < 0.30;
+    let col, thickness, opacity, speed, maxLife, numPasses, bristleSpread;
 
-    // Varied Brush Hierarchy (Inspired by reference painting strata)
-    const category = Math.random();
-    let thickness, opacity, speed, maxLife, numPasses, bristleSpread;
-
-    if (category < 0.35) {
-      // 1. Broad deep midnight blue and wine strata
-      thickness = 22 + Math.random() * 20;
-      opacity = 0.24 + Math.random() * 0.16;
-      speed = 22 + Math.random() * 16;
-      maxLife = 16.0 + Math.random() * 7.0;
-      numPasses = 4;
-      bristleSpread = 0.48;
-    } else if (category < 0.75) {
-      // 2. Dense twisted asymmetrical gothic ribbons
-      thickness = 9 + Math.random() * 13;
-      opacity = 0.35 + Math.random() * 0.25;
-      speed = 28 + Math.random() * 20;
-      maxLife = 13.0 + Math.random() * 6.0;
-      numPasses = 3;
-      bristleSpread = 0.38;
-    } else {
-      // 3. Sharp carmine and petrol thorn filigrees
-      thickness = 2.4 + Math.random() * 3.8;
-      opacity = 0.55 + Math.random() * 0.30;
-      speed = 34 + Math.random() * 22;
-      maxLife = 11.0 + Math.random() * 5.0;
+    if (isLuminousAccent) {
+      col = this.luminousAccents[Math.floor(Math.random() * this.luminousAccents.length)];
+      thickness = 2.4 + Math.random() * 4.2;
+      opacity = 0.68 + Math.random() * 0.28;
+      speed = 36 + Math.random() * 26;
+      maxLife = 12.0 + Math.random() * 6.0;
       numPasses = 2;
       bristleSpread = 0.22;
+    } else {
+      col = this.getColorForRadius(baseR);
+      const category = Math.random();
+      if (category < 0.35) {
+        // 1. Broad deep midnight blue and wine strata
+        thickness = 22 + Math.random() * 20;
+        opacity = 0.24 + Math.random() * 0.16;
+        speed = 22 + Math.random() * 16;
+        maxLife = 16.0 + Math.random() * 7.0;
+        numPasses = 4;
+        bristleSpread = 0.48;
+      } else if (category < 0.75) {
+        // 2. Dense twisted asymmetrical gothic ribbons
+        thickness = 9 + Math.random() * 13;
+        opacity = 0.35 + Math.random() * 0.25;
+        speed = 28 + Math.random() * 20;
+        maxLife = 13.0 + Math.random() * 6.0;
+        numPasses = 3;
+        bristleSpread = 0.38;
+      } else {
+        // 3. Sharp carmine and petrol thorn filigrees
+        thickness = 2.4 + Math.random() * 3.8;
+        opacity = 0.55 + Math.random() * 0.30;
+        speed = 34 + Math.random() * 22;
+        maxLife = 11.0 + Math.random() * 5.0;
+        numPasses = 2;
+        bristleSpread = 0.22;
+      }
     }
 
     const initForce = this.flowField.getForce(x, y, cx, cy, this.time);
 
-    this.agents.push(new BrushAgent({
+    const agent = new BrushAgent({
       x,
       y,
       vx: initForce.x * speed,
@@ -212,7 +231,9 @@ export class GameTunnel {
       bristleSpread,
       isWet: true,
       isGothic: true
-    }));
+    });
+    agent.isLuminousAccent = isLuminousAccent;
+    this.agents.push(agent);
   }
 
   /**
@@ -327,11 +348,11 @@ export class GameTunnel {
     const offCtx = this.offCtx;
     const maxCorner = Math.hypot(this.width, this.height) * 0.82;
 
-    // Organic Abstract Crimson Splatters
+    // Organic Abstract Crimson Splatters (un poquito más seguido)
     this.nextSplatterTime -= dt * speedMult;
     if (this.nextSplatterTime <= 0) {
       this.spawnAbstractSplatter();
-      this.nextSplatterTime = (2.2 + Math.random() * 2.2) / Math.max(1, speedMult * 0.85);
+      this.nextSplatterTime = (0.75 + Math.random() * 0.95) / Math.max(1, speedMult * 0.85);
     }
 
     // Dark dense watercolor blotches
@@ -370,16 +391,18 @@ export class GameTunnel {
     for (let i = this.agents.length - 1; i >= 0; i--) {
       const agent = this.agents[i];
 
-      // Dynamically blend agent color toward outward tone as it journeys away from center
+      // Dynamically blend dark agents toward outward tone, preserving luminous accents
       const currentR = Math.hypot(agent.x - cx, agent.y - cy);
-      const targetCol = this.getColorForRadius(currentR);
-      agent.currentColor = FastMath.blendRGB(agent.currentColor, targetCol, 0.04);
+      if (!agent.isLuminousAccent) {
+        const targetCol = this.getColorForRadius(currentR);
+        agent.currentColor = FastMath.blendRGB(agent.currentColor, targetCol, 0.04);
+      }
 
       agent.update(dt, this.flowField, this.colorGrid, cx, cy, this.time, speedMult);
       agent.drawSegment(offCtx);
 
-      // Occasional organic splatter spawned along high-curvature turns of dark agents
-      if (Math.random() > 0.985 && agent.currentColor.r > 100) {
+      // Occasional organic splatter spawned along high-energy trajectories
+      if (Math.random() > 0.975 && (agent.currentColor.r > 120 || agent.isLuminousAccent)) {
         this.spawnAbstractSplatter(agent.x, agent.y);
       }
 
