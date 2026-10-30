@@ -1,5 +1,5 @@
 /**
- * WHY BOTHER? — GENERATIVE RABBIT HOLE
+ * WHY BOTHER? — GENERATIVE RABBIT HOLE & CREATE STAGE
  * Main Entry Point & Orchestrator
  */
 
@@ -10,23 +10,39 @@ import { GameTunnel } from './systems/gameTunnel.js';
 import { AliceController } from './systems/aliceController.js';
 import { PocketWatch } from './systems/pocketWatch.js';
 import { TransitionManager, States } from './transitionManager.js';
+import { CreateStage } from './systems/createStage.js';
 
 // DOM Elements
 const canvas = document.getElementById('tunnel-canvas');
 const ctx = canvas.getContext('2d');
 const watchCanvas = document.getElementById('pocket-watch-canvas');
+const watchContainer = document.getElementById('watch-container');
 
+const mainTitleEl = document.getElementById('main-title');
+const mainSubtitleEl = document.getElementById('main-subtitle');
+const eraBadgeContainer = document.getElementById('era-badge-container');
 const eraNumberEl = document.getElementById('era-number');
 const eraTitleEl = document.getElementById('era-title');
 const eraDescEl = document.getElementById('era-desc');
+const manifestoContainer = document.getElementById('manifesto-quote-container');
 const manifestoTextEl = document.getElementById('manifesto-text');
 const watchHintEl = document.getElementById('watch-hint');
+
+// Tool buttons
 const soundBtn = document.getElementById('btn-sound');
 const soundIcon = document.getElementById('sound-icon');
 const soundLabel = document.getElementById('sound-label');
 const fullscreenBtn = document.getElementById('btn-fullscreen');
 
-// Era Metadata definitions
+// Reflection Modal elements
+const reflectionModal = document.getElementById('reflection-modal');
+const createHintPanel = document.getElementById('create-hint-panel');
+const btnContemplate = document.getElementById('btn-contemplate');
+const btnDownloadArt = document.getElementById('btn-download-art');
+const btnResumeCreating = document.getElementById('btn-resume-creating');
+const btnReturnRabbitHole = document.getElementById('btn-return-rabbit-hole');
+
+// 4 Stages definitions: Libro -> Película -> Videojuego -> CREATE
 const ERAS = [
   {
     number: "Capítulo I · 1865",
@@ -48,6 +64,13 @@ const ERAS = [
     desc: "American McGee & Rogue Entertainment — Acuarela oscura, borgoña, índigo denso y espirales retorcidas.",
     quote: "«Solo unos pocos encuentran el camino; otros no lo reconocen cuando lo encuentran; otros no quieren encontrarlo.»",
     className: "era-2"
+  },
+  {
+    number: "Capítulo IV · Creación",
+    title: "Tu Propia Composición",
+    desc: "Materia generativa liberada — Alicia como inspiración fantástica y surrealista.",
+    quote: "«El observador se convierte en creador... Tu mano guía el curso de la materia generativa.»",
+    className: "era-create"
   }
 ];
 
@@ -57,17 +80,18 @@ const bookTunnel = new BookTunnel();
 const movieTunnel = new MovieTunnel();
 const gameTunnel = new GameTunnel();
 const alice = new AliceController();
+const createStage = new CreateStage();
 
-// Pocket Watch instance
 let pocketWatch;
 let transitionManager;
+let isCreateMode = false;
+let isMouseDown = false;
 
 // Web Audio Ambiance Synthesizer
 class AmbianceAudio {
   constructor() {
     this.ctx = null;
     this.isPlaying = false;
-    this.tickOsc = null;
     this.tickInterval = null;
     this.droneOsc = null;
     this.droneGain = null;
@@ -78,12 +102,10 @@ class AmbianceAudio {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     this.ctx = new AudioContext();
 
-    // Main master gain
     this.masterGain = this.ctx.createGain();
     this.masterGain.gain.setValueAtTime(0.2, this.ctx.currentTime);
     this.masterGain.connect(this.ctx.destination);
 
-    // Drone oscillator for abyss feeling
     this.droneOsc = this.ctx.createOscillator();
     this.droneGain = this.ctx.createGain();
     this.droneGain.gain.setValueAtTime(0.04, this.ctx.currentTime);
@@ -93,7 +115,6 @@ class AmbianceAudio {
     this.droneGain.connect(this.masterGain);
     this.droneOsc.start();
 
-    // Clock ticking loop
     this.startTickLoop();
     this.isPlaying = true;
   }
@@ -119,11 +140,10 @@ class AmbianceAudio {
     }, 550);
   }
 
-  triggerTransitionWhoosh(speedMultiplier = 2.0) {
+  triggerTransitionWhoosh() {
     if (!this.ctx || this.ctx.state !== 'running') return;
     const now = this.ctx.currentTime;
 
-    // Resonant filter sweep
     const bufferSize = this.ctx.sampleRate * 1.5;
     const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
     const data = buffer.getChannelData(0);
@@ -158,14 +178,13 @@ class AmbianceAudio {
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
     if (era === 0) {
-      // Antique book: low hollow tone
       this.droneOsc.frequency.exponentialRampToValueAtTime(55, now + 1.0);
     } else if (era === 1) {
-      // 1951 Movie: whimsical higher harmonic
       this.droneOsc.frequency.exponentialRampToValueAtTime(110, now + 1.0);
-    } else {
-      // American McGee: deep sinister low drone
+    } else if (era === 2) {
       this.droneOsc.frequency.exponentialRampToValueAtTime(42, now + 1.0);
+    } else {
+      this.droneOsc.frequency.exponentialRampToValueAtTime(84, now + 1.0);
     }
   }
 
@@ -191,10 +210,8 @@ const audio = new AmbianceAudio();
 // Setup era change UI sync
 function handleEraChanged(newEraIndex) {
   const meta = ERAS[newEraIndex];
-
   document.body.className = meta.className;
 
-  // Fade out text briefly, update, and fade in
   eraTitleEl.style.opacity = '0';
   eraDescEl.style.opacity = '0';
   manifestoTextEl.style.opacity = '0';
@@ -210,17 +227,36 @@ function handleEraChanged(newEraIndex) {
     manifestoTextEl.style.opacity = '1';
   }, 250);
 
-  audio.setEra(newEraIndex);
+  if (newEraIndex === 3) {
+    // ENTERING CREATE STAGE
+    isCreateMode = true;
+    // Inherit the game tunnel canvas without erasing previous marks!
+    createStage.init(width, height, gameTunnel.offscreenCanvas);
+
+    mainTitleEl.textContent = 'Why Bother?';
+    mainSubtitleEl.textContent = 'Etapa de Creación · Tu Mano Interviene el Sistema';
+
+    if (createHintPanel) createHintPanel.style.display = 'flex';
+    if (watchHintEl) watchHintEl.textContent = 'Gira en sentido contrario para volver';
+    audio.setEra(3);
+  } else {
+    // RETURNING TO RABBIT HOLE STAGE
+    isCreateMode = false;
+    createStage.isActive = false;
+
+    mainTitleEl.textContent = 'Why Bother?';
+    mainSubtitleEl.textContent = 'The Generative Rabbit Hole';
+
+    if (createHintPanel) createHintPanel.style.display = 'none';
+    if (watchHintEl) watchHintEl.textContent = 'Gira o mantén el reloj para caer';
+    audio.setEra(newEraIndex);
+  }
 }
 
 // Initialize Pocket Watch & Transition Manager
 pocketWatch = new PocketWatch(watchCanvas, (direction) => {
-  // Fade hint on first interaction
   if (watchHintEl) {
-    watchHintEl.style.opacity = '0';
-    setTimeout(() => {
-      watchHintEl.style.display = 'none';
-    }, 600);
+    watchHintEl.style.opacity = '0.5';
   }
   audio.triggerTransitionWhoosh();
   transitionManager.triggerTransition(direction);
@@ -231,6 +267,7 @@ transitionManager = new TransitionManager(
   bookTunnel,
   movieTunnel,
   gameTunnel,
+  createStage,
   lightWaves,
   pocketWatch,
   handleEraChanged
@@ -261,21 +298,63 @@ function handleResize() {
   bookTunnel.resize(width, height);
   movieTunnel.resize(width, height);
   gameTunnel.resize(width, height);
+  createStage.resize(width, height);
 }
 
 window.addEventListener('resize', handleResize);
 handleResize();
 
-// Mouse & Touch Parallax Interaction
+// Mouse & Touch Parallax / Cursor Interaction
 let mouseTargetX = 0;
 let mouseTargetY = 0;
 
-window.addEventListener('mousemove', (e) => {
-  const nx = (e.clientX / width) * 2 - 1;
-  const ny = (e.clientY / height) * 2 - 1;
-  mouseTargetX = nx;
-  mouseTargetY = ny;
-  alice.setMouse(nx, ny);
+function updatePointer(e) {
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+  if (isCreateMode) {
+    createStage.setCursor(clientX, clientY, isMouseDown);
+  } else {
+    const nx = (clientX / width) * 2 - 1;
+    const ny = (clientY / height) * 2 - 1;
+    mouseTargetX = nx;
+    mouseTargetY = ny;
+    alice.setMouse(nx, ny);
+  }
+}
+
+window.addEventListener('mousemove', updatePointer);
+
+window.addEventListener('mousedown', (e) => {
+  if (e.target.closest('.modal-card') || e.target.closest('.extra-tools') || e.target.closest('.tool-btn')) {
+    return;
+  }
+  isMouseDown = true;
+  updatePointer(e);
+});
+
+window.addEventListener('mouseup', () => {
+  isMouseDown = false;
+  if (isCreateMode) {
+    createStage.cursor.isDown = false;
+  }
+});
+
+window.addEventListener('touchstart', (e) => {
+  if (e.target.closest('.modal-card') || e.target.closest('.extra-tools') || e.target.closest('.tool-btn')) {
+    return;
+  }
+  isMouseDown = true;
+  updatePointer(e);
+}, { passive: true });
+
+window.addEventListener('touchmove', updatePointer, { passive: true });
+
+window.addEventListener('touchend', () => {
+  isMouseDown = false;
+  if (isCreateMode) {
+    createStage.cursor.isDown = false;
+  }
 });
 
 // Keyboard navigation (Arrow Left: back, Arrow Right: forward)
@@ -309,6 +388,29 @@ fullscreenBtn.addEventListener('click', () => {
   }
 });
 
+// Reflection Modal triggers
+btnContemplate.addEventListener('click', () => {
+  reflectionModal.style.display = 'flex';
+});
+
+btnResumeCreating.addEventListener('click', () => {
+  reflectionModal.style.display = 'none';
+});
+
+btnReturnRabbitHole.addEventListener('click', () => {
+  reflectionModal.style.display = 'none';
+  // Turning watch backward back to Game version
+  transitionManager.triggerTransition(-1);
+});
+
+// Export Canvas Snapshot as PNG
+btnDownloadArt.addEventListener('click', () => {
+  const link = document.createElement('a');
+  link.download = `WhyBother-GenerativeArt-${Date.now()}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+});
+
 // Main Animation Loop with Delta-Time
 let lastTime = performance.now();
 
@@ -318,41 +420,50 @@ function animate(currentTime) {
   const dt = Math.min((currentTime - lastTime) / 1000, 0.1);
   lastTime = currentTime;
 
-  // Transition and speed coordination
+  ctx.clearRect(0, 0, width, height);
+
+  // Update Transition Manager
   transitionManager.update(dt);
   const speedMult = transitionManager.tunnelSpeedMultiplier;
 
-  // Dynamic vanishing point with subtle mouse parallax
-  const targetCx = width / 2 + mouseTargetX * 20;
-  const targetCy = height / 2 + mouseTargetY * 15;
-  cx += (targetCx - cx) * Math.min(1.0, dt * 3);
-  cy += (targetCy - cy) * Math.min(1.0, dt * 3);
+  if (isCreateMode && transitionManager.state === States.IDLE) {
+    // --- CREATE STAGE UPDATE & RENDER ---
+    createStage.update(dt, 1.0);
+    createStage.render(ctx);
+  } else {
+    // --- RABBIT HOLE STAGE UPDATE & RENDER ---
+    const targetCx = width / 2 + mouseTargetX * 22;
+    const targetCy = height / 2 + mouseTargetY * 16;
+    cx += (targetCx - cx) * Math.min(1.0, dt * 3);
+    cy += (targetCy - cy) * Math.min(1.0, dt * 3);
 
-  // Update light waves & tunnels
-  lightWaves.update(dt, transitionManager.currentEra, speedMult);
-  bookTunnel.update(dt, speedMult);
-  movieTunnel.update(dt, speedMult);
-  gameTunnel.update(dt, speedMult);
+    lightWaves.update(dt, transitionManager.currentEra, speedMult);
+    bookTunnel.update(dt, speedMult);
+    movieTunnel.update(dt, speedMult);
+    gameTunnel.update(dt, speedMult);
 
-  // Update Alice
-  alice.update(dt, speedMult);
+    if (isCreateMode) {
+      createStage.update(dt, speedMult);
+    }
 
-  // Update Pocket Watch
-  pocketWatch.update(dt);
+    alice.update(dt, speedMult);
 
-  // --- RENDER PASS ---
-  ctx.clearRect(0, 0, width, height);
+    // 1. Render active generative rabbit hole tunnel (with morphing support)
+    transitionManager.renderTunnels(ctx, width, height, cx, cy);
 
-  // 1. Render active generative rabbit hole tunnel (with morphing support)
-  transitionManager.renderTunnels(ctx, width, height, cx, cy);
+    // 2. Render radial energy glow waves
+    if (transitionManager.currentEra < 3) {
+      lightWaves.renderRadialGlow(ctx, width, height, cx, cy);
+    }
 
-  // 2. Render radial energy glow waves
-  lightWaves.renderRadialGlow(ctx, width, height, cx, cy);
-
-  // 3. Render Alice character
-  alice.render(ctx, width, height, cx, cy);
+    // 3. Render Alice character with 3D depth perspective
+    if (transitionManager.currentEra < 3 || transitionManager.state !== States.IDLE) {
+      alice.render(ctx, width, height, cx, cy);
+    }
+  }
 
   // 4. Render Pocket Watch on its dedicated canvas
+  pocketWatch.update(dt);
   pocketWatch.render();
 }
 

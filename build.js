@@ -11,6 +11,7 @@ const files = [
   'js/systems/gameTunnel.js',
   'js/systems/aliceController.js',
   'js/systems/pocketWatch.js',
+  'js/systems/createStage.js',
   'js/transitionManager.js',
   'js/main.js'
 ];

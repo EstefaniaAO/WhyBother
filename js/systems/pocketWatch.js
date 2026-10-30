@@ -39,7 +39,8 @@ export class PocketWatch {
     this.eraColors = [
       'rgba(215, 195, 160, ', // Book: warm antique parchment / brass
       'rgba(164, 195, 225, ', // Movie: soft powdery watercolor blue
-      'rgba(165, 45, 68, '    // Game: rich wine red watercolor
+      'rgba(165, 45, 68, ',   // Game: rich wine red watercolor
+      'rgba(245, 185, 45, '   // Create: warm golden yellow & amber
     ];
     this.currentEra = 0;
 

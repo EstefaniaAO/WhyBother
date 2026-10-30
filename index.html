@@ -17,8 +17,8 @@
     <!-- Top Header -->
     <header class="top-header">
       <div class="brand-block">
-        <h1 class="title">Why Bother?</h1>
-        <p class="subtitle">The Generative Rabbit Hole</p>
+        <h1 class="title" id="main-title">Why Bother?</h1>
+        <p class="subtitle" id="main-subtitle">The Generative Rabbit Hole</p>
       </div>
 
       <!-- Extra Controls (Audio Ambiance / Fullscreen) -->
@@ -34,7 +34,7 @@
       </div>
 
       <!-- Era Badge Info -->
-      <div class="era-badge-container">
+      <div class="era-badge-container" id="era-badge-container">
         <span class="era-number" id="era-number">Capítulo I · 1865</span>
         <h2 class="era-title" id="era-title">El Libro Original</h2>
         <p class="era-desc" id="era-desc">Lewis Carroll &amp; John Tenniel — Grabado, tinta, tipografía y papel envejecido.</p>
@@ -43,18 +43,58 @@
 
     <!-- Bottom Footer -->
     <footer class="bottom-footer">
-      <div class="manifesto-quote">
+      <div class="manifesto-quote" id="manifesto-quote-container">
         <p id="manifesto-text">"Al principio, la madriguera del conejo se extendía en línea recta como un túnel, y después torció bruscamente hacia abajo..."</p>
         <span class="manifesto-bold">Different tools. Different worlds. The same imagination.</span>
       </div>
 
-      <!-- Pocket Watch Interactive Widget -->
+      <!-- Create Mode Interactive Hint Panel (Shown only in CREATE stage) -->
+      <div class="create-hint-panel" id="create-hint-panel" style="display: none;">
+        <span class="hint-pill">Mueve el cursor para desviar</span>
+        <span class="hint-pill">Mantén presionado para generar vórtice</span>
+        <span class="hint-pill">Arrastra rápido para ramificar</span>
+        <button id="btn-contemplate" class="tool-btn highlight-accent">Contemplar Obra</button>
+      </div>
+
+      <!-- Pocket Watch Interactive Widget (Controls ALL navigation: Book -> Movie -> Game -> CREATE) -->
       <div class="watch-widget-container" id="watch-container">
         <canvas id="pocket-watch-canvas"></canvas>
         <div class="watch-hint" id="watch-hint">Gira o mantén el reloj para caer</div>
       </div>
     </footer>
   </main>
+
+  <!-- Reflection Closure Modal: WHY BOTHER? -->
+  <div class="modal-backdrop" id="reflection-modal" style="display: none;">
+    <div class="modal-card reflection-card">
+      <span class="modal-tag">Reflexión Final</span>
+      <h2 class="modal-title reflection-title">WHY BOTHER?</h2>
+      <p class="reflection-quote">«You could have left it untouched. But you didn't.»</p>
+      <p class="reflection-subquote">Podrías haberlo dejado intacto. Pero no lo hiciste.</p>
+      
+      <p class="modal-desc">
+        En un mundo donde los sistemas autónomos pueden generar infinitas formas por sí mismos,
+        la verdadera magia surge en el instante en que la voluntad humana decide intervenir, transformar y dejar su propia huella en el tiempo.
+      </p>
+
+      <div class="modal-actions">
+        <button class="choice-btn primary" id="btn-download-art">
+          <span class="choice-label">📥 Descargar Mi Obra (PNG)</span>
+          <span class="choice-sub">Guardar captura de tu composición en alta resolución</span>
+        </button>
+
+        <button class="choice-btn secondary" id="btn-resume-creating">
+          <span class="choice-label">Continuar Pintando</span>
+          <span class="choice-sub">Seguir interactuando con el sistema generativo</span>
+        </button>
+
+        <button class="choice-btn tertiary" id="btn-return-rabbit-hole">
+          <span class="choice-label">Regresar a la Madriguera</span>
+          <span class="choice-sub">Volver al viaje temporal de las tres versiones</span>
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- Standalone script: works with both direct double-click (file:///) and web server -->
   <script src="js/bundle.js"></script>

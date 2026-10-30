@@ -4,8 +4,12 @@
  * - AliceBook-Photoroom.png
  * - AliceMovie-Photoroom.png
  * - AliceGame-Photoroom.png
- * Preserves original aspect ratios, manages falling physics, initial spin-down,
- * gentle vertical floating bob, and 3D-like perspective descent/ascent during transitions.
+ *
+ * Implements true 3D depth animations:
+ * 1. Initial fall from camera foreground (scale ~4.2, rotating as she plunges toward vanishing point).
+ * 2. Settled slow-motion vertical suspension floating.
+ * 3. Perspective descent into depth (scale 1.0 -> 0.01 into central hole) during transitions.
+ * 4. Perspective ascent from depth (scale 0.01 -> 1.0 from central hole) for new Alice.
  */
 
 export class AliceController {
@@ -22,18 +26,16 @@ export class AliceController {
     ];
 
     // Physics & transform state
-    this.scale = 1.0;
-    this.rotation = 0; // radians
-    this.angularVelocity = 0;
-    this.targetRotation = 0;
-    this.verticalOffset = 0; // pixels
-    this.horizontalOffset = 0;
+    this.scale = 4.2;
+    this.rotation = -Math.PI * 5.0; // ~2.5 turns coupled to fall
+    this.verticalOffset = -300; // starts above / near camera
+    this.horizontalOffset = 40;
     this.alpha = 1.0;
 
     // Time tracking
     this.time = 0;
     this.isIntro = true;
-    this.introDuration = 3.2; // seconds for initial spin-down
+    this.introDuration = 3.6; // seconds for dramatic perspective fall
     this.introElapsed = 0;
 
     // Parallax mouse tilt
@@ -41,6 +43,9 @@ export class AliceController {
     this.mouseTargetY = 0;
     this.mouseX = 0;
     this.mouseY = 0;
+
+    // Mode override for manual transition transforms
+    this.isTransitionControlled = false;
 
     this.loadAssets();
   }
@@ -57,10 +62,6 @@ export class AliceController {
         console.error(`Error loading Alice asset: ${path}`);
       };
     });
-
-    // Start initial slow spin-down animation
-    this.rotation = -Math.PI * 4.5; // ~2.25 turns
-    this.angularVelocity = 4.0;
   }
 
   setEra(index) {
@@ -68,9 +69,8 @@ export class AliceController {
   }
 
   setMouse(nx, ny) {
-    // nx, ny in range [-1, 1]
-    this.mouseTargetX = nx * 25;
-    this.mouseTargetY = ny * 18;
+    this.mouseTargetX = nx * 22;
+    this.mouseTargetY = ny * 16;
   }
 
   update(dt, speedMult = 1.0) {
@@ -80,41 +80,72 @@ export class AliceController {
     this.mouseX += (this.mouseTargetX - this.mouseX) * Math.min(1.0, dt * 4);
     this.mouseY += (this.mouseTargetY - this.mouseY) * Math.min(1.0, dt * 4);
 
+    if (this.isTransitionControlled) {
+      // In transition, transform is controlled directly by transitionManager
+      return;
+    }
+
     if (this.isIntro) {
       this.introElapsed += dt;
-      // Exponential rotational decay towards 0
-      this.rotation += this.angularVelocity * dt;
-      this.angularVelocity *= Math.pow(0.25, dt);
+      const progress = Math.min(1.0, this.introElapsed / this.introDuration);
 
-      if (this.introElapsed >= this.introDuration || Math.abs(this.angularVelocity) < 0.05) {
+      // Ease out cubic for falling deceleration into depth
+      const t = progress;
+      const easeOut = 1 - Math.pow(1 - t, 3);
+
+      // Scale drops from 4.2 (camera closeup) down to 1.0 (settled position)
+      this.scale = 1.0 + 3.2 * (1 - easeOut);
+
+      // Rotation coupled directly to downward descent
+      this.rotation = (1 - easeOut) * (-Math.PI * 5.0);
+
+      // Position travels from high foreground into center vanishing point
+      this.verticalOffset = (1 - easeOut) * -260;
+      this.horizontalOffset = (1 - easeOut) * 35;
+      this.alpha = Math.min(1.0, progress * 2.0); // Clean fast appearance
+
+      if (progress >= 1.0) {
         this.isIntro = false;
-        this.angularVelocity = 0;
+        this.scale = 1.0;
         this.rotation = 0;
+        this.verticalOffset = 0;
+        this.horizontalOffset = 0;
       }
     } else {
-      // Subtle organic vertical bobbing (falling gently in slow-motion space)
-      // Compound sine wave for natural float feel
-      const bob1 = Math.sin(this.time * 1.4) * 9.0;
-      const bob2 = Math.sin(this.time * 2.3 + 1.2) * 4.5;
+      // Subtle continuous slow-motion vertical bobbing (perpetual gentle fall)
+      const bob1 = Math.sin(this.time * 1.3) * 8.5;
+      const bob2 = Math.sin(this.time * 2.2 + 1.1) * 4.0;
       this.verticalOffset = bob1 + bob2;
 
-      // Subtle breath-like scale oscillation (±1.5%)
-      this.scale = 1.0 + Math.sin(this.time * 1.8) * 0.015;
+      // Subtle scale oscillation (+-1.2%)
+      this.scale = 1.0 + Math.sin(this.time * 1.7) * 0.012;
 
-      // Subtle sway tilt
-      this.rotation = Math.sin(this.time * 0.9) * 0.035;
+      // Subtle swaying angle tilt
+      this.rotation = Math.sin(this.time * 0.85) * 0.03;
+      this.horizontalOffset = 0;
+      this.alpha = 1.0;
     }
   }
 
   /**
-   * Set custom transform for transitions (descent / ascent)
+   * Set custom 3D depth transform during transitions
    */
   setTransitionTransform(scale, rotation, alpha = 1.0, offsetX = 0, offsetY = 0) {
+    this.isTransitionControlled = true;
     this.scale = scale;
     this.rotation = rotation;
     this.alpha = alpha;
     this.horizontalOffset = offsetX;
     this.verticalOffset = offsetY;
+  }
+
+  releaseTransitionTransform() {
+    this.isTransitionControlled = false;
+    this.horizontalOffset = 0;
+    this.verticalOffset = 0;
+    this.scale = 1.0;
+    this.rotation = 0;
+    this.alpha = 1.0;
   }
 
   render(ctx, width, height, cx, cy) {
@@ -124,7 +155,7 @@ export class AliceController {
     ctx.save();
     ctx.globalAlpha = Math.max(0, Math.min(1, this.alpha));
 
-    // Target rendering height: 38% of screen height, constrained by width
+    // Target height: 38% of viewport height
     const targetHeight = Math.min(height * 0.44, width * 0.48);
     const aspect = img.naturalWidth / img.naturalHeight;
     const drawWidth = targetHeight * aspect;
@@ -137,13 +168,14 @@ export class AliceController {
     ctx.rotate(this.rotation);
     ctx.scale(this.scale, this.scale);
 
-    // Subtle drop shadow / depth aura behind Alice
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
-    ctx.shadowBlur = 24 * this.scale;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 12 * this.scale;
+    // Dynamic depth shadow scaling with depth
+    if (this.scale > 0.1) {
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+      ctx.shadowBlur = Math.min(30, 24 * this.scale);
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = Math.min(20, 10 * this.scale);
+    }
 
-    // Draw centered without altering proportions
     ctx.drawImage(
       img,
       -drawWidth / 2,
