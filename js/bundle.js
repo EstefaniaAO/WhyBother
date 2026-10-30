@@ -679,9 +679,16 @@ class LightWaveSystem {
 // --- js/systems/bookTunnel.js ---
 /**
  * Scene 1: Book Tunnel (Original Book, 1865)
+<<<<<<< HEAD
  * Inspired by Reference 1: The original text paragraph literally builds the spiral tunnel
  * expanding from the central vanishing point all the way to the screen corners.
  * Strictly monochromatic (SOLO BLANCO Y NEGRO). High contrast black ink on cut paper.
+=======
+ * Pure Monochromatic Antique Ink on Cut Paper (SOLO BLANCO Y NEGRO).
+ * Concentric paper rings, deep cut shadows, hand-drawn ink pen spirals,
+ * and typographic literary fragments stamped along organic spiral curves.
+ * Expanded to cover full screen from center into every corner with maximum contrast.
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
  */
 
 class BookTunnel {
@@ -706,15 +713,25 @@ class BookTunnel {
 
     this.words = this.fullParagraph.split(/\s+/).filter(w => w.length > 0);
 
+<<<<<<< HEAD
     // Progressive spiral text streamers (streams of words forming the tunnel)
     this.textStreamers = [];
     this.maxStreamers = 6;
     this.nextStreamerTime = 0;
+=======
+    // Active progressive ink pen agents
+    this.penAgents = [];
+    this.maxPenAgents = 32; // Increased for richer corner-to-corner coverage
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
 
     // Concentric paper ring bands with drop shadows (Reference 1)
     this.paperRings = [];
     this.nextRingTime = 0;
+<<<<<<< HEAD
     this.ringInterval = 1.3;
+=======
+    this.ringInterval = 1.2;
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
 
     // Fine ink pen agents accompanying the text
     this.penAgents = [];
@@ -722,7 +739,7 @@ class BookTunnel {
 
     // Completed paths for subtle light wave shimmer
     this.recentPaths = [];
-    this.maxRecentPaths = 45;
+    this.maxRecentPaths = 50;
   }
 
   init(width, height) {
@@ -731,20 +748,32 @@ class BookTunnel {
     this.offscreenCanvas.width = width;
     this.offscreenCanvas.height = height;
 
+<<<<<<< HEAD
     // Crisp heavy white/ivory paper ground
+=======
+    // Initial crisp white paper ground
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     this.offCtx.fillStyle = '#faf8f5';
     this.offCtx.fillRect(0, 0, width, height);
 
     // Initial deep center aperture (black hole at center)
     const cx = width / 2;
     const cy = height / 2;
+<<<<<<< HEAD
     const coreGrad = this.offCtx.createRadialGradient(cx, cy, 0, cx, cy, 36);
+=======
+    const coreGrad = this.offCtx.createRadialGradient(cx, cy, 0, cx, cy, 38);
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     coreGrad.addColorStop(0, '#000000');
     coreGrad.addColorStop(0.7, '#0a0a0a');
     coreGrad.addColorStop(1, 'rgba(250, 248, 245, 0)');
     this.offCtx.fillStyle = coreGrad;
     this.offCtx.beginPath();
+<<<<<<< HEAD
     this.offCtx.arc(cx, cy, 36, 0, Math.PI * 2);
+=======
+    this.offCtx.arc(cx, cy, 38, 0, Math.PI * 2);
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     this.offCtx.fill();
 
     this.textStreamers = [];
@@ -753,6 +782,7 @@ class BookTunnel {
     this.recentPaths = [];
     this.time = 0;
     this.nextRingTime = 0.2;
+<<<<<<< HEAD
     this.nextStreamerTime = 0.1;
 
     // Seed initial text streamers from center
@@ -762,6 +792,12 @@ class BookTunnel {
 
     // Seed initial pen agents
     for (let i = 0; i < 8; i++) {
+=======
+    this.nextSpiralTextTime = 0.4;
+
+    // Spawn initial pen agents near the center
+    for (let i = 0; i < 10; i++) {
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
       this.spawnPenAgent();
     }
 
@@ -797,6 +833,7 @@ class BookTunnel {
     }
   }
 
+<<<<<<< HEAD
   spawnTextStreamer(startAngle = null) {
     const baseAngle = startAngle !== null ? startAngle : Math.random() * Math.PI * 2;
     const maxCorner = Math.hypot(this.width, this.height) * 0.78;
@@ -812,23 +849,57 @@ class BookTunnel {
       charInterval: 0.045, // Progressive character typing speed
       maxDist: maxCorner,
       isDone: false
+=======
+  spawnPenAgent() {
+    const cx = this.width / 2;
+    const cy = this.height / 2;
+    const angle = Math.random() * Math.PI * 2;
+    const startR = 8 + Math.random() * 22;
+
+    // Coverage to the farthest corners: 0.78 * hypot(w, h)
+    const maxCornerDist = Math.hypot(this.width, this.height) * 0.78;
+
+    this.penAgents.push({
+      x: cx + Math.cos(angle) * startR,
+      y: cy + Math.sin(angle) * startR,
+      angle: angle,
+      r: startR,
+      speedR: 45 + Math.random() * 65, // Outward speed
+      speedTheta: (0.42 + Math.random() * 0.75) * (Math.random() > 0.4 ? 1 : -1),
+      noiseScale: 0.0022 + Math.random() * 0.003,
+      lineWidth: 0.8 + Math.random() * 2.4,
+      opacity: 0.65 + Math.random() * 0.35, // High contrast pure black ink
+      isHatch: Math.random() > 0.55,
+      history: [],
+      maxDist: maxCornerDist,
+      age: 0
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     });
   }
 
   spawnPaperRing() {
     const cx = this.width / 2;
     const cy = this.height / 2;
+<<<<<<< HEAD
     const maxScreenRadius = Math.hypot(this.width, this.height) * (0.28 + Math.random() * 0.50);
 
     // Subset of original text words for ring edge stamping
     const wordCount = 14 + Math.floor(Math.random() * 18);
+=======
+    const wordCount = 16 + Math.floor(Math.random() * 22);
+    const ringWords = [];
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     const startIdx = Math.floor(Math.random() * (this.words.length - wordCount));
     const ringWords = [];
     for (let i = 0; i < wordCount; i++) {
       ringWords.push(this.words[(startIdx + i) % this.words.length]);
     }
 
+    // Rings now expand all the way out to screen borders and corners
+    const maxScreenRadius = Math.hypot(this.width, this.height) * (0.25 + Math.random() * 0.52);
+
     this.paperRings.push({
+<<<<<<< HEAD
       currentRadius: 22 + Math.random() * 18,
       targetRadius: maxScreenRadius,
       expansionSpeed: 26 + Math.random() * 32,
@@ -863,6 +934,34 @@ class BookTunnel {
       history: [],
       maxDist: maxCorner,
       age: 0
+=======
+      currentRadius: 24 + Math.random() * 20,
+      targetRadius: maxScreenRadius,
+      expansionSpeed: 28 + Math.random() * 36,
+      rotationAngle: Math.random() * Math.PI * 2,
+      rotationSpeed: (0.035 + Math.random() * 0.045) * (Math.random() > 0.5 ? 1 : -1),
+      irregularity: 0.035 + Math.random() * 0.045,
+      words: ringWords,
+      isStamped: false,
+      shadowBlur: 12 + Math.random() * 18,
+      lineWidth: 1.4 + Math.random() * 1.8
+    });
+  }
+
+  spawnSpiralText() {
+    const phrase = this.texts[Math.floor(Math.random() * this.texts.length)];
+    this.spiralTextArms.push({
+      text: phrase,
+      chars: phrase.split(''),
+      currentIndex: 0,
+      baseAngle: Math.random() * Math.PI * 2,
+      currentR: 18 + Math.random() * 25,
+      spiralGrowth: 32 + Math.random() * 30, // Expands broad spiral reaching corners
+      charStepTimer: 0,
+      charInterval: 0.05 + Math.random() * 0.03,
+      fontSize: 11 + Math.floor(Math.random() * 15),
+      isDone: false
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     });
   }
 
@@ -960,12 +1059,58 @@ class BookTunnel {
       this.nextRingTime = this.ringInterval / Math.max(1, speedMult * 0.8);
     }
 
+<<<<<<< HEAD
+=======
+    // 2. Spawning spiral text arms
+    this.nextSpiralTextTime -= dt * speedMult;
+    if (this.nextSpiralTextTime <= 0) {
+      this.spawnSpiralText();
+      this.nextSpiralTextTime = (1.8 + Math.random() * 1.6) / Math.max(1, speedMult * 0.8);
+    }
+
+    // 3. Progressively stamp spiral text streams
+    for (let i = this.spiralTextArms.length - 1; i >= 0; i--) {
+      const arm = this.spiralTextArms[i];
+      arm.charStepTimer += dt * speedMult;
+
+      while (arm.charStepTimer >= arm.charInterval && arm.currentIndex < arm.chars.length) {
+        arm.charStepTimer -= arm.charInterval;
+        const ch = arm.chars[arm.currentIndex];
+        arm.currentIndex++;
+
+        const turns = (arm.currentIndex * 0.09);
+        const theta = arm.baseAngle + turns * Math.PI * 2;
+        const r = arm.currentR + turns * arm.spiralGrowth;
+
+        const px = cx + Math.cos(theta) * r;
+        const py = cy + Math.sin(theta) * r;
+
+        // Render with high black ink contrast
+        offCtx.save();
+        offCtx.translate(px, py);
+        offCtx.rotate(theta + Math.PI / 2);
+        const dynamicSize = Math.max(10, Math.min(26, Math.floor(arm.fontSize * (0.7 + (r / 400)))));
+        offCtx.font = `700 ${dynamicSize}px "Cormorant Garamond", "Cinzel", "Times New Roman", serif`;
+        offCtx.fillStyle = '#0a0a0a'; // Pure black ink contrast
+        offCtx.textAlign = 'center';
+        offCtx.textBaseline = 'middle';
+        offCtx.fillText(ch, 0, 0);
+        offCtx.restore();
+      }
+
+      if (arm.currentIndex >= arm.chars.length) {
+        this.spiralTextArms.splice(i, 1);
+      }
+    }
+
+    // 4. Progressively draw and stamp concentric paper rings
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     for (let i = this.paperRings.length - 1; i >= 0; i--) {
       const ring = this.paperRings[i];
       ring.currentRadius += ring.expansionSpeed * dt * speedMult;
       ring.rotationAngle += ring.rotationSpeed * dt * speedMult;
 
-      const numPts = 90;
+      const numPts = 100;
       const pts = [];
       for (let s = 0; s <= numPts; s++) {
         const theta = (s / numPts) * Math.PI * 2;
@@ -991,7 +1136,11 @@ class BookTunnel {
       }
       offCtx.closePath();
 
+<<<<<<< HEAD
       // Sharp shadow & paper cut edge
+=======
+      // Sharp shadow & defined paper cut edge
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
       offCtx.shadowColor = 'rgba(0, 0, 0, 0.22)';
       offCtx.shadowBlur = ring.shadowBlur;
       offCtx.shadowOffsetX = 0;
@@ -1001,12 +1150,21 @@ class BookTunnel {
       offCtx.stroke();
       offCtx.restore();
 
+<<<<<<< HEAD
       // Stamp typography along paper ring edges
       if (ring.currentRadius > 60 && !ring.isStamped) {
         offCtx.save();
         const fontSize = Math.max(10, Math.min(26, Math.floor(ring.currentRadius * 0.058)));
         offCtx.font = `700 ${fontSize}px "Cormorant Garamond", "Cinzel", "Times New Roman", serif`;
         offCtx.fillStyle = '#080808';
+=======
+      // Stamp typography along the ring perimeters
+      if (ring.currentRadius > 65 && !ring.isStamped) {
+        offCtx.save();
+        const fontSize = Math.max(10, Math.min(28, Math.floor(ring.currentRadius * 0.06)));
+        offCtx.font = `700 ${fontSize}px "Cormorant Garamond", "Cinzel", "Times New Roman", serif`;
+        offCtx.fillStyle = '#080808'; // Deepest black ink
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
         offCtx.textAlign = 'center';
         offCtx.textBaseline = 'middle';
 
@@ -1055,6 +1213,7 @@ class BookTunnel {
       p.x = cx + Math.cos(p.angle) * p.r;
       p.y = cy + Math.sin(p.angle) * p.r;
 
+      // Draw progressive stroke with solid black ink
       offCtx.save();
       offCtx.beginPath();
       offCtx.moveTo(prevX, prevY);
@@ -1064,6 +1223,10 @@ class BookTunnel {
       offCtx.lineCap = 'round';
       offCtx.stroke();
 
+<<<<<<< HEAD
+=======
+      // Cross-hatching ticks on some strokes (Victorian engraving style)
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
       if (p.isHatch && Math.random() > 0.58) {
         const hLen = 5 + Math.random() * 10;
         const normAngle = p.angle + Math.PI / 2 + (Math.random() - 0.5) * 0.5;
@@ -2306,10 +2469,17 @@ class PocketWatch {
 // --- js/systems/createStage.js ---
 /**
  * CREATE Stage — WHY BOTHER?
+<<<<<<< HEAD
  * Inspired by Alice in Wonderland fantasy surrealism & Omniharmonic generative art.
  * Palette: Rich purples & violets, warm golden yellows, deep & sky blues, turquoises,
  * lavenders, and rose accents.
  * Autonomous multi-agent organic system influenced by cursor forces (deflection, vortex wells, flick branchings).
+=======
+ * The user transitions from passive observer to active co-creator.
+ * Inspired by Omniharmonic: Organic, dynamic, and complex generative composition.
+ * Multi-focal fluid fields, autonomous agent networks, persistent pigment accumulation,
+ * and indirect cursor influence (deflection, vortex wells, flick impulses).
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
  */
 
 
@@ -2322,6 +2492,7 @@ class CreateStage {
     this.width = 0;
     this.height = 0;
 
+<<<<<<< HEAD
     // Persistent canvas buffer (inherits from previous video game stage without wiping)
     this.offscreenCanvas = document.createElement('canvas');
     this.offCtx = this.offscreenCanvas.getContext('2d');
@@ -2353,6 +2524,36 @@ class CreateStage {
       { x: 0, y: 0, strength: -0.85, angle: Math.PI * 0.65, speed: 0.18 },
       { x: 0, y: 0, strength: 0.75, angle: Math.PI * 1.35, speed: 0.25 },
       { x: 0, y: 0, strength: -0.7, angle: Math.PI * 1.8, speed: 0.16 }
+=======
+    // Persistent canvas buffer (inherits from previous tunnel or initializes fresh)
+    this.offscreenCanvas = document.createElement('canvas');
+    this.offCtx = this.offscreenCanvas.getContext('2d');
+
+    // Rich Omniharmonic-inspired palette (uniting all 3 eras + mineral accents)
+    this.palette = [
+      { r: 24,  g: 48,  b: 88  },  // Deep Prussian Blue
+      { r: 120, g: 155, b: 195 },  // Powdery Sky Blue
+      { r: 168, g: 145, b: 192 },  // Muted Lavender
+      { r: 142, g: 32,  b: 52  },  // Wine Crimson
+      { r: 35,  g: 72,  b: 85  },  // Petrol Blue
+      { r: 215, g: 175, b: 120 },  // Muted Gold Pigment
+      { r: 18,  g: 18,  b: 24  },  // Rich Indian Ink
+      { r: 212, g: 172, b: 180 }   // Soft Powdery Rose
+    ];
+
+    // Low-res pigment simulation & coverage map
+    this.colorGrid = new ColorGrid(80, 60);
+
+    // Autonomous creative agents
+    this.agents = [];
+    this.maxAgents = 42;
+
+    // Dynamic wandering focal centers (Omniharmonic dynamic foci)
+    this.foci = [
+      { x: 0, y: 0, targetX: 0, targetY: 0, strength: 0.8, angle: 0 },
+      { x: 0, y: 0, targetX: 0, targetY: 0, strength: -0.7, angle: Math.PI },
+      { x: 0, y: 0, targetX: 0, targetY: 0, strength: 0.6, angle: Math.PI / 2 }
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     ];
 
     // Cursor influence state
@@ -2369,7 +2570,11 @@ class CreateStage {
       active: false
     };
 
+<<<<<<< HEAD
     // Transition progress (relaxing previous stage constraints)
+=======
+    // Transition progress (0 -> 1 as rabbit hole frees its central constraint)
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     this.freedomBlend = 0;
   }
 
@@ -2380,11 +2585,20 @@ class CreateStage {
     this.offscreenCanvas.height = height;
     this.colorGrid.resize(width, height);
 
+<<<<<<< HEAD
     // Inherit existing canvas marks from the rabbit hole seamlessly
     if (existingCanvas) {
       this.offCtx.drawImage(existingCanvas, 0, 0, width, height);
     } else {
       this.offCtx.fillStyle = '#0f0a18';
+=======
+    // If coming from an existing rabbit hole, copy its canvas so nothing is erased!
+    if (existingCanvas) {
+      this.offCtx.drawImage(existingCanvas, 0, 0, width, height);
+    } else {
+      // Soft primed paper wash
+      this.offCtx.fillStyle = '#f5f2eb';
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
       this.offCtx.fillRect(0, 0, width, height);
     }
 
@@ -2393,6 +2607,7 @@ class CreateStage {
     this.cursor.prevX = width / 2;
     this.cursor.prevY = height / 2;
 
+<<<<<<< HEAD
     // Distribute wandering foci across the canvas
     this.foci.forEach((f, idx) => {
       const angle = (idx / this.foci.length) * Math.PI * 2;
@@ -2403,6 +2618,20 @@ class CreateStage {
 
     this.agents = [];
     for (let i = 0; i < 20; i++) {
+=======
+    // Initialize wandering focal points
+    this.foci.forEach((f, idx) => {
+      const angle = (idx / this.foci.length) * Math.PI * 2;
+      const r = Math.min(width, height) * 0.28;
+      f.x = width / 2 + Math.cos(angle) * r;
+      f.y = height / 2 + Math.sin(angle) * r;
+      f.targetX = f.x;
+      f.targetY = f.y;
+    });
+
+    this.agents = [];
+    for (let i = 0; i < 16; i++) {
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
       this.spawnAgent();
     }
 
@@ -2449,6 +2678,7 @@ class CreateStage {
   }
 
   spawnAgent(atX = null, atY = null, inheritAngle = null) {
+<<<<<<< HEAD
     let x, y, angle;
 
     if (atX !== null && atY !== null) {
@@ -2459,11 +2689,30 @@ class CreateStage {
       if (Math.random() > 0.45 && this.foci.length > 0) {
         const focus = this.foci[Math.floor(Math.random() * this.foci.length)];
         const r = 25 + Math.random() * 95;
+=======
+    const cx = this.width / 2;
+    const cy = this.height / 2;
+
+    let x, y, angle;
+    if (atX !== null && atY !== null) {
+      x = atX;
+      y = atY;
+      angle = inheritAngle !== null ? inheritAngle + (Math.random() - 0.5) * 0.8 : Math.random() * Math.PI * 2;
+    } else {
+      // Free spawn: randomly distributed or seeded near dynamic foci
+      if (Math.random() > 0.4 && this.foci.length > 0) {
+        const focus = this.foci[Math.floor(Math.random() * this.foci.length)];
+        const r = 20 + Math.random() * 80;
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
         const a = Math.random() * Math.PI * 2;
         x = focus.x + Math.cos(a) * r;
         y = focus.y + Math.sin(a) * r;
       } else {
+<<<<<<< HEAD
         // Distributed across full canvas
+=======
+        // Broad canvas spawn
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
         x = Math.random() * this.width;
         y = Math.random() * this.height;
       }
@@ -2471,6 +2720,7 @@ class CreateStage {
     }
 
     const col = this.palette[Math.floor(Math.random() * this.palette.length)];
+<<<<<<< HEAD
     // Diverse agent forms: broad gestural strokes, fine filigrees, or medium ribbons
     const role = Math.random();
     let thickness, opacity, maxLife, speed;
@@ -2494,6 +2744,11 @@ class CreateStage {
       maxLife = 8.5 + Math.random() * 5.5;
       speed = 64 + Math.random() * 50;
     }
+=======
+    const thickness = 6 + Math.random() * 24;
+    const opacity = 0.22 + Math.random() * 0.26;
+    const speed = 48 + Math.random() * 56;
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
 
     this.agents.push(new BrushAgent({
       x,
@@ -2501,6 +2756,7 @@ class CreateStage {
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed,
       speed,
+<<<<<<< HEAD
       maxSteerForce: 4.2,
       thickness,
       opacity,
@@ -2510,6 +2766,17 @@ class CreateStage {
       bristleSpread: 0.44,
       isWet: true,
       isGothic: false
+=======
+      maxSteerForce: 3.8,
+      thickness,
+      opacity,
+      color: col,
+      maxLife: 6.0 + Math.random() * 5.0,
+      numPasses: 3,
+      bristleSpread: 0.42,
+      isWet: true,
+      isGothic: Math.random() > 0.75
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     }));
   }
 
@@ -2517,6 +2784,7 @@ class CreateStage {
     const cx = this.width / 2;
     const cy = this.height / 2;
 
+<<<<<<< HEAD
     // 1. Weakened remnant of central vortex during transition, relaxing to zero
     let fx = 0, fy = 0;
     if (this.freedomBlend < 0.95) {
@@ -2529,10 +2797,27 @@ class CreateStage {
     }
 
     // 2. Dynamic wandering foci (Omniharmonic organic centers)
+=======
+    // 1. Weakened central rabbit hole vortex (relaxation from centralized constraint)
+    const dxCenter = x - cx;
+    const dyCenter = y - cy;
+    const distCenter = Math.hypot(dxCenter, dyCenter) + 0.001;
+    const rx = dxCenter / distCenter;
+    const ry = dyCenter / distCenter;
+    const tx = -ry;
+    const ty = rx;
+
+    const centerWeight = Math.max(0.05, 0.55 * (1.0 - this.freedomBlend));
+    let fx = tx * centerWeight * 0.4 + rx * centerWeight * 0.2;
+    let fy = ty * centerWeight * 0.4 + ry * centerWeight * 0.2;
+
+    // 2. Dynamic wandering foci (Omniharmonic interconnected centers)
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     for (const f of this.foci) {
       const fdx = x - f.x;
       const fdy = y - f.y;
       const fDist = Math.hypot(fdx, fdy) + 1.0;
+<<<<<<< HEAD
       if (fDist < 420) {
         const falloff = Math.cos((fDist / 420) * (Math.PI / 2));
         const rotX = -fdy / fDist;
@@ -2547,13 +2832,33 @@ class CreateStage {
     const curl = noise.curl2D(x * nScale, y * nScale + time * 0.04);
     fx += curl.x * 0.92;
     fy += curl.y * 0.92;
+=======
+      if (fDist < 360) {
+        const falloff = Math.cos((fDist / 360) * (Math.PI / 2));
+        const rotX = -fdy / fDist;
+        const rotY = fdx / fDist;
+        fx += rotX * f.strength * falloff * 0.65;
+        fy += rotY * f.strength * falloff * 0.65;
+      }
+    }
+
+    // 3. Multi-octave 3D Simplex Curl Noise
+    const nScale = 0.0024;
+    const curl = noise.curl2D(x * nScale, y * nScale + time * 0.03);
+    fx += curl.x * 0.85;
+    fy += curl.y * 0.85;
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
 
     // 4. Cursor Influence: Deflection, Vortex Well, Flick Impulse
     if (this.cursor.active) {
       const cdx = x - this.cursor.x;
       const cdy = y - this.cursor.y;
       const cDist = Math.hypot(cdx, cdy) + 0.01;
+<<<<<<< HEAD
       const influenceRadius = this.cursor.isDown ? 280 : 175;
+=======
+      const influenceRadius = this.cursor.isDown ? 260 : 160;
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
 
       if (cDist < influenceRadius) {
         const cFactor = 1.0 - cDist / influenceRadius;
@@ -2565,6 +2870,7 @@ class CreateStage {
           const cRotY = cdx / cDist;
           const cPullX = -cdx / cDist;
           const cPullY = -cdy / cDist;
+<<<<<<< HEAD
           // Inward swirl + vortex spin
           fx += (cRotX * 2.2 + cPullX * 0.85) * smoothFactor * (1.0 + this.cursor.holdTime * 1.8);
           fy += (cRotY * 2.2 + cPullY * 0.85) * smoothFactor * (1.0 + this.cursor.holdTime * 1.8);
@@ -2579,6 +2885,22 @@ class CreateStage {
           const cRotY = cdx / cDist;
           fx += cRotX * smoothFactor * 0.95;
           fy += cRotY * smoothFactor * 0.95;
+=======
+          // Inward pull + high-speed spin
+          fx += (cRotX * 1.8 + cPullX * 0.9) * smoothFactor * (1.0 + this.cursor.holdTime * 1.5);
+          fy += (cRotY * 1.8 + cPullY * 0.9) * smoothFactor * (1.0 + this.cursor.holdTime * 1.5);
+        } else if (this.cursor.speed > 8.0) {
+          // Rapid flick / drag: directional wave impulse
+          const normSpeed = Math.min(2.5, this.cursor.speed / 15.0);
+          fx += (this.cursor.vx / this.cursor.speed) * normSpeed * smoothFactor * 2.2;
+          fy += (this.cursor.vy / this.cursor.speed) * normSpeed * smoothFactor * 2.2;
+        } else {
+          // Gentle hover deflection / gentle orbital steering
+          const cRotX = -cdy / cDist;
+          const cRotY = cdx / cDist;
+          fx += cRotX * smoothFactor * 0.8;
+          fy += cRotY * smoothFactor * 0.8;
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
         }
       }
     }
@@ -2596,20 +2918,35 @@ class CreateStage {
     this.time += dt * speedMult;
     const offCtx = this.offCtx;
 
+<<<<<<< HEAD
     // Smoothly relax centralized rabbit hole pull (freedom blend 0 -> 1)
     if (this.freedomBlend < 1.0) {
       this.freedomBlend = Math.min(1.0, this.freedomBlend + dt * 0.14);
+=======
+    // Smoothly relax central constraints (freedom blend: 0 -> 1 over 8s)
+    if (this.freedomBlend < 1.0) {
+      this.freedomBlend = Math.min(1.0, this.freedomBlend + dt * 0.12);
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     }
 
     // Cursor hold duration tracking
     if (this.cursor.isDown) {
       this.cursor.holdTime += dt;
+<<<<<<< HEAD
       // Deposit localized rich pigment bloom around cursor
       if (Math.random() > 0.35) {
         const rad = 20 + Math.random() * 45;
         const col = this.palette[Math.floor(Math.random() * this.palette.length)];
         const grad = offCtx.createRadialGradient(this.cursor.x, this.cursor.y, 0, this.cursor.x, this.cursor.y, rad);
         grad.addColorStop(0, `rgba(${col.r}, ${col.g}, ${col.b}, 0.16)`);
+=======
+      // Deposit localized rich pigment puddle when held
+      if (Math.random() > 0.4) {
+        const rad = 15 + Math.random() * 35;
+        const col = this.palette[Math.floor(Math.random() * this.palette.length)];
+        const grad = offCtx.createRadialGradient(this.cursor.x, this.cursor.y, 0, this.cursor.x, this.cursor.y, rad);
+        grad.addColorStop(0, `rgba(${col.r}, ${col.g}, ${col.b}, 0.12)`);
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
         grad.addColorStop(1, 'rgba(0,0,0,0)');
         offCtx.fillStyle = grad;
         offCtx.beginPath();
@@ -2625,12 +2962,21 @@ class CreateStage {
     this.cursor.vy *= 0.85;
     this.cursor.speed *= 0.85;
 
+<<<<<<< HEAD
     // Update wandering foci with smooth Lissajous & Simplex motion
     this.foci.forEach((f, idx) => {
       f.angle += f.speed * dt;
       const baseR = Math.min(this.width, this.height) * (0.24 + (idx % 2) * 0.14);
       const wanderX = noise.noise2D(idx * 15 + this.time * 0.07, idx * 8) * 110;
       const wanderY = noise.noise2D(idx * 8, idx * 15 + this.time * 0.07) * 110;
+=======
+    // Update wandering focal points with smooth noise
+    this.foci.forEach((f, idx) => {
+      f.angle += (0.12 + idx * 0.05) * dt;
+      const baseR = Math.min(this.width, this.height) * (0.22 + idx * 0.08);
+      const wanderX = noise.noise2D(idx * 10 + this.time * 0.08, idx * 5) * 90;
+      const wanderY = noise.noise2D(idx * 5, idx * 10 + this.time * 0.08) * 90;
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
       f.x = this.width / 2 + Math.cos(f.angle) * baseR + wanderX;
       f.y = this.height / 2 + Math.sin(f.angle) * baseR + wanderY;
     });
@@ -2640,7 +2986,11 @@ class CreateStage {
       this.spawnAgent();
     }
 
+<<<<<<< HEAD
     // FlowField adapter for BrushAgent
+=======
+    // Custom flowField adapter for BrushAgent
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     const adapterFlow = {
       getForce: (x, y) => this.getFlowForce(x, y, this.time)
     };
@@ -2651,22 +3001,38 @@ class CreateStage {
       agent.update(dt, adapterFlow, this.colorGrid, this.width / 2, this.height / 2, this.time, speedMult);
       agent.drawSegment(offCtx);
 
+<<<<<<< HEAD
       // Branching when cursor flicks or during high energy
       if (this.cursor.speed > 10.0 && Math.random() > 0.92 && this.agents.length < this.maxAgents + 8) {
         const distToCursor = Math.hypot(agent.x - this.cursor.x, agent.y - this.cursor.y);
         if (distToCursor < 190) {
+=======
+      // Occasional organic branching when cursor flicks or during high energy
+      if (this.cursor.speed > 12.0 && Math.random() > 0.94 && this.agents.length < this.maxAgents + 6) {
+        const distToCursor = Math.hypot(agent.x - this.cursor.x, agent.y - this.cursor.y);
+        if (distToCursor < 180) {
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
           this.spawnAgent(agent.x, agent.y, Math.atan2(agent.vy, agent.vx));
         }
       }
 
+<<<<<<< HEAD
       const isOutOfBounds = agent.x < -80 || agent.x > this.width + 80 || agent.y < -80 || agent.y > this.height + 80;
+=======
+      // Check bounds & life
+      const isOutOfBounds = agent.x < -60 || agent.x > this.width + 60 || agent.y < -60 || agent.y > this.height + 60;
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
       if (agent.isDead || isOutOfBounds) {
         this.agents.splice(i, 1);
       }
     }
 
     // Gentle pigment diffusion
+<<<<<<< HEAD
     this.colorGrid.diffuse(0.018 * dt * speedMult);
+=======
+    this.colorGrid.diffuse(0.015 * dt * speedMult);
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
   }
 
   render(ctx) {
@@ -2675,6 +3041,7 @@ class CreateStage {
     ctx.save();
     ctx.drawImage(this.offscreenCanvas, 0, 0);
 
+<<<<<<< HEAD
     // Subtle interactive cursor aura
     if (this.cursor.active) {
       const radius = this.cursor.isDown ? 42 + Math.sin(this.time * 6) * 6 : 24;
@@ -2682,6 +3049,15 @@ class CreateStage {
       ctx.arc(this.cursor.x, this.cursor.y, radius, 0, Math.PI * 2);
       ctx.strokeStyle = this.cursor.isDown ? 'rgba(255, 215, 85, 0.55)' : 'rgba(168, 75, 215, 0.3)';
       ctx.lineWidth = 1.5;
+=======
+    // Subtle interactive cursor halo
+    if (this.cursor.active) {
+      const radius = this.cursor.isDown ? 38 + Math.sin(this.time * 6) * 6 : 22;
+      ctx.beginPath();
+      ctx.arc(this.cursor.x, this.cursor.y, radius, 0, Math.PI * 2);
+      ctx.strokeStyle = this.cursor.isDown ? 'rgba(215, 175, 120, 0.45)' : 'rgba(168, 145, 192, 0.25)';
+      ctx.lineWidth = 1.4;
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
       ctx.stroke();
     }
     ctx.restore();
@@ -2711,13 +3087,18 @@ const States = {
 };
 
 class TransitionManager {
+<<<<<<< HEAD
   constructor(aliceController, bookTunnel, movieTunnel, gameTunnel, createStage, lightWaves, pocketWatch, onEraChanged) {
+=======
+  constructor(aliceController, bookTunnel, movieTunnel, gameTunnel, lightWaves, pocketWatch, onEraChanged, onTransitionsMilestone) {
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     this.alice = aliceController;
     this.tunnels = [bookTunnel, movieTunnel, gameTunnel];
     this.createStage = createStage;
     this.lightWaves = lightWaves;
     this.watch = pocketWatch;
     this.onEraChanged = onEraChanged;
+    this.onTransitionsMilestone = onTransitionsMilestone;
 
     this.state = States.INITIALIZING;
     this.currentEra = 0; // 0: Book, 1: Movie, 2: Game, 3: Create
@@ -2735,6 +3116,9 @@ class TransitionManager {
     // Tunnel speed multiplier
     this.tunnelSpeedMultiplier = 1.0;
 
+    // Total transitions counter to prompt decision
+    this.transitionsCount = 0;
+
     // Start in intro animation
     this.startIntro();
   }
@@ -2742,7 +3126,11 @@ class TransitionManager {
   startIntro() {
     this.state = States.INTRO_ANIMATION;
     this.phaseTime = 0;
+<<<<<<< HEAD
     this.phaseDuration = 3.6;
+=======
+    this.phaseDuration = 3.6; // Coupled to Alice dramatic perspective fall
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     this.tunnelSpeedMultiplier = 1.0;
   }
 
@@ -2810,12 +3198,21 @@ class TransitionManager {
       const t = Math.min(1.0, this.phaseTime / this.phaseDuration);
       this.tunnelSpeedMultiplier = 1.0 + t * 2.8;
 
+<<<<<<< HEAD
       if (this.currentEra < 3) {
         const startSpin = this.direction * (t * t) * Math.PI * 0.8;
         this.alice.setTransitionTransform(1.0, startSpin, 1.0, 0, 0);
       }
 
       if (this.phaseTime >= this.phaseDuration) {
+=======
+      // Start gentle rotation acceleration
+      const startSpin = this.direction * (t * t) * Math.PI * 0.8;
+      this.alice.setTransitionTransform(1.0, startSpin, 1.0, 0, 0);
+
+      if (this.phaseTime >= this.phaseDuration) {
+        // Move to Phase B: Descent (Alice spins & physically plunges into depth)
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
         this.subPhase = 'PHASE_B';
         this.phaseTime = 0;
         this.phaseDuration = 1.4;
@@ -2826,6 +3223,7 @@ class TransitionManager {
 
       this.tunnelSpeedMultiplier = 3.8 + t * 1.5;
 
+<<<<<<< HEAD
       if (this.currentEra < 3) {
         // Alice physical 3D plunge into the central hole
         const scale = Math.max(0.005, 1.0 - ease * 0.995);
@@ -2841,6 +3239,24 @@ class TransitionManager {
         this.phaseTime = 0;
         this.phaseDuration = 0.25;
         this.alice.setTransitionTransform(0.001, 0, 0.0, 0, 0);
+=======
+      // Physical scale plunge down to 0.005 at vanishing point
+      const scale = Math.max(0.005, 1.0 - ease * 0.995);
+      const spin = this.direction * (Math.PI * 0.8 + ease * Math.PI * 6.5);
+
+      // NO early opacity fades! Remains solid until it enters the tiny core aperture
+      const alpha = scale > 0.04 ? 1.0 : (scale / 0.04);
+      const offsetY = ease * 18;
+
+      this.alice.setTransitionTransform(scale, spin, alpha, 0, offsetY);
+
+      if (this.phaseTime >= this.phaseDuration) {
+        // Phase C: Complete disappearance inside the central hole
+        this.subPhase = 'PHASE_C';
+        this.phaseTime = 0;
+        this.phaseDuration = 0.25;
+        this.alice.setTransitionTransform(0.001, spin, 0.0, 0, 0);
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
       }
     } else if (this.subPhase === 'PHASE_C') {
       this.alice.setTransitionTransform(0.0, 0, 0.0, 0, 0);
@@ -2864,6 +3280,10 @@ class TransitionManager {
     this.morphProgress = t * t * (3 - 2 * t);
     this.tunnelSpeedMultiplier = 4.5 - t * 1.5;
 
+<<<<<<< HEAD
+=======
+    // Keep Alice in the depths during tunnel transformation
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     this.alice.setTransitionTransform(0.0, 0, 0.0, 0, 0);
 
     if (this.phaseTime >= this.phaseDuration) {
@@ -2879,6 +3299,10 @@ class TransitionManager {
         this.onEraChanged(this.currentEra);
       }
 
+<<<<<<< HEAD
+=======
+      // Enter TRANSITION_IN (Phase E: New Alice emerges from central hole)
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
       this.state = States.TRANSITION_IN;
       this.subPhase = 'PHASE_E';
       this.phaseTime = 0;
@@ -2888,6 +3312,7 @@ class TransitionManager {
 
   handleTransitionIn(dt) {
     if (this.subPhase === 'PHASE_E') {
+<<<<<<< HEAD
       const t = Math.min(1.0, this.phaseTime / this.phaseDuration);
       const ease = 1 - Math.pow(1 - t, 3);
 
@@ -2905,6 +3330,20 @@ class TransitionManager {
         // In CREATE stage: Alice is not drawn; user takes over
         this.alice.setTransitionTransform(0.0, 0, 0.0, 0, 0);
       }
+=======
+      // Phase E: New Alice emerges directly from central vanishing point (scale ~0.01 -> 1.0)
+      const t = Math.min(1.0, this.phaseTime / this.phaseDuration);
+      const ease = 1 - Math.pow(1 - t, 3); // Ease out cubic
+
+      this.tunnelSpeedMultiplier = 3.0 - ease * 1.8;
+
+      const scale = 0.01 + ease * 0.99;
+      const spin = this.direction * (1 - ease) * Math.PI * 5.0; // Decelerating spin
+      const alpha = scale > 0.04 ? 1.0 : (scale / 0.04);
+      const offsetY = (1 - ease) * -12;
+
+      this.alice.setTransitionTransform(scale, spin, alpha, 0, offsetY);
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
 
       if (this.phaseTime >= this.phaseDuration) {
         this.subPhase = 'PHASE_F';
@@ -2915,18 +3354,33 @@ class TransitionManager {
       const t = Math.min(1.0, this.phaseTime / this.phaseDuration);
       this.tunnelSpeedMultiplier = 1.2 - t * 0.2;
 
+<<<<<<< HEAD
       if (this.currentEra < 3) {
         this.alice.setTransitionTransform(1.0, 0, 1.0, 0, 0);
       } else {
         this.alice.setTransitionTransform(0.0, 0, 0.0, 0, 0);
       }
+=======
+      const scale = 1.0;
+      const spin = 0;
+      const alpha = 1.0;
+      this.alice.setTransitionTransform(scale, spin, alpha, 0, 0);
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
 
       if (this.phaseTime >= this.phaseDuration) {
         this.state = States.IDLE;
         this.tunnelSpeedMultiplier = 1.0;
         this.watch.setTransitionState(false);
+<<<<<<< HEAD
         if (this.currentEra < 3) {
           this.alice.releaseTransitionTransform();
+=======
+        this.alice.releaseTransitionTransform();
+
+        this.transitionsCount++;
+        if (this.onTransitionsMilestone) {
+          this.onTransitionsMilestone(this.transitionsCount);
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
         }
       }
     }
@@ -2944,6 +3398,7 @@ class TransitionManager {
       const toEra = this.targetEra;
       const blend = this.morphProgress;
 
+<<<<<<< HEAD
       if (fromEra < 3 && toEra < 3) {
         this.tunnels[fromEra].render(ctx, width, height, cx, cy, this.lightWaves, 1.0 - blend);
         this.tunnels[toEra].render(ctx, width, height, cx, cy, this.lightWaves, blend);
@@ -2956,6 +3411,10 @@ class TransitionManager {
         this.createStage.render(ctx);
         this.tunnels[2].render(ctx, width, height, cx, cy, this.lightWaves, blend);
       }
+=======
+      this.tunnels[fromEra].render(ctx, width, height, cx, cy, this.lightWaves, 1.0 - blend);
+      this.tunnels[toEra].render(ctx, width, height, cx, cy, this.lightWaves, blend);
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     } else {
       this.tunnels[this.currentEra].render(ctx, width, height, cx, cy, this.lightWaves, 1.0);
     }
@@ -2998,6 +3457,19 @@ const soundBtn = document.getElementById('btn-sound');
 const soundIcon = document.getElementById('sound-icon');
 const soundLabel = document.getElementById('sound-label');
 const fullscreenBtn = document.getElementById('btn-fullscreen');
+const choosePathBtn = document.getElementById('btn-choose-path');
+
+// Decision & Reflection Modals
+const decisionModal = document.getElementById('decision-modal');
+const btnContinueExploring = document.getElementById('btn-continue-exploring');
+const btnStartCreating = document.getElementById('btn-start-creating');
+
+const reflectionModal = document.getElementById('reflection-modal');
+const createHintPanel = document.getElementById('create-hint-panel');
+const btnContemplate = document.getElementById('btn-contemplate');
+const btnDownloadArt = document.getElementById('btn-download-art');
+const btnResumeCreating = document.getElementById('btn-resume-creating');
+const btnReturnRabbitHole = document.getElementById('btn-return-rabbit-hole');
 
 // Reflection Modal elements
 const reflectionModal = document.getElementById('reflection-modal');
@@ -3149,7 +3621,12 @@ class AmbianceAudio {
     } else if (era === 2) {
       this.droneOsc.frequency.exponentialRampToValueAtTime(42, now + 1.0);
     } else {
+<<<<<<< HEAD
       this.droneOsc.frequency.exponentialRampToValueAtTime(84, now + 1.0);
+=======
+      // Create stage harmonic drone
+      this.droneOsc.frequency.exponentialRampToValueAtTime(88, now + 1.0);
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     }
   }
 
@@ -3174,6 +3651,7 @@ const audio = new AmbianceAudio();
 
 // Setup era change UI sync
 function handleEraChanged(newEraIndex) {
+  if (isCreateMode) return;
   const meta = ERAS[newEraIndex];
   document.body.className = meta.className;
 
@@ -3218,8 +3696,22 @@ function handleEraChanged(newEraIndex) {
   }
 }
 
+// Automatic milestone: show decision prompt after user explores eras
+function handleTransitionsMilestone(count) {
+  if (count >= 2 && !isCreateMode) {
+    // Subtly highlight choice button
+    if (choosePathBtn) {
+      choosePathBtn.classList.add('highlight');
+    }
+  }
+}
+
 // Initialize Pocket Watch & Transition Manager
 pocketWatch = new PocketWatch(watchCanvas, (direction) => {
+<<<<<<< HEAD
+=======
+  if (isCreateMode) return;
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
   if (watchHintEl) {
     watchHintEl.style.opacity = '0.5';
   }
@@ -3235,7 +3727,8 @@ transitionManager = new TransitionManager(
   createStage,
   lightWaves,
   pocketWatch,
-  handleEraChanged
+  handleEraChanged,
+  handleTransitionsMilestone
 );
 
 // Viewport & Resolution Management
@@ -3288,7 +3781,13 @@ function updatePointer(e) {
   }
 }
 
+<<<<<<< HEAD
 window.addEventListener('mousemove', updatePointer);
+=======
+window.addEventListener('mousemove', (e) => {
+  updatePointer(e);
+});
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
 
 window.addEventListener('mousedown', (e) => {
   if (e.target.closest('.modal-card') || e.target.closest('.extra-tools') || e.target.closest('.tool-btn')) {
@@ -3313,7 +3812,13 @@ window.addEventListener('touchstart', (e) => {
   updatePointer(e);
 }, { passive: true });
 
+<<<<<<< HEAD
 window.addEventListener('touchmove', updatePointer, { passive: true });
+=======
+window.addEventListener('touchmove', (e) => {
+  updatePointer(e);
+}, { passive: true });
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
 
 window.addEventListener('touchend', () => {
   isMouseDown = false;
@@ -3324,6 +3829,7 @@ window.addEventListener('touchend', () => {
 
 // Keyboard navigation (Arrow Left: back, Arrow Right: forward)
 window.addEventListener('keydown', (e) => {
+  if (isCreateMode) return;
   if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
     pocketWatch.accumulatedAngle = 0;
     pocketWatch.angularVelocity = 28.0;
@@ -3353,6 +3859,64 @@ fullscreenBtn.addEventListener('click', () => {
   }
 });
 
+<<<<<<< HEAD
+=======
+// --- DECISION & CREATE STAGE WIRING ---
+
+choosePathBtn.addEventListener('click', () => {
+  decisionModal.style.display = 'flex';
+});
+
+btnContinueExploring.addEventListener('click', () => {
+  decisionModal.style.display = 'none';
+});
+
+btnStartCreating.addEventListener('click', () => {
+  decisionModal.style.display = 'none';
+  enterCreateStage();
+});
+
+function enterCreateStage() {
+  isCreateMode = true;
+
+  // Active tunnel offscreen canvas is inherited so NOTHING is erased!
+  const currentTunnel = transitionManager.tunnels[transitionManager.currentEra];
+  const inheritedCanvas = currentTunnel ? currentTunnel.offscreenCanvas : null;
+  createStage.init(width, height, inheritedCanvas);
+
+  document.body.className = 'era-create';
+
+  // Update HUD
+  mainTitleEl.textContent = 'Why Bother?';
+  mainSubtitleEl.textContent = 'Etapa de Creación · Tu Mano Interviene el Sistema';
+
+  if (eraBadgeContainer) eraBadgeContainer.style.display = 'none';
+  if (manifestoContainer) manifestoContainer.style.display = 'none';
+  if (watchContainer) watchContainer.style.display = 'none';
+  if (createHintPanel) createHintPanel.style.display = 'flex';
+
+  audio.setEra(3);
+}
+
+function exitCreateStage() {
+  isCreateMode = false;
+  createStage.isActive = false;
+
+  const meta = ERAS[transitionManager.currentEra];
+  document.body.className = meta.className;
+
+  mainTitleEl.textContent = 'Why Bother?';
+  mainSubtitleEl.textContent = 'The Generative Rabbit Hole';
+
+  if (eraBadgeContainer) eraBadgeContainer.style.display = 'flex';
+  if (manifestoContainer) manifestoContainer.style.display = 'block';
+  if (watchContainer) watchContainer.style.display = 'flex';
+  if (createHintPanel) createHintPanel.style.display = 'none';
+
+  audio.setEra(transitionManager.currentEra);
+}
+
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
 // Reflection Modal triggers
 btnContemplate.addEventListener('click', () => {
   reflectionModal.style.display = 'flex';
@@ -3364,8 +3928,12 @@ btnResumeCreating.addEventListener('click', () => {
 
 btnReturnRabbitHole.addEventListener('click', () => {
   reflectionModal.style.display = 'none';
+<<<<<<< HEAD
   // Turning watch backward back to Game version
   transitionManager.triggerTransition(-1);
+=======
+  exitCreateStage();
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
 });
 
 // Export Canvas Snapshot as PNG
@@ -3386,6 +3954,7 @@ function animate(currentTime) {
   lastTime = currentTime;
 
   ctx.clearRect(0, 0, width, height);
+<<<<<<< HEAD
 
   // Update Transition Manager
   transitionManager.update(dt);
@@ -3430,6 +3999,48 @@ function animate(currentTime) {
   // 4. Render Pocket Watch on its dedicated canvas
   pocketWatch.update(dt);
   pocketWatch.render();
+=======
+
+  if (isCreateMode) {
+    // --- CREATE STAGE RENDER LOOP ---
+    createStage.update(dt, 1.0);
+    createStage.render(ctx);
+  } else {
+    // --- RABBIT HOLE STAGE RENDER LOOP ---
+    transitionManager.update(dt);
+    const speedMult = transitionManager.tunnelSpeedMultiplier;
+
+    // Dynamic vanishing point with subtle mouse parallax
+    const targetCx = width / 2 + mouseTargetX * 22;
+    const targetCy = height / 2 + mouseTargetY * 16;
+    cx += (targetCx - cx) * Math.min(1.0, dt * 3);
+    cy += (targetCy - cy) * Math.min(1.0, dt * 3);
+
+    // Update light waves & tunnels
+    lightWaves.update(dt, transitionManager.currentEra, speedMult);
+    bookTunnel.update(dt, speedMult);
+    movieTunnel.update(dt, speedMult);
+    gameTunnel.update(dt, speedMult);
+
+    // Update Alice
+    alice.update(dt, speedMult);
+
+    // Update Pocket Watch
+    pocketWatch.update(dt);
+
+    // 1. Render active generative rabbit hole tunnel (with morphing support)
+    transitionManager.renderTunnels(ctx, width, height, cx, cy);
+
+    // 2. Render radial energy glow waves
+    lightWaves.renderRadialGlow(ctx, width, height, cx, cy);
+
+    // 3. Render Alice character with 3D depth perspective
+    alice.render(ctx, width, height, cx, cy);
+
+    // 4. Render Pocket Watch on its dedicated canvas
+    pocketWatch.render();
+  }
+>>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
 }
 
 requestAnimationFrame(animate);
