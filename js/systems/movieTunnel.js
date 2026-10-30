@@ -22,54 +22,23 @@ export class MovieTunnel {
     this.offscreenCanvas = document.createElement('canvas');
     this.offCtx = this.offscreenCanvas.getContext('2d');
 
-    // Rich Watercolor Color Themes with Center -> Outer chromatic evolutions:
-    // Dark deep roots at center, with capability to spawn turquoise that lightens to aqua,
-    // royal purple that lightens to lilac, delicate yellow ribbons that lighten to pale gold,
-    // and classic Prussian blue that blooms into soft powdery blue.
-    this.colorThemes = [
-      {
-        name: 'blue',
-        center: { r: 16, g: 28, b: 56 },   // Azul Prusia profundo
-        outer:  { r: 135, g: 175, b: 220 }, // Azul Alicia empolvado clásico
-        weight: 0.32,
-        isFineRibbon: false
-      },
-      {
-        name: 'turquoise',
-        center: { r: 14, g: 88, b: 108 },  // Turquesa profundo / petróleo
-        outer:  { r: 96, g: 226, b: 218 }, // Turquesa luminoso / aguamarina que se va aclarando
-        weight: 0.28,
-        isFineRibbon: false
-      },
-      {
-        name: 'purple',
-        center: { r: 56, g: 18, b: 78 },   // Morado oscuro / ciruela profundo
-        outer:  { r: 198, g: 156, b: 238 }, // Lila / lavanda luminoso que se va aclarando
-        weight: 0.26,
-        isFineRibbon: false
-      },
-      {
-        name: 'yellow',
-        center: { r: 192, g: 152, b: 32 }, // Ámbar dorado cálido
-        outer:  { r: 255, g: 232, b: 88 }, // Fino amarillo luminoso y delicado
-        weight: 0.14,
-        isFineRibbon: true                  // Ribbon fino y delicado
-      }
-    ];
-
-    // Center & outer colors for wash stains and ambient blending
+    // Rich Watercolor Palette with Deep Center Tones & Luminous Outer Tones
     this.centerColors = [
-      { r: 16, g: 28, b: 56 },
-      { r: 14, g: 88, b: 108 },
-      { r: 56, g: 18, b: 78 },
-      { r: 18, g: 46, b: 62 }
+      { r: 16, g: 28, b: 56 },  // Azul Prusia profundo
+      { r: 24, g: 22, b: 54 },  // Índigo abisal
+      { r: 38, g: 18, b: 46 },  // Ciruela / violeta oscuro
+      { r: 18, g: 46, b: 62 },  // Azul petróleo denso
+      { r: 32, g: 24, b: 42 }   // Sombra berenjena suave
     ];
 
     this.outerColors = [
-      { r: 135, g: 175, b: 220 },
-      { r: 96, g: 226, b: 218 },
-      { r: 198, g: 156, b: 238 },
-      { r: 255, g: 232, b: 88 }
+      { r: 135, g: 172, b: 212 }, // Azul empolvado clásico Disney
+      { r: 168, g: 205, b: 232 }, // Celeste cielo acuarelado
+      { r: 115, g: 198, b: 195 }, // Turquesa suave luminoso
+      { r: 178, g: 162, b: 212 }, // Lavanda suave
+      { r: 202, g: 178, b: 222 }, // Lila empolvado
+      { r: 218, g: 168, b: 182 }, // Rosa empolvado
+      { r: 142, g: 218, b: 214 }  // Menta translúcido
     ];
 
     // FlowField for organic, sweeping watercolor vortex curves
@@ -163,31 +132,18 @@ export class MovieTunnel {
     }
   }
 
-  pickTheme() {
-    const roll = Math.random();
-    let accum = 0;
-    for (const t of this.colorThemes) {
-      accum += t.weight;
-      if (roll <= accum) return t;
-    }
-    return this.colorThemes[0];
-  }
-
   /**
    * Samples color dynamically based on distance from center:
    * Dark deep tones near vanishing point, blossoming to luminous tones at edges
    */
-  getColorForRadius(r, theme = null) {
+  getColorForRadius(r) {
     const maxCorner = Math.hypot(this.width, this.height) * 0.75;
     const normDist = Math.min(1.0, r / Math.max(100, maxCorner));
 
-    if (theme) {
-      return FastMath.blendRGB(theme.center, theme.outer, Math.pow(normDist, 0.75));
-    }
-
-    // Default fallback to general center / outer palettes
+    // Choose base color from center or outer palette
     const centerCol = this.centerColors[Math.floor(Math.random() * this.centerColors.length)];
     const outerCol = this.outerColors[Math.floor(Math.random() * this.outerColors.length)];
+
     return FastMath.blendRGB(centerCol, outerCol, Math.pow(normDist, 0.75));
   }
 
@@ -204,52 +160,41 @@ export class MovieTunnel {
     const x = cx + Math.cos(spawnAngle) * baseR;
     const y = cy + Math.sin(spawnAngle) * baseR;
 
-    const theme = this.pickTheme();
-    const col = this.getColorForRadius(baseR, theme);
+    const col = this.getColorForRadius(baseR);
 
-    // Brush styling based on theme and visual hierarchy
+    // 3 Distinct Brush Categories for High Visual Richness (Reference Painting)
+    const category = Math.random();
     let thickness, opacity, speed, maxLife, numPasses, bristleSpread;
 
-    if (theme.isFineRibbon) {
-      // Fino amarillo luminoso: delicate sinuous golden ribbon
-      thickness = 2.2 + Math.random() * 3.2;
-      opacity = 0.62 + Math.random() * 0.28;
-      speed = 32 + Math.random() * 22;
+    if (category < 0.35) {
+      // 1. Broad translucent watercolor washes (soft billowing strata)
+      thickness = 24 + Math.random() * 22;
+      opacity = 0.16 + Math.random() * 0.14;
+      speed = 18 + Math.random() * 14; // very languid, fluid
+      maxLife = 18.0 + Math.random() * 8.0;
+      numPasses = 4;
+      bristleSpread = 0.52;
+    } else if (category < 0.75) {
+      // 2. Medium expressive pigment ribbons (defined curving bands)
+      thickness = 10 + Math.random() * 14;
+      opacity = 0.28 + Math.random() * 0.22;
+      speed = 24 + Math.random() * 18;
       maxLife = 14.0 + Math.random() * 7.0;
-      numPasses = 2;
-      bristleSpread = 0.20;
+      numPasses = 3;
+      bristleSpread = 0.40;
     } else {
-      const category = Math.random();
-      if (category < 0.32) {
-        // 1. Broad translucent watercolor washes (soft billowing strata)
-        thickness = 22 + Math.random() * 22;
-        opacity = 0.16 + Math.random() * 0.14;
-        speed = 18 + Math.random() * 14; // languid, fluid
-        maxLife = 18.0 + Math.random() * 8.0;
-        numPasses = 4;
-        bristleSpread = 0.52;
-      } else if (category < 0.72) {
-        // 2. Medium expressive pigment ribbons (defined curving bands)
-        thickness = 9 + Math.random() * 13;
-        opacity = 0.28 + Math.random() * 0.22;
-        speed = 24 + Math.random() * 18;
-        maxLife = 14.0 + Math.random() * 7.0;
-        numPasses = 3;
-        bristleSpread = 0.38;
-      } else {
-        // 3. Delicate sinuous filigrees
-        thickness = 2.4 + Math.random() * 3.6;
-        opacity = 0.48 + Math.random() * 0.30;
-        speed = 30 + Math.random() * 20;
-        maxLife = 12.0 + Math.random() * 6.0;
-        numPasses = 2;
-        bristleSpread = 0.24;
-      }
+      // 3. Delicate sinuous filigrees (vein-like interconnecting lines)
+      thickness = 2.5 + Math.random() * 4.0;
+      opacity = 0.48 + Math.random() * 0.30;
+      speed = 30 + Math.random() * 20;
+      maxLife = 12.0 + Math.random() * 6.0;
+      numPasses = 2;
+      bristleSpread = 0.25;
     }
 
     const initForce = this.flowField.getForce(x, y, cx, cy, this.time);
 
-    const agent = new BrushAgent({
+    this.agents.push(new BrushAgent({
       x,
       y,
       vx: initForce.x * speed,
@@ -264,9 +209,7 @@ export class MovieTunnel {
       bristleSpread,
       isWet: true,
       isGothic: false
-    });
-    agent.theme = theme;
-    this.agents.push(agent);
+    }));
   }
 
   spawnWashStain() {
@@ -333,8 +276,8 @@ export class MovieTunnel {
 
       // Dynamically blend agent color toward outward tone as it journeys away from center
       const currentR = Math.hypot(agent.x - cx, agent.y - cy);
-      const targetCol = this.getColorForRadius(currentR, agent.theme);
-      agent.currentColor = FastMath.blendRGB(agent.currentColor, targetCol, 0.045);
+      const targetCol = this.getColorForRadius(currentR);
+      agent.currentColor = FastMath.blendRGB(agent.currentColor, targetCol, 0.04);
 
       agent.update(dt, this.flowField, this.colorGrid, cx, cy, this.time, speedMult);
       agent.drawSegment(offCtx);

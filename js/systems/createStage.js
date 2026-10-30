@@ -225,41 +225,6 @@ export class CreateStage {
     }));
   }
 
-  /**
-   * Spawns an organic fork/branch off an active parent agent
-   * Branches at a defined lateral angle with inherited momentum
-   */
-  spawnBranchAgent(parentAgent) {
-    const parentAngle = Math.atan2(parentAgent.vy, parentAgent.vx);
-    const forkDirection = Math.random() > 0.5 ? 1 : -1;
-    const branchAngle = parentAngle + forkDirection * (0.42 + Math.random() * 0.45);
-    const speed = parentAgent.speed * (0.92 + Math.random() * 0.28);
-    const thickness = Math.max(2.2, parentAgent.thickness * 0.65);
-    const opacity = Math.min(0.85, parentAgent.opacity * 1.25);
-
-    // Harmonic pigment choice
-    const col = this.palette[Math.floor(Math.random() * this.palette.length)];
-
-    const branchAgent = new BrushAgent({
-      x: parentAgent.x,
-      y: parentAgent.y,
-      vx: Math.cos(branchAngle) * speed,
-      vy: Math.sin(branchAngle) * speed,
-      speed,
-      maxSteerForce: 4.6,
-      thickness,
-      opacity,
-      color: col,
-      maxLife: 6.0 + Math.random() * 4.5,
-      numPasses: Math.max(2, parentAgent.numPasses - 1),
-      bristleSpread: 0.32,
-      isWet: true,
-      isGothic: false
-    });
-    branchAgent.lastBranchTime = this.time;
-    this.agents.push(branchAgent);
-  }
-
   getFlowForce(x, y, time) {
     const cx = this.width / 2;
     const cy = this.height / 2;
@@ -425,20 +390,11 @@ export class CreateStage {
       agent.update(dt, adapterFlow, this.colorGrid, this.width / 2, this.height / 2, this.time, currentSpeedMult);
       agent.drawSegment(offCtx);
 
-      // Responsive branching when cursor moves near agents, or during flicks / holds
-      if (!this.isContemplating && this.agents.length < this.maxAgents + 12) {
+      // Branching when cursor flicks or during high energy
+      if (!this.isContemplating && this.cursor.speed > 10.0 && Math.random() > 0.92 && this.agents.length < this.maxAgents + 8) {
         const distToCursor = Math.hypot(agent.x - this.cursor.x, agent.y - this.cursor.y);
-        const nearCursor = distToCursor < 185;
-        const cursorActive = (this.cursor.speed > 2.8 || this.cursor.isDown);
-        const cooldownOk = !agent.lastBranchTime || (this.time - agent.lastBranchTime > 0.35);
-
-        if (nearCursor && cursorActive && cooldownOk && Math.random() > 0.40) {
-          agent.lastBranchTime = this.time;
-          this.spawnBranchAgent(agent);
-        } else if (!nearCursor && cooldownOk && Math.random() > 0.993 && this.agents.length < this.maxAgents + 4) {
-          // Occasional organic spontaneous branching
-          agent.lastBranchTime = this.time;
-          this.spawnBranchAgent(agent);
+        if (distToCursor < 190) {
+          this.spawnAgent(agent.x, agent.y, Math.atan2(agent.vy, agent.vx));
         }
       }
 
