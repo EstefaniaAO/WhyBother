@@ -1,15 +1,9 @@
 /**
  * Scene 1: Book Tunnel (Original Book, 1865)
-<<<<<<< HEAD
- * Inspired by Reference 1: The original text paragraph literally builds the spiral tunnel
+ * Inspired by Lewis Carroll & John Tenniel.
+ * The original text paragraph literally builds the spiral tunnel
  * expanding from the central vanishing point all the way to the screen corners.
  * Strictly monochromatic (SOLO BLANCO Y NEGRO). High contrast black ink on cut paper.
-=======
- * Pure Monochromatic Antique Ink on Cut Paper (SOLO BLANCO Y NEGRO).
- * Concentric paper rings, deep cut shadows, hand-drawn ink pen spirals,
- * and typographic literary fragments stamped along organic spiral curves.
- * Expanded to cover full screen from center into every corner with maximum contrast.
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
  */
 import { noise } from '../math/noise.js';
 
@@ -35,29 +29,19 @@ export class BookTunnel {
 
     this.words = this.fullParagraph.split(/\s+/).filter(w => w.length > 0);
 
-<<<<<<< HEAD
     // Progressive spiral text streamers (streams of words forming the tunnel)
     this.textStreamers = [];
     this.maxStreamers = 6;
     this.nextStreamerTime = 0;
-=======
-    // Active progressive ink pen agents
-    this.penAgents = [];
-    this.maxPenAgents = 32; // Increased for richer corner-to-corner coverage
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
 
-    // Concentric paper ring bands with drop shadows (Reference 1)
+    // Concentric paper ring bands with drop shadows
     this.paperRings = [];
     this.nextRingTime = 0;
-<<<<<<< HEAD
-    this.ringInterval = 1.3;
-=======
-    this.ringInterval = 1.2;
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
+    this.ringInterval = 1.25;
 
     // Fine ink pen agents accompanying the text
     this.penAgents = [];
-    this.maxPenAgents = 20;
+    this.maxPenAgents = 26;
 
     // Completed paths for subtle light wave shimmer
     this.recentPaths = [];
@@ -70,32 +54,20 @@ export class BookTunnel {
     this.offscreenCanvas.width = width;
     this.offscreenCanvas.height = height;
 
-<<<<<<< HEAD
     // Crisp heavy white/ivory paper ground
-=======
-    // Initial crisp white paper ground
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     this.offCtx.fillStyle = '#faf8f5';
     this.offCtx.fillRect(0, 0, width, height);
 
     // Initial deep center aperture (black hole at center)
     const cx = width / 2;
     const cy = height / 2;
-<<<<<<< HEAD
     const coreGrad = this.offCtx.createRadialGradient(cx, cy, 0, cx, cy, 36);
-=======
-    const coreGrad = this.offCtx.createRadialGradient(cx, cy, 0, cx, cy, 38);
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     coreGrad.addColorStop(0, '#000000');
     coreGrad.addColorStop(0.7, '#0a0a0a');
     coreGrad.addColorStop(1, 'rgba(250, 248, 245, 0)');
     this.offCtx.fillStyle = coreGrad;
     this.offCtx.beginPath();
-<<<<<<< HEAD
     this.offCtx.arc(cx, cy, 36, 0, Math.PI * 2);
-=======
-    this.offCtx.arc(cx, cy, 38, 0, Math.PI * 2);
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     this.offCtx.fill();
 
     this.textStreamers = [];
@@ -104,7 +76,6 @@ export class BookTunnel {
     this.recentPaths = [];
     this.time = 0;
     this.nextRingTime = 0.2;
-<<<<<<< HEAD
     this.nextStreamerTime = 0.1;
 
     // Seed initial text streamers from center
@@ -113,13 +84,7 @@ export class BookTunnel {
     }
 
     // Seed initial pen agents
-    for (let i = 0; i < 8; i++) {
-=======
-    this.nextSpiralTextTime = 0.4;
-
-    // Spawn initial pen agents near the center
     for (let i = 0; i < 10; i++) {
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
       this.spawnPenAgent();
     }
 
@@ -155,10 +120,9 @@ export class BookTunnel {
     }
   }
 
-<<<<<<< HEAD
   spawnTextStreamer(startAngle = null) {
     const baseAngle = startAngle !== null ? startAngle : Math.random() * Math.PI * 2;
-    const maxCorner = Math.hypot(this.width, this.height) * 0.78;
+    const maxCorner = Math.hypot(this.width, this.height) * 0.82;
 
     this.textStreamers.push({
       baseAngle,
@@ -171,60 +135,26 @@ export class BookTunnel {
       charInterval: 0.045, // Progressive character typing speed
       maxDist: maxCorner,
       isDone: false
-=======
-  spawnPenAgent() {
-    const cx = this.width / 2;
-    const cy = this.height / 2;
-    const angle = Math.random() * Math.PI * 2;
-    const startR = 8 + Math.random() * 22;
-
-    // Coverage to the farthest corners: 0.78 * hypot(w, h)
-    const maxCornerDist = Math.hypot(this.width, this.height) * 0.78;
-
-    this.penAgents.push({
-      x: cx + Math.cos(angle) * startR,
-      y: cy + Math.sin(angle) * startR,
-      angle: angle,
-      r: startR,
-      speedR: 45 + Math.random() * 65, // Outward speed
-      speedTheta: (0.42 + Math.random() * 0.75) * (Math.random() > 0.4 ? 1 : -1),
-      noiseScale: 0.0022 + Math.random() * 0.003,
-      lineWidth: 0.8 + Math.random() * 2.4,
-      opacity: 0.65 + Math.random() * 0.35, // High contrast pure black ink
-      isHatch: Math.random() > 0.55,
-      history: [],
-      maxDist: maxCornerDist,
-      age: 0
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     });
   }
 
   spawnPaperRing() {
     const cx = this.width / 2;
     const cy = this.height / 2;
-<<<<<<< HEAD
-    const maxScreenRadius = Math.hypot(this.width, this.height) * (0.28 + Math.random() * 0.50);
-
-    // Subset of original text words for ring edge stamping
     const wordCount = 14 + Math.floor(Math.random() * 18);
-=======
-    const wordCount = 16 + Math.floor(Math.random() * 22);
-    const ringWords = [];
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     const startIdx = Math.floor(Math.random() * (this.words.length - wordCount));
     const ringWords = [];
     for (let i = 0; i < wordCount; i++) {
       ringWords.push(this.words[(startIdx + i) % this.words.length]);
     }
 
-    // Rings now expand all the way out to screen borders and corners
-    const maxScreenRadius = Math.hypot(this.width, this.height) * (0.25 + Math.random() * 0.52);
+    // Rings expand all the way out to screen borders and corners
+    const maxScreenRadius = Math.hypot(this.width, this.height) * (0.28 + Math.random() * 0.52);
 
     this.paperRings.push({
-<<<<<<< HEAD
       currentRadius: 22 + Math.random() * 18,
       targetRadius: maxScreenRadius,
-      expansionSpeed: 26 + Math.random() * 32,
+      expansionSpeed: 28 + Math.random() * 34,
       rotationAngle: Math.random() * Math.PI * 2,
       rotationSpeed: (0.03 + Math.random() * 0.04) * (Math.random() > 0.5 ? 1 : -1),
       irregularity: 0.035 + Math.random() * 0.04,
@@ -240,7 +170,7 @@ export class BookTunnel {
     const cy = this.height / 2;
     const angle = Math.random() * Math.PI * 2;
     const startR = 10 + Math.random() * 22;
-    const maxCorner = Math.hypot(this.width, this.height) * 0.78;
+    const maxCorner = Math.hypot(this.width, this.height) * 0.82;
 
     this.penAgents.push({
       x: cx + Math.cos(angle) * startR,
@@ -256,34 +186,6 @@ export class BookTunnel {
       history: [],
       maxDist: maxCorner,
       age: 0
-=======
-      currentRadius: 24 + Math.random() * 20,
-      targetRadius: maxScreenRadius,
-      expansionSpeed: 28 + Math.random() * 36,
-      rotationAngle: Math.random() * Math.PI * 2,
-      rotationSpeed: (0.035 + Math.random() * 0.045) * (Math.random() > 0.5 ? 1 : -1),
-      irregularity: 0.035 + Math.random() * 0.045,
-      words: ringWords,
-      isStamped: false,
-      shadowBlur: 12 + Math.random() * 18,
-      lineWidth: 1.4 + Math.random() * 1.8
-    });
-  }
-
-  spawnSpiralText() {
-    const phrase = this.texts[Math.floor(Math.random() * this.texts.length)];
-    this.spiralTextArms.push({
-      text: phrase,
-      chars: phrase.split(''),
-      currentIndex: 0,
-      baseAngle: Math.random() * Math.PI * 2,
-      currentR: 18 + Math.random() * 25,
-      spiralGrowth: 32 + Math.random() * 30, // Expands broad spiral reaching corners
-      charStepTimer: 0,
-      charInterval: 0.05 + Math.random() * 0.03,
-      fontSize: 11 + Math.floor(Math.random() * 15),
-      isDone: false
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     });
   }
 
@@ -304,7 +206,7 @@ export class BookTunnel {
       }
     }
 
-    // 2. Progressively type the original paragraph along expanding spirals
+    // 2. Progressively stamp words along expanding spirals
     for (let i = this.textStreamers.length - 1; i >= 0; i--) {
       const st = this.textStreamers[i];
       st.charTimer += dt * speedMult;
@@ -314,16 +216,16 @@ export class BookTunnel {
         const currentWord = this.words[st.wordIndex];
         st.wordIndex++;
 
-        // Advance along Archimedean/logarithmic spiral
+        // Advance along spiral
         const dAngle = 0.28;
         st.currentAngle += dAngle;
         st.currentR += (st.spiralPitch / (Math.PI * 2)) * dAngle;
 
-        // Coordinates on the spiral
+        // Coordinates on spiral
         const px = cx + Math.cos(st.currentAngle) * st.currentR;
         const py = cy + Math.sin(st.currentAngle) * st.currentR;
 
-        // Font scaling with distance from vanishing point (small in center, large in corners)
+        // Font scaling with distance from vanishing point
         const fontSize = Math.max(9, Math.min(26, Math.floor(10 + (st.currentR / 380) * 14)));
 
         offCtx.save();
@@ -338,7 +240,7 @@ export class BookTunnel {
         offCtx.textBaseline = 'middle';
         offCtx.fillText(currentWord, 0, 0);
 
-        // Subtle ink underline or ligature connecting the spiral words
+        // Subtle ink underline connecting spiral words
         if (Math.random() > 0.45) {
           const wMetrics = offCtx.measureText(currentWord);
           const wWidth = wMetrics.width;
@@ -352,12 +254,12 @@ export class BookTunnel {
 
         offCtx.restore();
 
-        // Check if word loop is complete (start over paragraph seamlessly)
+        // Loop seamlessly through words
         if (st.wordIndex >= this.words.length) {
-          st.wordIndex = 0; // Seamless sequential loop of the paragraph
+          st.wordIndex = 0;
         }
 
-        // Record recent path coordinate for light wave traversal
+        // Record recent path for light wave traversal
         this.recentPaths.push([{ x: px, y: py, r: st.currentR }]);
         if (this.recentPaths.length > this.maxRecentPaths) {
           this.recentPaths.shift();
@@ -381,52 +283,6 @@ export class BookTunnel {
       this.nextRingTime = this.ringInterval / Math.max(1, speedMult * 0.8);
     }
 
-<<<<<<< HEAD
-=======
-    // 2. Spawning spiral text arms
-    this.nextSpiralTextTime -= dt * speedMult;
-    if (this.nextSpiralTextTime <= 0) {
-      this.spawnSpiralText();
-      this.nextSpiralTextTime = (1.8 + Math.random() * 1.6) / Math.max(1, speedMult * 0.8);
-    }
-
-    // 3. Progressively stamp spiral text streams
-    for (let i = this.spiralTextArms.length - 1; i >= 0; i--) {
-      const arm = this.spiralTextArms[i];
-      arm.charStepTimer += dt * speedMult;
-
-      while (arm.charStepTimer >= arm.charInterval && arm.currentIndex < arm.chars.length) {
-        arm.charStepTimer -= arm.charInterval;
-        const ch = arm.chars[arm.currentIndex];
-        arm.currentIndex++;
-
-        const turns = (arm.currentIndex * 0.09);
-        const theta = arm.baseAngle + turns * Math.PI * 2;
-        const r = arm.currentR + turns * arm.spiralGrowth;
-
-        const px = cx + Math.cos(theta) * r;
-        const py = cy + Math.sin(theta) * r;
-
-        // Render with high black ink contrast
-        offCtx.save();
-        offCtx.translate(px, py);
-        offCtx.rotate(theta + Math.PI / 2);
-        const dynamicSize = Math.max(10, Math.min(26, Math.floor(arm.fontSize * (0.7 + (r / 400)))));
-        offCtx.font = `700 ${dynamicSize}px "Cormorant Garamond", "Cinzel", "Times New Roman", serif`;
-        offCtx.fillStyle = '#0a0a0a'; // Pure black ink contrast
-        offCtx.textAlign = 'center';
-        offCtx.textBaseline = 'middle';
-        offCtx.fillText(ch, 0, 0);
-        offCtx.restore();
-      }
-
-      if (arm.currentIndex >= arm.chars.length) {
-        this.spiralTextArms.splice(i, 1);
-      }
-    }
-
-    // 4. Progressively draw and stamp concentric paper rings
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     for (let i = this.paperRings.length - 1; i >= 0; i--) {
       const ring = this.paperRings[i];
       ring.currentRadius += ring.expansionSpeed * dt * speedMult;
@@ -458,11 +314,7 @@ export class BookTunnel {
       }
       offCtx.closePath();
 
-<<<<<<< HEAD
       // Sharp shadow & paper cut edge
-=======
-      // Sharp shadow & defined paper cut edge
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
       offCtx.shadowColor = 'rgba(0, 0, 0, 0.22)';
       offCtx.shadowBlur = ring.shadowBlur;
       offCtx.shadowOffsetX = 0;
@@ -472,21 +324,12 @@ export class BookTunnel {
       offCtx.stroke();
       offCtx.restore();
 
-<<<<<<< HEAD
       // Stamp typography along paper ring edges
       if (ring.currentRadius > 60 && !ring.isStamped) {
         offCtx.save();
         const fontSize = Math.max(10, Math.min(26, Math.floor(ring.currentRadius * 0.058)));
         offCtx.font = `700 ${fontSize}px "Cormorant Garamond", "Cinzel", "Times New Roman", serif`;
         offCtx.fillStyle = '#080808';
-=======
-      // Stamp typography along the ring perimeters
-      if (ring.currentRadius > 65 && !ring.isStamped) {
-        offCtx.save();
-        const fontSize = Math.max(10, Math.min(28, Math.floor(ring.currentRadius * 0.06)));
-        offCtx.font = `700 ${fontSize}px "Cormorant Garamond", "Cinzel", "Times New Roman", serif`;
-        offCtx.fillStyle = '#080808'; // Deepest black ink
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
         offCtx.textAlign = 'center';
         offCtx.textBaseline = 'middle';
 
@@ -545,10 +388,7 @@ export class BookTunnel {
       offCtx.lineCap = 'round';
       offCtx.stroke();
 
-<<<<<<< HEAD
-=======
       // Cross-hatching ticks on some strokes (Victorian engraving style)
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
       if (p.isHatch && Math.random() > 0.58) {
         const hLen = 5 + Math.random() * 10;
         const normAngle = p.angle + Math.PI / 2 + (Math.random() - 0.5) * 0.5;

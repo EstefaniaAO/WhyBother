@@ -1,354 +1,313 @@
 /**
- * Transition Manager & Finite State Machine
- * Coordinates the 6 phases of the rabbit hole descent across 4 stages:
- * - 0: Libro Original (1865)
- * - 1: Película Animada (1951)
- * - 2: Videojuego Siniestro (2000)
- * - 3: Etapa CREATE (El usuario se convierte en co-creador)
+ * Transition Manager & Finite State Machine — WHY BOTHER?
+ * Coordinates the full narrative flow, cinematic falls, spatial retractions,
+ * transitions between eras, and the interactive CREATE stage.
  *
- * Sequence: Libro -> Película -> Videojuego -> CREATE (and reverse)
+ * Sequence:
+ * 1. OPENING_BOOK (Book appears, opening story written)
+ * 2. FALLING_0 -> ERA_0_ACTIVE (Book Tunnel 1865, Tenniel engraving)
+ * 3. RETRACTING_0 -> TEXT_1_DISNEY (1951 adaptation text)
+ * 4. FALLING_1 -> ERA_1_ACTIVE (Movie Tunnel 1951, soft watercolor)
+ * 5. RETRACTING_1 -> TEXT_2_GAME (2011 video game text)
+ * 6. FALLING_2 -> ERA_2_ACTIVE (Game Tunnel 2011, dark gothic watercolor)
+ * 7. RETRACTING_2 -> TEXT_3_CREATE (Transition to user creation)
+ * 8. CREATE_ACTIVE (Autonomous + user interactive composition)
+ * 9. CONTEMPLATING (Artwork preserved + WHY BOTHER? final reflection)
  */
 
 export const States = {
-  INITIALIZING: 'INITIALIZING',
-  INTRO_ANIMATION: 'INTRO_ANIMATION',
-  IDLE: 'IDLE',
-  TRANSITION_OUT: 'TRANSITION_OUT',
-  TRANSFORMING: 'TRANSFORMING',
-  TRANSITION_IN: 'TRANSITION_IN'
+  OPENING_BOOK: 'OPENING_BOOK',
+  FALLING_0: 'FALLING_0',
+  ERA_0_ACTIVE: 'ERA_0_ACTIVE',
+  RETRACTING_0: 'RETRACTING_0',
+  TEXT_1_DISNEY: 'TEXT_1_DISNEY',
+  FALLING_1: 'FALLING_1',
+  ERA_1_ACTIVE: 'ERA_1_ACTIVE',
+  RETRACTING_1: 'RETRACTING_1',
+  TEXT_2_GAME: 'TEXT_2_GAME',
+  FALLING_2: 'FALLING_2',
+  ERA_2_ACTIVE: 'ERA_2_ACTIVE',
+  RETRACTING_2: 'RETRACTING_2',
+  TEXT_3_CREATE: 'TEXT_3_CREATE',
+  CREATE_ACTIVE: 'CREATE_ACTIVE',
+  CONTEMPLATING: 'CONTEMPLATING',
+  RETRACTING_BACKWARD: 'RETRACTING_BACKWARD'
 };
 
 export class TransitionManager {
-<<<<<<< HEAD
-  constructor(aliceController, bookTunnel, movieTunnel, gameTunnel, createStage, lightWaves, pocketWatch, onEraChanged) {
-=======
-  constructor(aliceController, bookTunnel, movieTunnel, gameTunnel, lightWaves, pocketWatch, onEraChanged, onTransitionsMilestone) {
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
+  constructor(aliceController, bookTunnel, movieTunnel, gameTunnel, createStage, lightWaves, pocketWatch, callbacks = {}) {
     this.alice = aliceController;
     this.tunnels = [bookTunnel, movieTunnel, gameTunnel];
     this.createStage = createStage;
     this.lightWaves = lightWaves;
     this.watch = pocketWatch;
-    this.onEraChanged = onEraChanged;
-    this.onTransitionsMilestone = onTransitionsMilestone;
+    this.callbacks = callbacks;
 
-    this.state = States.INITIALIZING;
-    this.currentEra = 0; // 0: Book, 1: Movie, 2: Game, 3: Create
-    this.targetEra = 0;
-    this.direction = 1; // 1: forward, -1: backward
-
-    // Phase timers & durations (seconds)
-    this.phaseTime = 0;
-    this.phaseDuration = 0;
-    this.subPhase = '';
-
-    // Generative morphing blend [0 = currentEra, 1 = targetEra]
-    this.morphProgress = 0;
-
-    // Tunnel speed multiplier
+    this.state = States.OPENING_BOOK;
+    this.activeEra = 0; // 0: Book, 1: Movie, 2: Game, 3: Create
     this.tunnelSpeedMultiplier = 1.0;
 
-    // Total transitions counter to prompt decision
-    this.transitionsCount = 0;
-
-    // Start in intro animation
-    this.startIntro();
+    // Retraction state
+    this.isRetractingTunnel = false;
+    this.retractTime = 0;
+    this.retractDuration = 1.5;
+    this.retractDirection = 1;
+    this.currentRetractEra = 0;
   }
 
-  startIntro() {
-    this.state = States.INTRO_ANIMATION;
-    this.phaseTime = 0;
-<<<<<<< HEAD
-    this.phaseDuration = 3.6;
-=======
-    this.phaseDuration = 3.6; // Coupled to Alice dramatic perspective fall
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
+  start() {
+    this.setState(States.OPENING_BOOK);
+  }
+
+  setState(newState) {
+    this.state = newState;
+    if (this.callbacks.onStateChanged) {
+      this.callbacks.onStateChanged(newState, this.activeEra);
+    }
+  }
+
+  /**
+   * Called by user interaction (Space or click) when narrative text finishes
+   */
+  onNarrativeFinished() {
+    if (this.state === States.OPENING_BOOK) {
+      this.startFirstFall();
+    } else if (this.state === States.TEXT_1_DISNEY) {
+      this.startSecondFall();
+    } else if (this.state === States.TEXT_2_GAME) {
+      this.startThirdFall();
+    } else if (this.state === States.TEXT_3_CREATE) {
+      this.startCreateStage();
+    }
+  }
+
+  /**
+   * Phase 1 -> 2: First cinematic fall into original book tunnel
+   */
+  startFirstFall() {
+    this.activeEra = 0;
+    this.setState(States.FALLING_0);
     this.tunnelSpeedMultiplier = 1.0;
+    this.tunnels[0].reset();
+
+    if (this.callbacks.onHideWatch) this.callbacks.onHideWatch();
+
+    this.alice.triggerFall(0, () => {
+      this.setState(States.ERA_0_ACTIVE);
+      this.watch.setEra(0);
+      if (this.callbacks.onShowWatch) this.callbacks.onShowWatch(0);
+    });
   }
 
-  triggerTransition(direction = 1) {
-    if (this.state !== States.IDLE) return; // Prevent overlapping transitions
+  /**
+   * Phase 3 -> 4: Second cinematic fall into 1951 movie tunnel
+   */
+  startSecondFall() {
+    this.activeEra = 1;
+    this.setState(States.FALLING_1);
+    this.tunnelSpeedMultiplier = 1.0;
+    this.tunnels[1].init(this.tunnels[1].width, this.tunnels[1].height);
 
-    this.direction = direction;
+    if (this.callbacks.onHideWatch) this.callbacks.onHideWatch();
 
-    // Navigation calculation across 4 stages: 0, 1, 2, 3
-    if (this.currentEra === 0) {
-      this.targetEra = direction > 0 ? 1 : 2;
-    } else if (this.currentEra === 1) {
-      this.targetEra = direction > 0 ? 2 : 0;
-    } else if (this.currentEra === 2) {
-      this.targetEra = direction > 0 ? 3 : 1; // Entering CREATE from Game!
-    } else if (this.currentEra === 3) {
-      if (direction < 0) {
-        this.targetEra = 2; // Returning to Game from CREATE
+    this.alice.triggerFall(1, () => {
+      this.setState(States.ERA_1_ACTIVE);
+      this.watch.setEra(1);
+      if (this.callbacks.onShowWatch) this.callbacks.onShowWatch(1);
+    });
+  }
+
+  /**
+   * Phase 5 -> 6: Third cinematic fall into 2011 video game tunnel
+   */
+  startThirdFall() {
+    this.activeEra = 2;
+    this.setState(States.FALLING_2);
+    this.tunnelSpeedMultiplier = 1.0;
+    this.tunnels[2].init(this.tunnels[2].width, this.tunnels[2].height);
+
+    if (this.callbacks.onHideWatch) this.callbacks.onHideWatch();
+
+    this.alice.triggerFall(2, () => {
+      this.setState(States.ERA_2_ACTIVE);
+      this.watch.setEra(2);
+      if (this.callbacks.onShowWatch) this.callbacks.onShowWatch(2);
+    });
+  }
+
+  /**
+   * Phase 7 -> 8: Start CREATE stage (No Alice falling; emerges from darkness)
+   */
+  startCreateStage() {
+    this.activeEra = 3;
+    this.setState(States.CREATE_ACTIVE);
+    this.tunnelSpeedMultiplier = 1.0;
+
+    // Alice is not drawn in CREATE stage
+    this.alice.alpha = 0;
+
+    // Initialize CREATE stage canvas
+    const width = this.tunnels[0].width;
+    const height = this.tunnels[0].height;
+    this.createStage.init(width, height);
+
+    this.watch.setEra(3);
+    if (this.callbacks.onShowWatch) this.callbacks.onShowWatch(3);
+    if (this.callbacks.onEnterCreate) this.callbacks.onEnterCreate();
+  }
+
+  /**
+   * Called when user spins the Pocket Watch
+   * @param {number} direction 1 = clockwise (forward), -1 = counter-clockwise (backward)
+   */
+  triggerWatchTransition(direction = 1) {
+    if (this.isRetractingTunnel) return; // Prevent overlapping transitions
+
+    if (this.state === States.ERA_0_ACTIVE) {
+      if (direction > 0) {
+        // Forward from Book -> Disney
+        this.beginRetraction(0, 1, () => {
+          this.setState(States.TEXT_1_DISNEY);
+        });
+      }
+    } else if (this.state === States.ERA_1_ACTIVE) {
+      if (direction > 0) {
+        // Forward from Disney -> Game
+        this.beginRetraction(1, 1, () => {
+          this.setState(States.TEXT_2_GAME);
+        });
       } else {
-        return; // Already in CREATE, keep creating
+        // Backward from Disney -> Book
+        this.beginRetraction(1, -1, () => {
+          this.activeEra = 0;
+          this.startFirstFall();
+        });
+      }
+    } else if (this.state === States.ERA_2_ACTIVE) {
+      if (direction > 0) {
+        // Forward from Game -> CREATE!
+        this.beginRetraction(2, 1, () => {
+          this.setState(States.TEXT_3_CREATE);
+        });
+      } else {
+        // Backward from Game -> Disney
+        this.beginRetraction(2, -1, () => {
+          this.activeEra = 1;
+          this.startSecondFall();
+        });
+      }
+    } else if (this.state === States.CREATE_ACTIVE) {
+      if (direction < 0) {
+        // Backward from CREATE -> Game
+        if (this.callbacks.onHideWatch) this.callbacks.onHideWatch();
+        this.activeEra = 2;
+        this.startThirdFall();
       }
     }
+  }
 
-    this.state = States.TRANSITION_OUT;
-    this.subPhase = 'PHASE_A';
-    this.phaseTime = 0;
-    this.phaseDuration = 0.8;
-    this.morphProgress = 0;
+  /**
+   * Spatial Retraction:
+   * Alice accelerates spin & plunges into vanishing point.
+   * Composition retracts spatially into central rabbit hole aperture.
+   */
+  beginRetraction(fromEra, direction, onComplete) {
+    this.isRetractingTunnel = true;
+    this.currentRetractEra = fromEra;
+    this.retractDirection = direction;
+    this.retractTime = 0;
+    this.retractDuration = 1.5;
 
+    if (this.callbacks.onHideWatch) this.callbacks.onHideWatch();
     this.watch.setTransitionState(true);
+
+    // Alice retracts into vanishing point
+    this.alice.triggerRetract(direction);
+
+    this.onRetractionDone = () => {
+      this.isRetractingTunnel = false;
+      this.watch.setTransitionState(false);
+      onComplete();
+    };
+  }
+
+  triggerContemplate() {
+    if (this.state !== States.CREATE_ACTIVE) return;
+    this.setState(States.CONTEMPLATING);
+    this.createStage.contemplate();
+    if (this.callbacks.onContemplate) {
+      this.callbacks.onContemplate();
+    }
+  }
+
+  resumeCreating() {
+    if (this.state !== States.CONTEMPLATING) return;
+    this.setState(States.CREATE_ACTIVE);
+    this.createStage.resume();
+    if (this.callbacks.onResumeCreate) {
+      this.callbacks.onResumeCreate();
+    }
   }
 
   update(dt) {
-    this.phaseTime += dt;
+    // Retraction timer
+    if (this.isRetractingTunnel) {
+      this.retractTime += dt;
+      const progress = Math.min(1.0, this.retractTime / this.retractDuration);
+      this.tunnelSpeedMultiplier = 1.0 + progress * 3.5;
 
-    switch (this.state) {
-      case States.INTRO_ANIMATION:
-        this.tunnelSpeedMultiplier = 1.0;
-        if (this.phaseTime >= this.phaseDuration) {
-          this.state = States.IDLE;
-        }
-        break;
-
-      case States.IDLE:
-        this.tunnelSpeedMultiplier = 1.0;
-        this.morphProgress = 0;
-        break;
-
-      case States.TRANSITION_OUT:
-        this.handleTransitionOut(dt);
-        break;
-
-      case States.TRANSFORMING:
-        this.handleTransforming(dt);
-        break;
-
-      case States.TRANSITION_IN:
-        this.handleTransitionIn(dt);
-        break;
-    }
-  }
-
-  handleTransitionOut(dt) {
-    if (this.subPhase === 'PHASE_A') {
-      const t = Math.min(1.0, this.phaseTime / this.phaseDuration);
-      this.tunnelSpeedMultiplier = 1.0 + t * 2.8;
-
-<<<<<<< HEAD
-      if (this.currentEra < 3) {
-        const startSpin = this.direction * (t * t) * Math.PI * 0.8;
-        this.alice.setTransitionTransform(1.0, startSpin, 1.0, 0, 0);
-      }
-
-      if (this.phaseTime >= this.phaseDuration) {
-=======
-      // Start gentle rotation acceleration
-      const startSpin = this.direction * (t * t) * Math.PI * 0.8;
-      this.alice.setTransitionTransform(1.0, startSpin, 1.0, 0, 0);
-
-      if (this.phaseTime >= this.phaseDuration) {
-        // Move to Phase B: Descent (Alice spins & physically plunges into depth)
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
-        this.subPhase = 'PHASE_B';
-        this.phaseTime = 0;
-        this.phaseDuration = 1.4;
-      }
-    } else if (this.subPhase === 'PHASE_B') {
-      const t = Math.min(1.0, this.phaseTime / this.phaseDuration);
-      const ease = t * t * t;
-
-      this.tunnelSpeedMultiplier = 3.8 + t * 1.5;
-
-<<<<<<< HEAD
-      if (this.currentEra < 3) {
-        // Alice physical 3D plunge into the central hole
-        const scale = Math.max(0.005, 1.0 - ease * 0.995);
-        const spin = this.direction * (Math.PI * 0.8 + ease * Math.PI * 6.5);
-        const alpha = scale > 0.04 ? 1.0 : (scale / 0.04);
-        const offsetY = ease * 18;
-
-        this.alice.setTransitionTransform(scale, spin, alpha, 0, offsetY);
-      }
-
-      if (this.phaseTime >= this.phaseDuration) {
-        this.subPhase = 'PHASE_C';
-        this.phaseTime = 0;
-        this.phaseDuration = 0.25;
-        this.alice.setTransitionTransform(0.001, 0, 0.0, 0, 0);
-=======
-      // Physical scale plunge down to 0.005 at vanishing point
-      const scale = Math.max(0.005, 1.0 - ease * 0.995);
-      const spin = this.direction * (Math.PI * 0.8 + ease * Math.PI * 6.5);
-
-      // NO early opacity fades! Remains solid until it enters the tiny core aperture
-      const alpha = scale > 0.04 ? 1.0 : (scale / 0.04);
-      const offsetY = ease * 18;
-
-      this.alice.setTransitionTransform(scale, spin, alpha, 0, offsetY);
-
-      if (this.phaseTime >= this.phaseDuration) {
-        // Phase C: Complete disappearance inside the central hole
-        this.subPhase = 'PHASE_C';
-        this.phaseTime = 0;
-        this.phaseDuration = 0.25;
-        this.alice.setTransitionTransform(0.001, spin, 0.0, 0, 0);
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
-      }
-    } else if (this.subPhase === 'PHASE_C') {
-      this.alice.setTransitionTransform(0.0, 0, 0.0, 0, 0);
-
-      if (this.phaseTime >= this.phaseDuration) {
-        this.state = States.TRANSFORMING;
-        this.phaseTime = 0;
-        this.phaseDuration = 2.0;
-        this.morphProgress = 0;
-
-        // If transitioning into one of the 3 rabbit hole tunnels, reset fresh
-        if (this.targetEra < 3 && this.tunnels[this.targetEra] && this.tunnels[this.targetEra].reset) {
-          this.tunnels[this.targetEra].reset();
+      if (this.retractTime >= this.retractDuration) {
+        if (this.onRetractionDone) {
+          const cb = this.onRetractionDone;
+          this.onRetractionDone = null;
+          cb();
         }
       }
-    }
-  }
-
-  handleTransforming(dt) {
-    const t = Math.min(1.0, this.phaseTime / this.phaseDuration);
-    this.morphProgress = t * t * (3 - 2 * t);
-    this.tunnelSpeedMultiplier = 4.5 - t * 1.5;
-
-<<<<<<< HEAD
-=======
-    // Keep Alice in the depths during tunnel transformation
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
-    this.alice.setTransitionTransform(0.0, 0, 0.0, 0, 0);
-
-    if (this.phaseTime >= this.phaseDuration) {
-      this.currentEra = this.targetEra;
-      this.morphProgress = 0;
-
-      if (this.currentEra < 3) {
-        this.alice.setEra(this.currentEra);
-      }
-      this.watch.setEra(this.currentEra);
-
-      if (this.onEraChanged) {
-        this.onEraChanged(this.currentEra);
-      }
-
-<<<<<<< HEAD
-=======
-      // Enter TRANSITION_IN (Phase E: New Alice emerges from central hole)
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
-      this.state = States.TRANSITION_IN;
-      this.subPhase = 'PHASE_E';
-      this.phaseTime = 0;
-      this.phaseDuration = 1.5;
-    }
-  }
-
-  handleTransitionIn(dt) {
-    if (this.subPhase === 'PHASE_E') {
-<<<<<<< HEAD
-      const t = Math.min(1.0, this.phaseTime / this.phaseDuration);
-      const ease = 1 - Math.pow(1 - t, 3);
-
-      this.tunnelSpeedMultiplier = 3.0 - ease * 1.8;
-
-      if (this.currentEra < 3) {
-        // New Alice emerges from vanishing point and climbs towards camera
-        const scale = 0.01 + ease * 0.99;
-        const spin = this.direction * (1 - ease) * Math.PI * 5.0;
-        const alpha = scale > 0.04 ? 1.0 : (scale / 0.04);
-        const offsetY = (1 - ease) * -12;
-
-        this.alice.setTransitionTransform(scale, spin, alpha, 0, offsetY);
-      } else {
-        // In CREATE stage: Alice is not drawn; user takes over
-        this.alice.setTransitionTransform(0.0, 0, 0.0, 0, 0);
-      }
-=======
-      // Phase E: New Alice emerges directly from central vanishing point (scale ~0.01 -> 1.0)
-      const t = Math.min(1.0, this.phaseTime / this.phaseDuration);
-      const ease = 1 - Math.pow(1 - t, 3); // Ease out cubic
-
-      this.tunnelSpeedMultiplier = 3.0 - ease * 1.8;
-
-      const scale = 0.01 + ease * 0.99;
-      const spin = this.direction * (1 - ease) * Math.PI * 5.0; // Decelerating spin
-      const alpha = scale > 0.04 ? 1.0 : (scale / 0.04);
-      const offsetY = (1 - ease) * -12;
-
-      this.alice.setTransitionTransform(scale, spin, alpha, 0, offsetY);
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
-
-      if (this.phaseTime >= this.phaseDuration) {
-        this.subPhase = 'PHASE_F';
-        this.phaseTime = 0;
-        this.phaseDuration = 0.8;
-      }
-    } else if (this.subPhase === 'PHASE_F') {
-      const t = Math.min(1.0, this.phaseTime / this.phaseDuration);
-      this.tunnelSpeedMultiplier = 1.2 - t * 0.2;
-
-<<<<<<< HEAD
-      if (this.currentEra < 3) {
-        this.alice.setTransitionTransform(1.0, 0, 1.0, 0, 0);
-      } else {
-        this.alice.setTransitionTransform(0.0, 0, 0.0, 0, 0);
-      }
-=======
-      const scale = 1.0;
-      const spin = 0;
-      const alpha = 1.0;
-      this.alice.setTransitionTransform(scale, spin, alpha, 0, 0);
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
-
-      if (this.phaseTime >= this.phaseDuration) {
-        this.state = States.IDLE;
-        this.tunnelSpeedMultiplier = 1.0;
-        this.watch.setTransitionState(false);
-<<<<<<< HEAD
-        if (this.currentEra < 3) {
-          this.alice.releaseTransitionTransform();
-=======
-        this.alice.releaseTransitionTransform();
-
-        this.transitionsCount++;
-        if (this.onTransitionsMilestone) {
-          this.onTransitionsMilestone(this.transitionsCount);
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
-        }
-      }
+    } else {
+      this.tunnelSpeedMultiplier = 1.0;
     }
   }
 
   renderTunnels(ctx, width, height, cx, cy) {
-    if (this.currentEra === 3) {
-      // In CREATE stage, render the create stage canvas
+    if (this.state === States.CREATE_ACTIVE || this.state === States.CONTEMPLATING) {
       this.createStage.render(ctx);
       return;
     }
 
-    if (this.state === States.TRANSFORMING) {
-      const fromEra = this.currentEra;
-      const toEra = this.targetEra;
-      const blend = this.morphProgress;
+    if (this.isRetractingTunnel) {
+      const t = Math.min(1.0, this.retractTime / this.retractDuration);
+      const tunnel = this.tunnels[this.currentRetractEra];
+      if (tunnel && tunnel.offscreenCanvas) {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(t * t * 0.8 * this.retractDirection);
+        const s = Math.max(0.001, 1.0 - Math.pow(t, 1.8) * 0.995);
+        ctx.scale(s, s);
+        ctx.translate(-cx, -cy);
+        ctx.drawImage(tunnel.offscreenCanvas, 0, 0);
+        ctx.restore();
 
-<<<<<<< HEAD
-      if (fromEra < 3 && toEra < 3) {
-        this.tunnels[fromEra].render(ctx, width, height, cx, cy, this.lightWaves, 1.0 - blend);
-        this.tunnels[toEra].render(ctx, width, height, cx, cy, this.lightWaves, blend);
-      } else if (toEra === 3) {
-        // Morphing from Game (2) into CREATE (3)
-        this.tunnels[2].render(ctx, width, height, cx, cy, this.lightWaves, 1.0 - blend * 0.6);
-        this.createStage.render(ctx);
-      } else if (fromEra === 3) {
-        // Morphing from CREATE (3) back into Game (2)
-        this.createStage.render(ctx);
-        this.tunnels[2].render(ctx, width, height, cx, cy, this.lightWaves, blend);
+        // Central dark suction hole
+        const holeR = 38 + t * 24;
+        const holeGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, holeR);
+        holeGrad.addColorStop(0, '#000000');
+        holeGrad.addColorStop(0.7, '#08060a');
+        holeGrad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = holeGrad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, holeR, 0, Math.PI * 2);
+        ctx.fill();
       }
-=======
-      this.tunnels[fromEra].render(ctx, width, height, cx, cy, this.lightWaves, 1.0 - blend);
-      this.tunnels[toEra].render(ctx, width, height, cx, cy, this.lightWaves, blend);
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
-    } else {
-      this.tunnels[this.currentEra].render(ctx, width, height, cx, cy, this.lightWaves, 1.0);
+      return;
+    }
+
+    // Active era tunnel rendering
+    if (this.state === States.FALLING_0 || this.state === States.ERA_0_ACTIVE) {
+      this.tunnels[0].render(ctx, width, height, cx, cy, this.lightWaves, 1.0);
+    } else if (this.state === States.FALLING_1 || this.state === States.ERA_1_ACTIVE) {
+      this.tunnels[1].render(ctx, width, height, cx, cy, this.lightWaves, 1.0);
+    } else if (this.state === States.FALLING_2 || this.state === States.ERA_2_ACTIVE) {
+      this.tunnels[2].render(ctx, width, height, cx, cy, this.lightWaves, 1.0);
     }
   }
 }

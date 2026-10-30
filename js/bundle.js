@@ -679,16 +679,10 @@ class LightWaveSystem {
 // --- js/systems/bookTunnel.js ---
 /**
  * Scene 1: Book Tunnel (Original Book, 1865)
-<<<<<<< HEAD
- * Inspired by Reference 1: The original text paragraph literally builds the spiral tunnel
+ * Inspired by Lewis Carroll & John Tenniel.
+ * The original text paragraph literally builds the spiral tunnel
  * expanding from the central vanishing point all the way to the screen corners.
  * Strictly monochromatic (SOLO BLANCO Y NEGRO). High contrast black ink on cut paper.
-=======
- * Pure Monochromatic Antique Ink on Cut Paper (SOLO BLANCO Y NEGRO).
- * Concentric paper rings, deep cut shadows, hand-drawn ink pen spirals,
- * and typographic literary fragments stamped along organic spiral curves.
- * Expanded to cover full screen from center into every corner with maximum contrast.
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
  */
 
 class BookTunnel {
@@ -713,29 +707,19 @@ class BookTunnel {
 
     this.words = this.fullParagraph.split(/\s+/).filter(w => w.length > 0);
 
-<<<<<<< HEAD
     // Progressive spiral text streamers (streams of words forming the tunnel)
     this.textStreamers = [];
     this.maxStreamers = 6;
     this.nextStreamerTime = 0;
-=======
-    // Active progressive ink pen agents
-    this.penAgents = [];
-    this.maxPenAgents = 32; // Increased for richer corner-to-corner coverage
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
 
-    // Concentric paper ring bands with drop shadows (Reference 1)
+    // Concentric paper ring bands with drop shadows
     this.paperRings = [];
     this.nextRingTime = 0;
-<<<<<<< HEAD
-    this.ringInterval = 1.3;
-=======
-    this.ringInterval = 1.2;
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
+    this.ringInterval = 1.25;
 
     // Fine ink pen agents accompanying the text
     this.penAgents = [];
-    this.maxPenAgents = 20;
+    this.maxPenAgents = 26;
 
     // Completed paths for subtle light wave shimmer
     this.recentPaths = [];
@@ -748,32 +732,20 @@ class BookTunnel {
     this.offscreenCanvas.width = width;
     this.offscreenCanvas.height = height;
 
-<<<<<<< HEAD
     // Crisp heavy white/ivory paper ground
-=======
-    // Initial crisp white paper ground
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     this.offCtx.fillStyle = '#faf8f5';
     this.offCtx.fillRect(0, 0, width, height);
 
     // Initial deep center aperture (black hole at center)
     const cx = width / 2;
     const cy = height / 2;
-<<<<<<< HEAD
     const coreGrad = this.offCtx.createRadialGradient(cx, cy, 0, cx, cy, 36);
-=======
-    const coreGrad = this.offCtx.createRadialGradient(cx, cy, 0, cx, cy, 38);
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     coreGrad.addColorStop(0, '#000000');
     coreGrad.addColorStop(0.7, '#0a0a0a');
     coreGrad.addColorStop(1, 'rgba(250, 248, 245, 0)');
     this.offCtx.fillStyle = coreGrad;
     this.offCtx.beginPath();
-<<<<<<< HEAD
     this.offCtx.arc(cx, cy, 36, 0, Math.PI * 2);
-=======
-    this.offCtx.arc(cx, cy, 38, 0, Math.PI * 2);
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     this.offCtx.fill();
 
     this.textStreamers = [];
@@ -782,7 +754,6 @@ class BookTunnel {
     this.recentPaths = [];
     this.time = 0;
     this.nextRingTime = 0.2;
-<<<<<<< HEAD
     this.nextStreamerTime = 0.1;
 
     // Seed initial text streamers from center
@@ -791,13 +762,7 @@ class BookTunnel {
     }
 
     // Seed initial pen agents
-    for (let i = 0; i < 8; i++) {
-=======
-    this.nextSpiralTextTime = 0.4;
-
-    // Spawn initial pen agents near the center
     for (let i = 0; i < 10; i++) {
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
       this.spawnPenAgent();
     }
 
@@ -833,10 +798,9 @@ class BookTunnel {
     }
   }
 
-<<<<<<< HEAD
   spawnTextStreamer(startAngle = null) {
     const baseAngle = startAngle !== null ? startAngle : Math.random() * Math.PI * 2;
-    const maxCorner = Math.hypot(this.width, this.height) * 0.78;
+    const maxCorner = Math.hypot(this.width, this.height) * 0.82;
 
     this.textStreamers.push({
       baseAngle,
@@ -849,60 +813,26 @@ class BookTunnel {
       charInterval: 0.045, // Progressive character typing speed
       maxDist: maxCorner,
       isDone: false
-=======
-  spawnPenAgent() {
-    const cx = this.width / 2;
-    const cy = this.height / 2;
-    const angle = Math.random() * Math.PI * 2;
-    const startR = 8 + Math.random() * 22;
-
-    // Coverage to the farthest corners: 0.78 * hypot(w, h)
-    const maxCornerDist = Math.hypot(this.width, this.height) * 0.78;
-
-    this.penAgents.push({
-      x: cx + Math.cos(angle) * startR,
-      y: cy + Math.sin(angle) * startR,
-      angle: angle,
-      r: startR,
-      speedR: 45 + Math.random() * 65, // Outward speed
-      speedTheta: (0.42 + Math.random() * 0.75) * (Math.random() > 0.4 ? 1 : -1),
-      noiseScale: 0.0022 + Math.random() * 0.003,
-      lineWidth: 0.8 + Math.random() * 2.4,
-      opacity: 0.65 + Math.random() * 0.35, // High contrast pure black ink
-      isHatch: Math.random() > 0.55,
-      history: [],
-      maxDist: maxCornerDist,
-      age: 0
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     });
   }
 
   spawnPaperRing() {
     const cx = this.width / 2;
     const cy = this.height / 2;
-<<<<<<< HEAD
-    const maxScreenRadius = Math.hypot(this.width, this.height) * (0.28 + Math.random() * 0.50);
-
-    // Subset of original text words for ring edge stamping
     const wordCount = 14 + Math.floor(Math.random() * 18);
-=======
-    const wordCount = 16 + Math.floor(Math.random() * 22);
-    const ringWords = [];
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     const startIdx = Math.floor(Math.random() * (this.words.length - wordCount));
     const ringWords = [];
     for (let i = 0; i < wordCount; i++) {
       ringWords.push(this.words[(startIdx + i) % this.words.length]);
     }
 
-    // Rings now expand all the way out to screen borders and corners
-    const maxScreenRadius = Math.hypot(this.width, this.height) * (0.25 + Math.random() * 0.52);
+    // Rings expand all the way out to screen borders and corners
+    const maxScreenRadius = Math.hypot(this.width, this.height) * (0.28 + Math.random() * 0.52);
 
     this.paperRings.push({
-<<<<<<< HEAD
       currentRadius: 22 + Math.random() * 18,
       targetRadius: maxScreenRadius,
-      expansionSpeed: 26 + Math.random() * 32,
+      expansionSpeed: 28 + Math.random() * 34,
       rotationAngle: Math.random() * Math.PI * 2,
       rotationSpeed: (0.03 + Math.random() * 0.04) * (Math.random() > 0.5 ? 1 : -1),
       irregularity: 0.035 + Math.random() * 0.04,
@@ -918,7 +848,7 @@ class BookTunnel {
     const cy = this.height / 2;
     const angle = Math.random() * Math.PI * 2;
     const startR = 10 + Math.random() * 22;
-    const maxCorner = Math.hypot(this.width, this.height) * 0.78;
+    const maxCorner = Math.hypot(this.width, this.height) * 0.82;
 
     this.penAgents.push({
       x: cx + Math.cos(angle) * startR,
@@ -934,34 +864,6 @@ class BookTunnel {
       history: [],
       maxDist: maxCorner,
       age: 0
-=======
-      currentRadius: 24 + Math.random() * 20,
-      targetRadius: maxScreenRadius,
-      expansionSpeed: 28 + Math.random() * 36,
-      rotationAngle: Math.random() * Math.PI * 2,
-      rotationSpeed: (0.035 + Math.random() * 0.045) * (Math.random() > 0.5 ? 1 : -1),
-      irregularity: 0.035 + Math.random() * 0.045,
-      words: ringWords,
-      isStamped: false,
-      shadowBlur: 12 + Math.random() * 18,
-      lineWidth: 1.4 + Math.random() * 1.8
-    });
-  }
-
-  spawnSpiralText() {
-    const phrase = this.texts[Math.floor(Math.random() * this.texts.length)];
-    this.spiralTextArms.push({
-      text: phrase,
-      chars: phrase.split(''),
-      currentIndex: 0,
-      baseAngle: Math.random() * Math.PI * 2,
-      currentR: 18 + Math.random() * 25,
-      spiralGrowth: 32 + Math.random() * 30, // Expands broad spiral reaching corners
-      charStepTimer: 0,
-      charInterval: 0.05 + Math.random() * 0.03,
-      fontSize: 11 + Math.floor(Math.random() * 15),
-      isDone: false
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     });
   }
 
@@ -982,7 +884,7 @@ class BookTunnel {
       }
     }
 
-    // 2. Progressively type the original paragraph along expanding spirals
+    // 2. Progressively stamp words along expanding spirals
     for (let i = this.textStreamers.length - 1; i >= 0; i--) {
       const st = this.textStreamers[i];
       st.charTimer += dt * speedMult;
@@ -992,16 +894,16 @@ class BookTunnel {
         const currentWord = this.words[st.wordIndex];
         st.wordIndex++;
 
-        // Advance along Archimedean/logarithmic spiral
+        // Advance along spiral
         const dAngle = 0.28;
         st.currentAngle += dAngle;
         st.currentR += (st.spiralPitch / (Math.PI * 2)) * dAngle;
 
-        // Coordinates on the spiral
+        // Coordinates on spiral
         const px = cx + Math.cos(st.currentAngle) * st.currentR;
         const py = cy + Math.sin(st.currentAngle) * st.currentR;
 
-        // Font scaling with distance from vanishing point (small in center, large in corners)
+        // Font scaling with distance from vanishing point
         const fontSize = Math.max(9, Math.min(26, Math.floor(10 + (st.currentR / 380) * 14)));
 
         offCtx.save();
@@ -1016,7 +918,7 @@ class BookTunnel {
         offCtx.textBaseline = 'middle';
         offCtx.fillText(currentWord, 0, 0);
 
-        // Subtle ink underline or ligature connecting the spiral words
+        // Subtle ink underline connecting spiral words
         if (Math.random() > 0.45) {
           const wMetrics = offCtx.measureText(currentWord);
           const wWidth = wMetrics.width;
@@ -1030,12 +932,12 @@ class BookTunnel {
 
         offCtx.restore();
 
-        // Check if word loop is complete (start over paragraph seamlessly)
+        // Loop seamlessly through words
         if (st.wordIndex >= this.words.length) {
-          st.wordIndex = 0; // Seamless sequential loop of the paragraph
+          st.wordIndex = 0;
         }
 
-        // Record recent path coordinate for light wave traversal
+        // Record recent path for light wave traversal
         this.recentPaths.push([{ x: px, y: py, r: st.currentR }]);
         if (this.recentPaths.length > this.maxRecentPaths) {
           this.recentPaths.shift();
@@ -1059,52 +961,6 @@ class BookTunnel {
       this.nextRingTime = this.ringInterval / Math.max(1, speedMult * 0.8);
     }
 
-<<<<<<< HEAD
-=======
-    // 2. Spawning spiral text arms
-    this.nextSpiralTextTime -= dt * speedMult;
-    if (this.nextSpiralTextTime <= 0) {
-      this.spawnSpiralText();
-      this.nextSpiralTextTime = (1.8 + Math.random() * 1.6) / Math.max(1, speedMult * 0.8);
-    }
-
-    // 3. Progressively stamp spiral text streams
-    for (let i = this.spiralTextArms.length - 1; i >= 0; i--) {
-      const arm = this.spiralTextArms[i];
-      arm.charStepTimer += dt * speedMult;
-
-      while (arm.charStepTimer >= arm.charInterval && arm.currentIndex < arm.chars.length) {
-        arm.charStepTimer -= arm.charInterval;
-        const ch = arm.chars[arm.currentIndex];
-        arm.currentIndex++;
-
-        const turns = (arm.currentIndex * 0.09);
-        const theta = arm.baseAngle + turns * Math.PI * 2;
-        const r = arm.currentR + turns * arm.spiralGrowth;
-
-        const px = cx + Math.cos(theta) * r;
-        const py = cy + Math.sin(theta) * r;
-
-        // Render with high black ink contrast
-        offCtx.save();
-        offCtx.translate(px, py);
-        offCtx.rotate(theta + Math.PI / 2);
-        const dynamicSize = Math.max(10, Math.min(26, Math.floor(arm.fontSize * (0.7 + (r / 400)))));
-        offCtx.font = `700 ${dynamicSize}px "Cormorant Garamond", "Cinzel", "Times New Roman", serif`;
-        offCtx.fillStyle = '#0a0a0a'; // Pure black ink contrast
-        offCtx.textAlign = 'center';
-        offCtx.textBaseline = 'middle';
-        offCtx.fillText(ch, 0, 0);
-        offCtx.restore();
-      }
-
-      if (arm.currentIndex >= arm.chars.length) {
-        this.spiralTextArms.splice(i, 1);
-      }
-    }
-
-    // 4. Progressively draw and stamp concentric paper rings
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     for (let i = this.paperRings.length - 1; i >= 0; i--) {
       const ring = this.paperRings[i];
       ring.currentRadius += ring.expansionSpeed * dt * speedMult;
@@ -1136,11 +992,7 @@ class BookTunnel {
       }
       offCtx.closePath();
 
-<<<<<<< HEAD
       // Sharp shadow & paper cut edge
-=======
-      // Sharp shadow & defined paper cut edge
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
       offCtx.shadowColor = 'rgba(0, 0, 0, 0.22)';
       offCtx.shadowBlur = ring.shadowBlur;
       offCtx.shadowOffsetX = 0;
@@ -1150,21 +1002,12 @@ class BookTunnel {
       offCtx.stroke();
       offCtx.restore();
 
-<<<<<<< HEAD
       // Stamp typography along paper ring edges
       if (ring.currentRadius > 60 && !ring.isStamped) {
         offCtx.save();
         const fontSize = Math.max(10, Math.min(26, Math.floor(ring.currentRadius * 0.058)));
         offCtx.font = `700 ${fontSize}px "Cormorant Garamond", "Cinzel", "Times New Roman", serif`;
         offCtx.fillStyle = '#080808';
-=======
-      // Stamp typography along the ring perimeters
-      if (ring.currentRadius > 65 && !ring.isStamped) {
-        offCtx.save();
-        const fontSize = Math.max(10, Math.min(28, Math.floor(ring.currentRadius * 0.06)));
-        offCtx.font = `700 ${fontSize}px "Cormorant Garamond", "Cinzel", "Times New Roman", serif`;
-        offCtx.fillStyle = '#080808'; // Deepest black ink
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
         offCtx.textAlign = 'center';
         offCtx.textBaseline = 'middle';
 
@@ -1223,10 +1066,7 @@ class BookTunnel {
       offCtx.lineCap = 'round';
       offCtx.stroke();
 
-<<<<<<< HEAD
-=======
       // Cross-hatching ticks on some strokes (Victorian engraving style)
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
       if (p.isHatch && Math.random() > 0.58) {
         const hLen = 5 + Math.random() * 10;
         const normAngle = p.angle + Math.PI / 2 + (Math.random() - 0.5) * 0.5;
@@ -1935,11 +1775,10 @@ class GameTunnel {
  * - AliceMovie-Photoroom.png
  * - AliceGame-Photoroom.png
  *
- * Implements true 3D depth animations:
- * 1. Initial fall from camera foreground (scale ~4.2, rotating as she plunges toward vanishing point).
+ * Implements true 3D depth cinematic animations:
+ * 1. Dramatic Fall from foreground/above (scale 4.2 -> 1.0, rotating down into vanishing point).
  * 2. Settled slow-motion vertical suspension floating.
- * 3. Perspective descent into depth (scale 1.0 -> 0.01 into central hole) during transitions.
- * 4. Perspective ascent from depth (scale 0.01 -> 1.0 from central hole) for new Alice.
+ * 3. Perspective descent into vanishing point (scale 1.0 -> 0.001) during transitions.
  */
 
 class AliceController {
@@ -1956,17 +1795,24 @@ class AliceController {
     ];
 
     // Physics & transform state
-    this.scale = 4.2;
-    this.rotation = -Math.PI * 5.0; // ~2.5 turns coupled to fall
-    this.verticalOffset = -300; // starts above / near camera
-    this.horizontalOffset = 40;
-    this.alpha = 1.0;
+    this.scale = 1.0;
+    this.rotation = 0;
+    this.verticalOffset = 0;
+    this.horizontalOffset = 0;
+    this.alpha = 0.0;
 
     // Time tracking
     this.time = 0;
-    this.isIntro = true;
-    this.introDuration = 3.6; // seconds for dramatic perspective fall
-    this.introElapsed = 0;
+    this.isFalling = false;
+    this.fallDuration = 3.4; // seconds for dramatic perspective fall
+    this.fallElapsed = 0;
+    this.onFallComplete = null;
+
+    this.isRetracting = false;
+    this.retractDuration = 1.5;
+    this.retractElapsed = 0;
+    this.retractDirection = 1;
+    this.onRetractComplete = null;
 
     // Parallax mouse tilt
     this.mouseTargetX = 0;
@@ -2003,6 +1849,33 @@ class AliceController {
     this.mouseTargetY = ny * 16;
   }
 
+  triggerFall(eraIndex, onComplete = null) {
+    this.setEra(eraIndex);
+    this.isFalling = true;
+    this.isRetracting = false;
+    this.isTransitionControlled = false;
+    this.fallDuration = 3.4;
+    this.fallElapsed = 0;
+    this.onFallComplete = onComplete;
+
+    // Initial cinematic entrance state: high above foreground
+    this.scale = 4.2;
+    this.rotation = -Math.PI * 5.0; // spinning descent
+    this.verticalOffset = -340; // above camera
+    this.horizontalOffset = 45;
+    this.alpha = 0.0;
+  }
+
+  triggerRetract(direction = 1, onComplete = null) {
+    this.isRetracting = true;
+    this.isFalling = false;
+    this.isTransitionControlled = false;
+    this.retractDuration = 1.5;
+    this.retractElapsed = 0;
+    this.retractDirection = direction;
+    this.onRetractComplete = onComplete;
+  }
+
   update(dt, speedMult = 1.0) {
     this.time += dt * speedMult;
 
@@ -2011,37 +1884,61 @@ class AliceController {
     this.mouseY += (this.mouseTargetY - this.mouseY) * Math.min(1.0, dt * 4);
 
     if (this.isTransitionControlled) {
-      // In transition, transform is controlled directly by transitionManager
       return;
     }
 
-    if (this.isIntro) {
-      this.introElapsed += dt;
-      const progress = Math.min(1.0, this.introElapsed / this.introDuration);
+    if (this.isFalling) {
+      this.fallElapsed += dt;
+      const progress = Math.min(1.0, this.fallElapsed / this.fallDuration);
 
       // Ease out cubic for falling deceleration into depth
       const t = progress;
       const easeOut = 1 - Math.pow(1 - t, 3);
 
-      // Scale drops from 4.2 (camera closeup) down to 1.0 (settled position)
+      // Scale drops from 4.2 down to 1.0
       this.scale = 1.0 + 3.2 * (1 - easeOut);
 
-      // Rotation coupled directly to downward descent
+      // Rotation spins into vanishing point
       this.rotation = (1 - easeOut) * (-Math.PI * 5.0);
 
       // Position travels from high foreground into center vanishing point
-      this.verticalOffset = (1 - easeOut) * -260;
-      this.horizontalOffset = (1 - easeOut) * 35;
-      this.alpha = Math.min(1.0, progress * 2.0); // Clean fast appearance
+      this.verticalOffset = (1 - easeOut) * -340;
+      this.horizontalOffset = (1 - easeOut) * 45;
+      this.alpha = Math.min(1.0, progress * 3.0);
 
       if (progress >= 1.0) {
-        this.isIntro = false;
+        this.isFalling = false;
         this.scale = 1.0;
         this.rotation = 0;
         this.verticalOffset = 0;
         this.horizontalOffset = 0;
+        this.alpha = 1.0;
+        if (this.onFallComplete) {
+          const cb = this.onFallComplete;
+          this.onFallComplete = null;
+          cb();
+        }
       }
-    } else {
+    } else if (this.isRetracting) {
+      this.retractElapsed += dt;
+      const progress = Math.min(1.0, this.retractElapsed / this.retractDuration);
+      const ease = progress * progress * progress; // ease in cubic
+
+      this.scale = Math.max(0.001, 1.0 - ease * 0.999);
+      this.rotation = this.retractDirection * (Math.PI * 0.8 + ease * Math.PI * 8.0);
+      this.verticalOffset = ease * 18;
+      this.alpha = this.scale > 0.04 ? 1.0 : (this.scale / 0.04);
+
+      if (progress >= 1.0) {
+        this.isRetracting = false;
+        this.alpha = 0.0;
+        if (this.onRetractComplete) {
+          const cb = this.onRetractComplete;
+          this.onRetractComplete = null;
+          cb();
+        }
+      }
+    } else if (this.alpha > 0.001) {
       // Subtle continuous slow-motion vertical bobbing (perpetual gentle fall)
       const bob1 = Math.sin(this.time * 1.3) * 8.5;
       const bob2 = Math.sin(this.time * 2.2 + 1.1) * 4.0;
@@ -2057,9 +1954,6 @@ class AliceController {
     }
   }
 
-  /**
-   * Set custom 3D depth transform during transitions
-   */
   setTransitionTransform(scale, rotation, alpha = 1.0, offsetX = 0, offsetY = 0) {
     this.isTransitionControlled = true;
     this.scale = scale;
@@ -2085,7 +1979,7 @@ class AliceController {
     ctx.save();
     ctx.globalAlpha = Math.max(0, Math.min(1, this.alpha));
 
-    // Target height: 38% of viewport height
+    // Target height: 42% of viewport height
     const targetHeight = Math.min(height * 0.44, width * 0.48);
     const aspect = img.naturalWidth / img.naturalHeight;
     const drawWidth = targetHeight * aspect;
@@ -2469,17 +2363,11 @@ class PocketWatch {
 // --- js/systems/createStage.js ---
 /**
  * CREATE Stage — WHY BOTHER?
-<<<<<<< HEAD
  * Inspired by Alice in Wonderland fantasy surrealism & Omniharmonic generative art.
  * Palette: Rich purples & violets, warm golden yellows, deep & sky blues, turquoises,
  * lavenders, and rose accents.
  * Autonomous multi-agent organic system influenced by cursor forces (deflection, vortex wells, flick branchings).
-=======
- * The user transitions from passive observer to active co-creator.
- * Inspired by Omniharmonic: Organic, dynamic, and complex generative composition.
- * Multi-focal fluid fields, autonomous agent networks, persistent pigment accumulation,
- * and indirect cursor influence (deflection, vortex wells, flick impulses).
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
+ * Features Contemplate mode to stabilize the work into a finished presentation.
  */
 
 
@@ -2488,72 +2376,43 @@ class PocketWatch {
 class CreateStage {
   constructor() {
     this.isActive = false;
+    this.isContemplating = false;
     this.time = 0;
     this.width = 0;
     this.height = 0;
+    this.emergenceAlpha = 0; // Gradually emerges from darkness (0 -> 1)
 
-<<<<<<< HEAD
-    // Persistent canvas buffer (inherits from previous video game stage without wiping)
+    // Persistent canvas buffer for accumulated generative artwork
     this.offscreenCanvas = document.createElement('canvas');
     this.offCtx = this.offscreenCanvas.getContext('2d');
 
-    // Rich Wonderland Surrealist Palette
+    // Rich Wonderland Surrealist Palette (harmonious, expressive, strictly non-neon)
     this.palette = [
-      { r: 128, g: 35,  b: 165 }, // Morado profundo (rich purple)
-      { r: 168, g: 75,  b: 215 }, // Violeta vibrante (vibrant violet)
-      { r: 245, g: 185, b: 45  }, // Amarillo cálido / dorado (warm gold)
-      { r: 255, g: 215, b: 85  }, // Oro brillante (buttercup gold)
-      { r: 22,  g: 78,  b: 185 }, // Azul intenso (intense azure)
-      { r: 105, g: 185, b: 245 }, // Azul cielo (sky blue)
-      { r: 28,  g: 195, b: 185 }, // Turquesa vivo (rich turquoise)
-      { r: 185, g: 165, b: 225 }, // Lavanda suave (soft lavender)
-      { r: 235, g: 110, b: 155 }, // Rosa frambuesa (raspberry rose)
-      { r: 42,  g: 22,  b: 65  }  // Acento ciruela oscuro (deep plum)
+      { r: 124, g: 38,  b: 168 }, // Violeta profundo
+      { r: 168, g: 72,  b: 220 }, // Púrpura vibrante
+      { r: 242, g: 182, b: 42  }, // Amarillo cálido / dorado
+      { r: 255, g: 216, b: 82  }, // Oro brillante suave
+      { r: 28,  g: 88,  b: 195 }, // Azul intenso
+      { r: 110, g: 188, b: 245 }, // Azul cielo / celeste
+      { r: 24,  g: 195, b: 182 }, // Turquesa vivo
+      { r: 186, g: 166, b: 228 }, // Lavanda suave
+      { r: 232, g: 112, b: 156 }, // Rosa frambuesa
+      { r: 48,  g: 22,  b: 72  }  // Acento ciruela oscuro
     ];
 
-    // Pigment simulation & spatial coverage map
+    // Low-res pigment simulation & spatial coverage map
     this.colorGrid = new ColorGrid(80, 60);
 
     // Multi-class creative agent population
     this.agents = [];
-    this.maxAgents = 48; // Rich multi-agent composition
+    this.maxAgents = 46;
 
     // Dynamic wandering focal centers (Omniharmonic dynamic foci)
     this.foci = [
-      { x: 0, y: 0, strength: 0.9, angle: 0, speed: 0.22 },
-      { x: 0, y: 0, strength: -0.85, angle: Math.PI * 0.65, speed: 0.18 },
-      { x: 0, y: 0, strength: 0.75, angle: Math.PI * 1.35, speed: 0.25 },
-      { x: 0, y: 0, strength: -0.7, angle: Math.PI * 1.8, speed: 0.16 }
-=======
-    // Persistent canvas buffer (inherits from previous tunnel or initializes fresh)
-    this.offscreenCanvas = document.createElement('canvas');
-    this.offCtx = this.offscreenCanvas.getContext('2d');
-
-    // Rich Omniharmonic-inspired palette (uniting all 3 eras + mineral accents)
-    this.palette = [
-      { r: 24,  g: 48,  b: 88  },  // Deep Prussian Blue
-      { r: 120, g: 155, b: 195 },  // Powdery Sky Blue
-      { r: 168, g: 145, b: 192 },  // Muted Lavender
-      { r: 142, g: 32,  b: 52  },  // Wine Crimson
-      { r: 35,  g: 72,  b: 85  },  // Petrol Blue
-      { r: 215, g: 175, b: 120 },  // Muted Gold Pigment
-      { r: 18,  g: 18,  b: 24  },  // Rich Indian Ink
-      { r: 212, g: 172, b: 180 }   // Soft Powdery Rose
-    ];
-
-    // Low-res pigment simulation & coverage map
-    this.colorGrid = new ColorGrid(80, 60);
-
-    // Autonomous creative agents
-    this.agents = [];
-    this.maxAgents = 42;
-
-    // Dynamic wandering focal centers (Omniharmonic dynamic foci)
-    this.foci = [
-      { x: 0, y: 0, targetX: 0, targetY: 0, strength: 0.8, angle: 0 },
-      { x: 0, y: 0, targetX: 0, targetY: 0, strength: -0.7, angle: Math.PI },
-      { x: 0, y: 0, targetX: 0, targetY: 0, strength: 0.6, angle: Math.PI / 2 }
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
+      { x: 0, y: 0, strength: 0.85, angle: 0, speed: 0.20 },
+      { x: 0, y: 0, strength: -0.80, angle: Math.PI * 0.65, speed: 0.16 },
+      { x: 0, y: 0, strength: 0.72, angle: Math.PI * 1.35, speed: 0.22 },
+      { x: 0, y: 0, strength: -0.68, angle: Math.PI * 1.80, speed: 0.15 }
     ];
 
     // Cursor influence state
@@ -2570,73 +2429,48 @@ class CreateStage {
       active: false
     };
 
-<<<<<<< HEAD
-    // Transition progress (relaxing previous stage constraints)
-=======
-    // Transition progress (0 -> 1 as rabbit hole frees its central constraint)
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
+    // Relaxation of previous central rabbit hole constraints (0 -> 1)
     this.freedomBlend = 0;
   }
 
-  init(width, height, existingCanvas = null) {
+  init(width, height) {
     this.width = width;
     this.height = height;
     this.offscreenCanvas.width = width;
     this.offscreenCanvas.height = height;
     this.colorGrid.resize(width, height);
+    this.colorGrid.reset();
 
-<<<<<<< HEAD
-    // Inherit existing canvas marks from the rabbit hole seamlessly
-    if (existingCanvas) {
-      this.offCtx.drawImage(existingCanvas, 0, 0, width, height);
-    } else {
-      this.offCtx.fillStyle = '#0f0a18';
-=======
-    // If coming from an existing rabbit hole, copy its canvas so nothing is erased!
-    if (existingCanvas) {
-      this.offCtx.drawImage(existingCanvas, 0, 0, width, height);
-    } else {
-      // Soft primed paper wash
-      this.offCtx.fillStyle = '#f5f2eb';
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
-      this.offCtx.fillRect(0, 0, width, height);
-    }
+    // Deep luminous dark background
+    this.offCtx.fillStyle = '#0a0812';
+    this.offCtx.fillRect(0, 0, width, height);
 
     this.cursor.x = width / 2;
     this.cursor.y = height / 2;
     this.cursor.prevX = width / 2;
     this.cursor.prevY = height / 2;
+    this.cursor.isDown = false;
+    this.cursor.active = false;
+    this.cursor.holdTime = 0;
 
-<<<<<<< HEAD
     // Distribute wandering foci across the canvas
     this.foci.forEach((f, idx) => {
       const angle = (idx / this.foci.length) * Math.PI * 2;
-      const r = Math.min(width, height) * (0.22 + (idx % 2) * 0.16);
+      const r = Math.min(width, height) * (0.24 + (idx % 2) * 0.14);
       f.x = width / 2 + Math.cos(angle) * r;
       f.y = height / 2 + Math.sin(angle) * r;
     });
 
     this.agents = [];
-    for (let i = 0; i < 20; i++) {
-=======
-    // Initialize wandering focal points
-    this.foci.forEach((f, idx) => {
-      const angle = (idx / this.foci.length) * Math.PI * 2;
-      const r = Math.min(width, height) * 0.28;
-      f.x = width / 2 + Math.cos(angle) * r;
-      f.y = height / 2 + Math.sin(angle) * r;
-      f.targetX = f.x;
-      f.targetY = f.y;
-    });
-
-    this.agents = [];
-    for (let i = 0; i < 16; i++) {
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
+    for (let i = 0; i < 22; i++) {
       this.spawnAgent();
     }
 
     this.isActive = true;
+    this.isContemplating = false;
     this.freedomBlend = 0;
+    this.emergenceAlpha = 0;
+    this.time = 0;
   }
 
   resize(width, height) {
@@ -2662,6 +2496,8 @@ class CreateStage {
   }
 
   setCursor(x, y, isDown = false) {
+    if (this.isContemplating) return; // Cursor interaction disabled when contemplating
+
     this.cursor.prevX = this.cursor.x;
     this.cursor.prevY = this.cursor.y;
     this.cursor.x = x;
@@ -2678,7 +2514,6 @@ class CreateStage {
   }
 
   spawnAgent(atX = null, atY = null, inheritAngle = null) {
-<<<<<<< HEAD
     let x, y, angle;
 
     if (atX !== null && atY !== null) {
@@ -2689,30 +2524,11 @@ class CreateStage {
       if (Math.random() > 0.45 && this.foci.length > 0) {
         const focus = this.foci[Math.floor(Math.random() * this.foci.length)];
         const r = 25 + Math.random() * 95;
-=======
-    const cx = this.width / 2;
-    const cy = this.height / 2;
-
-    let x, y, angle;
-    if (atX !== null && atY !== null) {
-      x = atX;
-      y = atY;
-      angle = inheritAngle !== null ? inheritAngle + (Math.random() - 0.5) * 0.8 : Math.random() * Math.PI * 2;
-    } else {
-      // Free spawn: randomly distributed or seeded near dynamic foci
-      if (Math.random() > 0.4 && this.foci.length > 0) {
-        const focus = this.foci[Math.floor(Math.random() * this.foci.length)];
-        const r = 20 + Math.random() * 80;
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
         const a = Math.random() * Math.PI * 2;
         x = focus.x + Math.cos(a) * r;
         y = focus.y + Math.sin(a) * r;
       } else {
-<<<<<<< HEAD
-        // Distributed across full canvas
-=======
-        // Broad canvas spawn
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
+        // Broad canvas distribution reaching all edges
         x = Math.random() * this.width;
         y = Math.random() * this.height;
       }
@@ -2720,8 +2536,8 @@ class CreateStage {
     }
 
     const col = this.palette[Math.floor(Math.random() * this.palette.length)];
-<<<<<<< HEAD
-    // Diverse agent forms: broad gestural strokes, fine filigrees, or medium ribbons
+
+    // Diverse agent forms (Omniharmonic varied strokes)
     const role = Math.random();
     let thickness, opacity, maxLife, speed;
 
@@ -2730,13 +2546,13 @@ class CreateStage {
       thickness = 18 + Math.random() * 26;
       opacity = 0.22 + Math.random() * 0.25;
       maxLife = 6.0 + Math.random() * 4.0;
-      speed = 38 + Math.random() * 32;
+      speed = 36 + Math.random() * 32;
     } else if (role < 0.65) {
       // Medium organic ribbon
       thickness = 8 + Math.random() * 12;
       opacity = 0.32 + Math.random() * 0.35;
       maxLife = 7.0 + Math.random() * 5.0;
-      speed = 52 + Math.random() * 42;
+      speed = 50 + Math.random() * 42;
     } else {
       // Fine sinuous filigree
       thickness = 2.2 + Math.random() * 4.5;
@@ -2744,11 +2560,6 @@ class CreateStage {
       maxLife = 8.5 + Math.random() * 5.5;
       speed = 64 + Math.random() * 50;
     }
-=======
-    const thickness = 6 + Math.random() * 24;
-    const opacity = 0.22 + Math.random() * 0.26;
-    const speed = 48 + Math.random() * 56;
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
 
     this.agents.push(new BrushAgent({
       x,
@@ -2756,7 +2567,6 @@ class CreateStage {
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed,
       speed,
-<<<<<<< HEAD
       maxSteerForce: 4.2,
       thickness,
       opacity,
@@ -2766,17 +2576,6 @@ class CreateStage {
       bristleSpread: 0.44,
       isWet: true,
       isGothic: false
-=======
-      maxSteerForce: 3.8,
-      thickness,
-      opacity,
-      color: col,
-      maxLife: 6.0 + Math.random() * 5.0,
-      numPasses: 3,
-      bristleSpread: 0.42,
-      isWet: true,
-      isGothic: Math.random() > 0.75
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     }));
   }
 
@@ -2784,9 +2583,9 @@ class CreateStage {
     const cx = this.width / 2;
     const cy = this.height / 2;
 
-<<<<<<< HEAD
-    // 1. Weakened remnant of central vortex during transition, relaxing to zero
     let fx = 0, fy = 0;
+
+    // 1. Weakened remnant of central vortex during transition, relaxing to zero
     if (this.freedomBlend < 0.95) {
       const dxCenter = x - cx;
       const dyCenter = y - cy;
@@ -2797,27 +2596,10 @@ class CreateStage {
     }
 
     // 2. Dynamic wandering foci (Omniharmonic organic centers)
-=======
-    // 1. Weakened central rabbit hole vortex (relaxation from centralized constraint)
-    const dxCenter = x - cx;
-    const dyCenter = y - cy;
-    const distCenter = Math.hypot(dxCenter, dyCenter) + 0.001;
-    const rx = dxCenter / distCenter;
-    const ry = dyCenter / distCenter;
-    const tx = -ry;
-    const ty = rx;
-
-    const centerWeight = Math.max(0.05, 0.55 * (1.0 - this.freedomBlend));
-    let fx = tx * centerWeight * 0.4 + rx * centerWeight * 0.2;
-    let fy = ty * centerWeight * 0.4 + ry * centerWeight * 0.2;
-
-    // 2. Dynamic wandering foci (Omniharmonic interconnected centers)
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     for (const f of this.foci) {
       const fdx = x - f.x;
       const fdy = y - f.y;
       const fDist = Math.hypot(fdx, fdy) + 1.0;
-<<<<<<< HEAD
       if (fDist < 420) {
         const falloff = Math.cos((fDist / 420) * (Math.PI / 2));
         const rotX = -fdy / fDist;
@@ -2827,38 +2609,18 @@ class CreateStage {
       }
     }
 
-    // 3. Multi-frequency 3D Simplex Curl Noise
+    // 3. Multi-frequency Simplex Curl Noise
     const nScale = 0.0022;
     const curl = noise.curl2D(x * nScale, y * nScale + time * 0.04);
     fx += curl.x * 0.92;
     fy += curl.y * 0.92;
-=======
-      if (fDist < 360) {
-        const falloff = Math.cos((fDist / 360) * (Math.PI / 2));
-        const rotX = -fdy / fDist;
-        const rotY = fdx / fDist;
-        fx += rotX * f.strength * falloff * 0.65;
-        fy += rotY * f.strength * falloff * 0.65;
-      }
-    }
-
-    // 3. Multi-octave 3D Simplex Curl Noise
-    const nScale = 0.0024;
-    const curl = noise.curl2D(x * nScale, y * nScale + time * 0.03);
-    fx += curl.x * 0.85;
-    fy += curl.y * 0.85;
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
 
     // 4. Cursor Influence: Deflection, Vortex Well, Flick Impulse
-    if (this.cursor.active) {
+    if (!this.isContemplating && this.cursor.active) {
       const cdx = x - this.cursor.x;
       const cdy = y - this.cursor.y;
       const cDist = Math.hypot(cdx, cdy) + 0.01;
-<<<<<<< HEAD
       const influenceRadius = this.cursor.isDown ? 280 : 175;
-=======
-      const influenceRadius = this.cursor.isDown ? 260 : 160;
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
 
       if (cDist < influenceRadius) {
         const cFactor = 1.0 - cDist / influenceRadius;
@@ -2870,8 +2632,6 @@ class CreateStage {
           const cRotY = cdx / cDist;
           const cPullX = -cdx / cDist;
           const cPullY = -cdy / cDist;
-<<<<<<< HEAD
-          // Inward swirl + vortex spin
           fx += (cRotX * 2.2 + cPullX * 0.85) * smoothFactor * (1.0 + this.cursor.holdTime * 1.8);
           fy += (cRotY * 2.2 + cPullY * 0.85) * smoothFactor * (1.0 + this.cursor.holdTime * 1.8);
         } else if (this.cursor.speed > 7.0) {
@@ -2880,27 +2640,11 @@ class CreateStage {
           fx += (this.cursor.vx / this.cursor.speed) * normSpeed * smoothFactor * 2.4;
           fy += (this.cursor.vy / this.cursor.speed) * normSpeed * smoothFactor * 2.4;
         } else {
-          // Sinuous hover deflection / gentle orbital steering
+          // Gentle hover deflection / orbital steering
           const cRotX = -cdy / cDist;
           const cRotY = cdx / cDist;
           fx += cRotX * smoothFactor * 0.95;
           fy += cRotY * smoothFactor * 0.95;
-=======
-          // Inward pull + high-speed spin
-          fx += (cRotX * 1.8 + cPullX * 0.9) * smoothFactor * (1.0 + this.cursor.holdTime * 1.5);
-          fy += (cRotY * 1.8 + cPullY * 0.9) * smoothFactor * (1.0 + this.cursor.holdTime * 1.5);
-        } else if (this.cursor.speed > 8.0) {
-          // Rapid flick / drag: directional wave impulse
-          const normSpeed = Math.min(2.5, this.cursor.speed / 15.0);
-          fx += (this.cursor.vx / this.cursor.speed) * normSpeed * smoothFactor * 2.2;
-          fy += (this.cursor.vy / this.cursor.speed) * normSpeed * smoothFactor * 2.2;
-        } else {
-          // Gentle hover deflection / gentle orbital steering
-          const cRotX = -cdy / cDist;
-          const cRotY = cdx / cDist;
-          fx += cRotX * smoothFactor * 0.8;
-          fy += cRotY * smoothFactor * 0.8;
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
         }
       }
     }
@@ -2912,41 +2656,41 @@ class CreateStage {
     };
   }
 
+  contemplate() {
+    this.isContemplating = true;
+    this.cursor.active = false;
+    this.cursor.isDown = false;
+  }
+
+  resume() {
+    this.isContemplating = false;
+  }
+
   update(dt, speedMult = 1.0) {
     if (!this.isActive) return;
 
     this.time += dt * speedMult;
     const offCtx = this.offCtx;
 
-<<<<<<< HEAD
+    // Gradual emergence from darkness into visibility
+    if (this.emergenceAlpha < 1.0) {
+      this.emergenceAlpha = Math.min(1.0, this.emergenceAlpha + dt * 0.45);
+    }
+
     // Smoothly relax centralized rabbit hole pull (freedom blend 0 -> 1)
     if (this.freedomBlend < 1.0) {
       this.freedomBlend = Math.min(1.0, this.freedomBlend + dt * 0.14);
-=======
-    // Smoothly relax central constraints (freedom blend: 0 -> 1 over 8s)
-    if (this.freedomBlend < 1.0) {
-      this.freedomBlend = Math.min(1.0, this.freedomBlend + dt * 0.12);
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     }
 
     // Cursor hold duration tracking
-    if (this.cursor.isDown) {
+    if (!this.isContemplating && this.cursor.isDown) {
       this.cursor.holdTime += dt;
-<<<<<<< HEAD
       // Deposit localized rich pigment bloom around cursor
       if (Math.random() > 0.35) {
         const rad = 20 + Math.random() * 45;
         const col = this.palette[Math.floor(Math.random() * this.palette.length)];
         const grad = offCtx.createRadialGradient(this.cursor.x, this.cursor.y, 0, this.cursor.x, this.cursor.y, rad);
         grad.addColorStop(0, `rgba(${col.r}, ${col.g}, ${col.b}, 0.16)`);
-=======
-      // Deposit localized rich pigment puddle when held
-      if (Math.random() > 0.4) {
-        const rad = 15 + Math.random() * 35;
-        const col = this.palette[Math.floor(Math.random() * this.palette.length)];
-        const grad = offCtx.createRadialGradient(this.cursor.x, this.cursor.y, 0, this.cursor.x, this.cursor.y, rad);
-        grad.addColorStop(0, `rgba(${col.r}, ${col.g}, ${col.b}, 0.12)`);
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
         grad.addColorStop(1, 'rgba(0,0,0,0)');
         offCtx.fillStyle = grad;
         offCtx.beginPath();
@@ -2962,35 +2706,25 @@ class CreateStage {
     this.cursor.vy *= 0.85;
     this.cursor.speed *= 0.85;
 
-<<<<<<< HEAD
     // Update wandering foci with smooth Lissajous & Simplex motion
     this.foci.forEach((f, idx) => {
       f.angle += f.speed * dt;
       const baseR = Math.min(this.width, this.height) * (0.24 + (idx % 2) * 0.14);
       const wanderX = noise.noise2D(idx * 15 + this.time * 0.07, idx * 8) * 110;
       const wanderY = noise.noise2D(idx * 8, idx * 15 + this.time * 0.07) * 110;
-=======
-    // Update wandering focal points with smooth noise
-    this.foci.forEach((f, idx) => {
-      f.angle += (0.12 + idx * 0.05) * dt;
-      const baseR = Math.min(this.width, this.height) * (0.22 + idx * 0.08);
-      const wanderX = noise.noise2D(idx * 10 + this.time * 0.08, idx * 5) * 90;
-      const wanderY = noise.noise2D(idx * 5, idx * 10 + this.time * 0.08) * 90;
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
       f.x = this.width / 2 + Math.cos(f.angle) * baseR + wanderX;
       f.y = this.height / 2 + Math.sin(f.angle) * baseR + wanderY;
     });
 
-    // Maintain creative agent population
-    while (this.agents.length < this.maxAgents) {
-      this.spawnAgent();
+    // In normal mode: continuously replenish agent population
+    // In contemplation mode: stop replenishing agents so composition stabilizes
+    if (!this.isContemplating) {
+      while (this.agents.length < this.maxAgents) {
+        this.spawnAgent();
+      }
     }
 
-<<<<<<< HEAD
     // FlowField adapter for BrushAgent
-=======
-    // Custom flowField adapter for BrushAgent
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
     const adapterFlow = {
       getForce: (x, y) => this.getFlowForce(x, y, this.time)
     };
@@ -3001,63 +2735,38 @@ class CreateStage {
       agent.update(dt, adapterFlow, this.colorGrid, this.width / 2, this.height / 2, this.time, speedMult);
       agent.drawSegment(offCtx);
 
-<<<<<<< HEAD
       // Branching when cursor flicks or during high energy
-      if (this.cursor.speed > 10.0 && Math.random() > 0.92 && this.agents.length < this.maxAgents + 8) {
+      if (!this.isContemplating && this.cursor.speed > 10.0 && Math.random() > 0.92 && this.agents.length < this.maxAgents + 8) {
         const distToCursor = Math.hypot(agent.x - this.cursor.x, agent.y - this.cursor.y);
         if (distToCursor < 190) {
-=======
-      // Occasional organic branching when cursor flicks or during high energy
-      if (this.cursor.speed > 12.0 && Math.random() > 0.94 && this.agents.length < this.maxAgents + 6) {
-        const distToCursor = Math.hypot(agent.x - this.cursor.x, agent.y - this.cursor.y);
-        if (distToCursor < 180) {
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
           this.spawnAgent(agent.x, agent.y, Math.atan2(agent.vy, agent.vx));
         }
       }
 
-<<<<<<< HEAD
       const isOutOfBounds = agent.x < -80 || agent.x > this.width + 80 || agent.y < -80 || agent.y > this.height + 80;
-=======
-      // Check bounds & life
-      const isOutOfBounds = agent.x < -60 || agent.x > this.width + 60 || agent.y < -60 || agent.y > this.height + 60;
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
       if (agent.isDead || isOutOfBounds) {
         this.agents.splice(i, 1);
       }
     }
 
     // Gentle pigment diffusion
-<<<<<<< HEAD
     this.colorGrid.diffuse(0.018 * dt * speedMult);
-=======
-    this.colorGrid.diffuse(0.015 * dt * speedMult);
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
   }
 
   render(ctx) {
     if (!this.isActive) return;
 
     ctx.save();
+    ctx.globalAlpha = this.emergenceAlpha;
     ctx.drawImage(this.offscreenCanvas, 0, 0);
 
-<<<<<<< HEAD
-    // Subtle interactive cursor aura
-    if (this.cursor.active) {
+    // Interactive cursor aura (only when active and not contemplating)
+    if (!this.isContemplating && this.cursor.active) {
       const radius = this.cursor.isDown ? 42 + Math.sin(this.time * 6) * 6 : 24;
       ctx.beginPath();
       ctx.arc(this.cursor.x, this.cursor.y, radius, 0, Math.PI * 2);
       ctx.strokeStyle = this.cursor.isDown ? 'rgba(255, 215, 85, 0.55)' : 'rgba(168, 75, 215, 0.3)';
       ctx.lineWidth = 1.5;
-=======
-    // Subtle interactive cursor halo
-    if (this.cursor.active) {
-      const radius = this.cursor.isDown ? 38 + Math.sin(this.time * 6) * 6 : 22;
-      ctx.beginPath();
-      ctx.arc(this.cursor.x, this.cursor.y, radius, 0, Math.PI * 2);
-      ctx.strokeStyle = this.cursor.isDown ? 'rgba(215, 175, 120, 0.45)' : 'rgba(168, 145, 192, 0.25)';
-      ctx.lineWidth = 1.4;
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
       ctx.stroke();
     }
     ctx.restore();
@@ -3067,356 +2776,315 @@ class CreateStage {
 
 // --- js/transitionManager.js ---
 /**
- * Transition Manager & Finite State Machine
- * Coordinates the 6 phases of the rabbit hole descent across 4 stages:
- * - 0: Libro Original (1865)
- * - 1: Película Animada (1951)
- * - 2: Videojuego Siniestro (2000)
- * - 3: Etapa CREATE (El usuario se convierte en co-creador)
+ * Transition Manager & Finite State Machine — WHY BOTHER?
+ * Coordinates the full narrative flow, cinematic falls, spatial retractions,
+ * transitions between eras, and the interactive CREATE stage.
  *
- * Sequence: Libro -> Película -> Videojuego -> CREATE (and reverse)
+ * Sequence:
+ * 1. OPENING_BOOK (Book appears, opening story written)
+ * 2. FALLING_0 -> ERA_0_ACTIVE (Book Tunnel 1865, Tenniel engraving)
+ * 3. RETRACTING_0 -> TEXT_1_DISNEY (1951 adaptation text)
+ * 4. FALLING_1 -> ERA_1_ACTIVE (Movie Tunnel 1951, soft watercolor)
+ * 5. RETRACTING_1 -> TEXT_2_GAME (2011 video game text)
+ * 6. FALLING_2 -> ERA_2_ACTIVE (Game Tunnel 2011, dark gothic watercolor)
+ * 7. RETRACTING_2 -> TEXT_3_CREATE (Transition to user creation)
+ * 8. CREATE_ACTIVE (Autonomous + user interactive composition)
+ * 9. CONTEMPLATING (Artwork preserved + WHY BOTHER? final reflection)
  */
 
 const States = {
-  INITIALIZING: 'INITIALIZING',
-  INTRO_ANIMATION: 'INTRO_ANIMATION',
-  IDLE: 'IDLE',
-  TRANSITION_OUT: 'TRANSITION_OUT',
-  TRANSFORMING: 'TRANSFORMING',
-  TRANSITION_IN: 'TRANSITION_IN'
+  OPENING_BOOK: 'OPENING_BOOK',
+  FALLING_0: 'FALLING_0',
+  ERA_0_ACTIVE: 'ERA_0_ACTIVE',
+  RETRACTING_0: 'RETRACTING_0',
+  TEXT_1_DISNEY: 'TEXT_1_DISNEY',
+  FALLING_1: 'FALLING_1',
+  ERA_1_ACTIVE: 'ERA_1_ACTIVE',
+  RETRACTING_1: 'RETRACTING_1',
+  TEXT_2_GAME: 'TEXT_2_GAME',
+  FALLING_2: 'FALLING_2',
+  ERA_2_ACTIVE: 'ERA_2_ACTIVE',
+  RETRACTING_2: 'RETRACTING_2',
+  TEXT_3_CREATE: 'TEXT_3_CREATE',
+  CREATE_ACTIVE: 'CREATE_ACTIVE',
+  CONTEMPLATING: 'CONTEMPLATING',
+  RETRACTING_BACKWARD: 'RETRACTING_BACKWARD'
 };
 
 class TransitionManager {
-<<<<<<< HEAD
-  constructor(aliceController, bookTunnel, movieTunnel, gameTunnel, createStage, lightWaves, pocketWatch, onEraChanged) {
-=======
-  constructor(aliceController, bookTunnel, movieTunnel, gameTunnel, lightWaves, pocketWatch, onEraChanged, onTransitionsMilestone) {
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
+  constructor(aliceController, bookTunnel, movieTunnel, gameTunnel, createStage, lightWaves, pocketWatch, callbacks = {}) {
     this.alice = aliceController;
     this.tunnels = [bookTunnel, movieTunnel, gameTunnel];
     this.createStage = createStage;
     this.lightWaves = lightWaves;
     this.watch = pocketWatch;
-    this.onEraChanged = onEraChanged;
-    this.onTransitionsMilestone = onTransitionsMilestone;
+    this.callbacks = callbacks;
 
-    this.state = States.INITIALIZING;
-    this.currentEra = 0; // 0: Book, 1: Movie, 2: Game, 3: Create
-    this.targetEra = 0;
-    this.direction = 1; // 1: forward, -1: backward
-
-    // Phase timers & durations (seconds)
-    this.phaseTime = 0;
-    this.phaseDuration = 0;
-    this.subPhase = '';
-
-    // Generative morphing blend [0 = currentEra, 1 = targetEra]
-    this.morphProgress = 0;
-
-    // Tunnel speed multiplier
+    this.state = States.OPENING_BOOK;
+    this.activeEra = 0; // 0: Book, 1: Movie, 2: Game, 3: Create
     this.tunnelSpeedMultiplier = 1.0;
 
-    // Total transitions counter to prompt decision
-    this.transitionsCount = 0;
-
-    // Start in intro animation
-    this.startIntro();
+    // Retraction state
+    this.isRetractingTunnel = false;
+    this.retractTime = 0;
+    this.retractDuration = 1.5;
+    this.retractDirection = 1;
+    this.currentRetractEra = 0;
   }
 
-  startIntro() {
-    this.state = States.INTRO_ANIMATION;
-    this.phaseTime = 0;
-<<<<<<< HEAD
-    this.phaseDuration = 3.6;
-=======
-    this.phaseDuration = 3.6; // Coupled to Alice dramatic perspective fall
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
+  start() {
+    this.setState(States.OPENING_BOOK);
+  }
+
+  setState(newState) {
+    this.state = newState;
+    if (this.callbacks.onStateChanged) {
+      this.callbacks.onStateChanged(newState, this.activeEra);
+    }
+  }
+
+  /**
+   * Called by user interaction (Space or click) when narrative text finishes
+   */
+  onNarrativeFinished() {
+    if (this.state === States.OPENING_BOOK) {
+      this.startFirstFall();
+    } else if (this.state === States.TEXT_1_DISNEY) {
+      this.startSecondFall();
+    } else if (this.state === States.TEXT_2_GAME) {
+      this.startThirdFall();
+    } else if (this.state === States.TEXT_3_CREATE) {
+      this.startCreateStage();
+    }
+  }
+
+  /**
+   * Phase 1 -> 2: First cinematic fall into original book tunnel
+   */
+  startFirstFall() {
+    this.activeEra = 0;
+    this.setState(States.FALLING_0);
     this.tunnelSpeedMultiplier = 1.0;
+    this.tunnels[0].reset();
+
+    if (this.callbacks.onHideWatch) this.callbacks.onHideWatch();
+
+    this.alice.triggerFall(0, () => {
+      this.setState(States.ERA_0_ACTIVE);
+      this.watch.setEra(0);
+      if (this.callbacks.onShowWatch) this.callbacks.onShowWatch(0);
+    });
   }
 
-  triggerTransition(direction = 1) {
-    if (this.state !== States.IDLE) return; // Prevent overlapping transitions
+  /**
+   * Phase 3 -> 4: Second cinematic fall into 1951 movie tunnel
+   */
+  startSecondFall() {
+    this.activeEra = 1;
+    this.setState(States.FALLING_1);
+    this.tunnelSpeedMultiplier = 1.0;
+    this.tunnels[1].init(this.tunnels[1].width, this.tunnels[1].height);
 
-    this.direction = direction;
+    if (this.callbacks.onHideWatch) this.callbacks.onHideWatch();
 
-    // Navigation calculation across 4 stages: 0, 1, 2, 3
-    if (this.currentEra === 0) {
-      this.targetEra = direction > 0 ? 1 : 2;
-    } else if (this.currentEra === 1) {
-      this.targetEra = direction > 0 ? 2 : 0;
-    } else if (this.currentEra === 2) {
-      this.targetEra = direction > 0 ? 3 : 1; // Entering CREATE from Game!
-    } else if (this.currentEra === 3) {
-      if (direction < 0) {
-        this.targetEra = 2; // Returning to Game from CREATE
+    this.alice.triggerFall(1, () => {
+      this.setState(States.ERA_1_ACTIVE);
+      this.watch.setEra(1);
+      if (this.callbacks.onShowWatch) this.callbacks.onShowWatch(1);
+    });
+  }
+
+  /**
+   * Phase 5 -> 6: Third cinematic fall into 2011 video game tunnel
+   */
+  startThirdFall() {
+    this.activeEra = 2;
+    this.setState(States.FALLING_2);
+    this.tunnelSpeedMultiplier = 1.0;
+    this.tunnels[2].init(this.tunnels[2].width, this.tunnels[2].height);
+
+    if (this.callbacks.onHideWatch) this.callbacks.onHideWatch();
+
+    this.alice.triggerFall(2, () => {
+      this.setState(States.ERA_2_ACTIVE);
+      this.watch.setEra(2);
+      if (this.callbacks.onShowWatch) this.callbacks.onShowWatch(2);
+    });
+  }
+
+  /**
+   * Phase 7 -> 8: Start CREATE stage (No Alice falling; emerges from darkness)
+   */
+  startCreateStage() {
+    this.activeEra = 3;
+    this.setState(States.CREATE_ACTIVE);
+    this.tunnelSpeedMultiplier = 1.0;
+
+    // Alice is not drawn in CREATE stage
+    this.alice.alpha = 0;
+
+    // Initialize CREATE stage canvas
+    const width = this.tunnels[0].width;
+    const height = this.tunnels[0].height;
+    this.createStage.init(width, height);
+
+    this.watch.setEra(3);
+    if (this.callbacks.onShowWatch) this.callbacks.onShowWatch(3);
+    if (this.callbacks.onEnterCreate) this.callbacks.onEnterCreate();
+  }
+
+  /**
+   * Called when user spins the Pocket Watch
+   * @param {number} direction 1 = clockwise (forward), -1 = counter-clockwise (backward)
+   */
+  triggerWatchTransition(direction = 1) {
+    if (this.isRetractingTunnel) return; // Prevent overlapping transitions
+
+    if (this.state === States.ERA_0_ACTIVE) {
+      if (direction > 0) {
+        // Forward from Book -> Disney
+        this.beginRetraction(0, 1, () => {
+          this.setState(States.TEXT_1_DISNEY);
+        });
+      }
+    } else if (this.state === States.ERA_1_ACTIVE) {
+      if (direction > 0) {
+        // Forward from Disney -> Game
+        this.beginRetraction(1, 1, () => {
+          this.setState(States.TEXT_2_GAME);
+        });
       } else {
-        return; // Already in CREATE, keep creating
+        // Backward from Disney -> Book
+        this.beginRetraction(1, -1, () => {
+          this.activeEra = 0;
+          this.startFirstFall();
+        });
+      }
+    } else if (this.state === States.ERA_2_ACTIVE) {
+      if (direction > 0) {
+        // Forward from Game -> CREATE!
+        this.beginRetraction(2, 1, () => {
+          this.setState(States.TEXT_3_CREATE);
+        });
+      } else {
+        // Backward from Game -> Disney
+        this.beginRetraction(2, -1, () => {
+          this.activeEra = 1;
+          this.startSecondFall();
+        });
+      }
+    } else if (this.state === States.CREATE_ACTIVE) {
+      if (direction < 0) {
+        // Backward from CREATE -> Game
+        if (this.callbacks.onHideWatch) this.callbacks.onHideWatch();
+        this.activeEra = 2;
+        this.startThirdFall();
       }
     }
+  }
 
-    this.state = States.TRANSITION_OUT;
-    this.subPhase = 'PHASE_A';
-    this.phaseTime = 0;
-    this.phaseDuration = 0.8;
-    this.morphProgress = 0;
+  /**
+   * Spatial Retraction:
+   * Alice accelerates spin & plunges into vanishing point.
+   * Composition retracts spatially into central rabbit hole aperture.
+   */
+  beginRetraction(fromEra, direction, onComplete) {
+    this.isRetractingTunnel = true;
+    this.currentRetractEra = fromEra;
+    this.retractDirection = direction;
+    this.retractTime = 0;
+    this.retractDuration = 1.5;
 
+    if (this.callbacks.onHideWatch) this.callbacks.onHideWatch();
     this.watch.setTransitionState(true);
+
+    // Alice retracts into vanishing point
+    this.alice.triggerRetract(direction);
+
+    this.onRetractionDone = () => {
+      this.isRetractingTunnel = false;
+      this.watch.setTransitionState(false);
+      onComplete();
+    };
+  }
+
+  triggerContemplate() {
+    if (this.state !== States.CREATE_ACTIVE) return;
+    this.setState(States.CONTEMPLATING);
+    this.createStage.contemplate();
+    if (this.callbacks.onContemplate) {
+      this.callbacks.onContemplate();
+    }
+  }
+
+  resumeCreating() {
+    if (this.state !== States.CONTEMPLATING) return;
+    this.setState(States.CREATE_ACTIVE);
+    this.createStage.resume();
+    if (this.callbacks.onResumeCreate) {
+      this.callbacks.onResumeCreate();
+    }
   }
 
   update(dt) {
-    this.phaseTime += dt;
+    // Retraction timer
+    if (this.isRetractingTunnel) {
+      this.retractTime += dt;
+      const progress = Math.min(1.0, this.retractTime / this.retractDuration);
+      this.tunnelSpeedMultiplier = 1.0 + progress * 3.5;
 
-    switch (this.state) {
-      case States.INTRO_ANIMATION:
-        this.tunnelSpeedMultiplier = 1.0;
-        if (this.phaseTime >= this.phaseDuration) {
-          this.state = States.IDLE;
-        }
-        break;
-
-      case States.IDLE:
-        this.tunnelSpeedMultiplier = 1.0;
-        this.morphProgress = 0;
-        break;
-
-      case States.TRANSITION_OUT:
-        this.handleTransitionOut(dt);
-        break;
-
-      case States.TRANSFORMING:
-        this.handleTransforming(dt);
-        break;
-
-      case States.TRANSITION_IN:
-        this.handleTransitionIn(dt);
-        break;
-    }
-  }
-
-  handleTransitionOut(dt) {
-    if (this.subPhase === 'PHASE_A') {
-      const t = Math.min(1.0, this.phaseTime / this.phaseDuration);
-      this.tunnelSpeedMultiplier = 1.0 + t * 2.8;
-
-<<<<<<< HEAD
-      if (this.currentEra < 3) {
-        const startSpin = this.direction * (t * t) * Math.PI * 0.8;
-        this.alice.setTransitionTransform(1.0, startSpin, 1.0, 0, 0);
-      }
-
-      if (this.phaseTime >= this.phaseDuration) {
-=======
-      // Start gentle rotation acceleration
-      const startSpin = this.direction * (t * t) * Math.PI * 0.8;
-      this.alice.setTransitionTransform(1.0, startSpin, 1.0, 0, 0);
-
-      if (this.phaseTime >= this.phaseDuration) {
-        // Move to Phase B: Descent (Alice spins & physically plunges into depth)
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
-        this.subPhase = 'PHASE_B';
-        this.phaseTime = 0;
-        this.phaseDuration = 1.4;
-      }
-    } else if (this.subPhase === 'PHASE_B') {
-      const t = Math.min(1.0, this.phaseTime / this.phaseDuration);
-      const ease = t * t * t;
-
-      this.tunnelSpeedMultiplier = 3.8 + t * 1.5;
-
-<<<<<<< HEAD
-      if (this.currentEra < 3) {
-        // Alice physical 3D plunge into the central hole
-        const scale = Math.max(0.005, 1.0 - ease * 0.995);
-        const spin = this.direction * (Math.PI * 0.8 + ease * Math.PI * 6.5);
-        const alpha = scale > 0.04 ? 1.0 : (scale / 0.04);
-        const offsetY = ease * 18;
-
-        this.alice.setTransitionTransform(scale, spin, alpha, 0, offsetY);
-      }
-
-      if (this.phaseTime >= this.phaseDuration) {
-        this.subPhase = 'PHASE_C';
-        this.phaseTime = 0;
-        this.phaseDuration = 0.25;
-        this.alice.setTransitionTransform(0.001, 0, 0.0, 0, 0);
-=======
-      // Physical scale plunge down to 0.005 at vanishing point
-      const scale = Math.max(0.005, 1.0 - ease * 0.995);
-      const spin = this.direction * (Math.PI * 0.8 + ease * Math.PI * 6.5);
-
-      // NO early opacity fades! Remains solid until it enters the tiny core aperture
-      const alpha = scale > 0.04 ? 1.0 : (scale / 0.04);
-      const offsetY = ease * 18;
-
-      this.alice.setTransitionTransform(scale, spin, alpha, 0, offsetY);
-
-      if (this.phaseTime >= this.phaseDuration) {
-        // Phase C: Complete disappearance inside the central hole
-        this.subPhase = 'PHASE_C';
-        this.phaseTime = 0;
-        this.phaseDuration = 0.25;
-        this.alice.setTransitionTransform(0.001, spin, 0.0, 0, 0);
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
-      }
-    } else if (this.subPhase === 'PHASE_C') {
-      this.alice.setTransitionTransform(0.0, 0, 0.0, 0, 0);
-
-      if (this.phaseTime >= this.phaseDuration) {
-        this.state = States.TRANSFORMING;
-        this.phaseTime = 0;
-        this.phaseDuration = 2.0;
-        this.morphProgress = 0;
-
-        // If transitioning into one of the 3 rabbit hole tunnels, reset fresh
-        if (this.targetEra < 3 && this.tunnels[this.targetEra] && this.tunnels[this.targetEra].reset) {
-          this.tunnels[this.targetEra].reset();
+      if (this.retractTime >= this.retractDuration) {
+        if (this.onRetractionDone) {
+          const cb = this.onRetractionDone;
+          this.onRetractionDone = null;
+          cb();
         }
       }
-    }
-  }
-
-  handleTransforming(dt) {
-    const t = Math.min(1.0, this.phaseTime / this.phaseDuration);
-    this.morphProgress = t * t * (3 - 2 * t);
-    this.tunnelSpeedMultiplier = 4.5 - t * 1.5;
-
-<<<<<<< HEAD
-=======
-    // Keep Alice in the depths during tunnel transformation
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
-    this.alice.setTransitionTransform(0.0, 0, 0.0, 0, 0);
-
-    if (this.phaseTime >= this.phaseDuration) {
-      this.currentEra = this.targetEra;
-      this.morphProgress = 0;
-
-      if (this.currentEra < 3) {
-        this.alice.setEra(this.currentEra);
-      }
-      this.watch.setEra(this.currentEra);
-
-      if (this.onEraChanged) {
-        this.onEraChanged(this.currentEra);
-      }
-
-<<<<<<< HEAD
-=======
-      // Enter TRANSITION_IN (Phase E: New Alice emerges from central hole)
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
-      this.state = States.TRANSITION_IN;
-      this.subPhase = 'PHASE_E';
-      this.phaseTime = 0;
-      this.phaseDuration = 1.5;
-    }
-  }
-
-  handleTransitionIn(dt) {
-    if (this.subPhase === 'PHASE_E') {
-<<<<<<< HEAD
-      const t = Math.min(1.0, this.phaseTime / this.phaseDuration);
-      const ease = 1 - Math.pow(1 - t, 3);
-
-      this.tunnelSpeedMultiplier = 3.0 - ease * 1.8;
-
-      if (this.currentEra < 3) {
-        // New Alice emerges from vanishing point and climbs towards camera
-        const scale = 0.01 + ease * 0.99;
-        const spin = this.direction * (1 - ease) * Math.PI * 5.0;
-        const alpha = scale > 0.04 ? 1.0 : (scale / 0.04);
-        const offsetY = (1 - ease) * -12;
-
-        this.alice.setTransitionTransform(scale, spin, alpha, 0, offsetY);
-      } else {
-        // In CREATE stage: Alice is not drawn; user takes over
-        this.alice.setTransitionTransform(0.0, 0, 0.0, 0, 0);
-      }
-=======
-      // Phase E: New Alice emerges directly from central vanishing point (scale ~0.01 -> 1.0)
-      const t = Math.min(1.0, this.phaseTime / this.phaseDuration);
-      const ease = 1 - Math.pow(1 - t, 3); // Ease out cubic
-
-      this.tunnelSpeedMultiplier = 3.0 - ease * 1.8;
-
-      const scale = 0.01 + ease * 0.99;
-      const spin = this.direction * (1 - ease) * Math.PI * 5.0; // Decelerating spin
-      const alpha = scale > 0.04 ? 1.0 : (scale / 0.04);
-      const offsetY = (1 - ease) * -12;
-
-      this.alice.setTransitionTransform(scale, spin, alpha, 0, offsetY);
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
-
-      if (this.phaseTime >= this.phaseDuration) {
-        this.subPhase = 'PHASE_F';
-        this.phaseTime = 0;
-        this.phaseDuration = 0.8;
-      }
-    } else if (this.subPhase === 'PHASE_F') {
-      const t = Math.min(1.0, this.phaseTime / this.phaseDuration);
-      this.tunnelSpeedMultiplier = 1.2 - t * 0.2;
-
-<<<<<<< HEAD
-      if (this.currentEra < 3) {
-        this.alice.setTransitionTransform(1.0, 0, 1.0, 0, 0);
-      } else {
-        this.alice.setTransitionTransform(0.0, 0, 0.0, 0, 0);
-      }
-=======
-      const scale = 1.0;
-      const spin = 0;
-      const alpha = 1.0;
-      this.alice.setTransitionTransform(scale, spin, alpha, 0, 0);
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
-
-      if (this.phaseTime >= this.phaseDuration) {
-        this.state = States.IDLE;
-        this.tunnelSpeedMultiplier = 1.0;
-        this.watch.setTransitionState(false);
-<<<<<<< HEAD
-        if (this.currentEra < 3) {
-          this.alice.releaseTransitionTransform();
-=======
-        this.alice.releaseTransitionTransform();
-
-        this.transitionsCount++;
-        if (this.onTransitionsMilestone) {
-          this.onTransitionsMilestone(this.transitionsCount);
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
-        }
-      }
+    } else {
+      this.tunnelSpeedMultiplier = 1.0;
     }
   }
 
   renderTunnels(ctx, width, height, cx, cy) {
-    if (this.currentEra === 3) {
-      // In CREATE stage, render the create stage canvas
+    if (this.state === States.CREATE_ACTIVE || this.state === States.CONTEMPLATING) {
       this.createStage.render(ctx);
       return;
     }
 
-    if (this.state === States.TRANSFORMING) {
-      const fromEra = this.currentEra;
-      const toEra = this.targetEra;
-      const blend = this.morphProgress;
+    if (this.isRetractingTunnel) {
+      const t = Math.min(1.0, this.retractTime / this.retractDuration);
+      const tunnel = this.tunnels[this.currentRetractEra];
+      if (tunnel && tunnel.offscreenCanvas) {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(t * t * 0.8 * this.retractDirection);
+        const s = Math.max(0.001, 1.0 - Math.pow(t, 1.8) * 0.995);
+        ctx.scale(s, s);
+        ctx.translate(-cx, -cy);
+        ctx.drawImage(tunnel.offscreenCanvas, 0, 0);
+        ctx.restore();
 
-<<<<<<< HEAD
-      if (fromEra < 3 && toEra < 3) {
-        this.tunnels[fromEra].render(ctx, width, height, cx, cy, this.lightWaves, 1.0 - blend);
-        this.tunnels[toEra].render(ctx, width, height, cx, cy, this.lightWaves, blend);
-      } else if (toEra === 3) {
-        // Morphing from Game (2) into CREATE (3)
-        this.tunnels[2].render(ctx, width, height, cx, cy, this.lightWaves, 1.0 - blend * 0.6);
-        this.createStage.render(ctx);
-      } else if (fromEra === 3) {
-        // Morphing from CREATE (3) back into Game (2)
-        this.createStage.render(ctx);
-        this.tunnels[2].render(ctx, width, height, cx, cy, this.lightWaves, blend);
+        // Central dark suction hole
+        const holeR = 38 + t * 24;
+        const holeGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, holeR);
+        holeGrad.addColorStop(0, '#000000');
+        holeGrad.addColorStop(0.7, '#08060a');
+        holeGrad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = holeGrad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, holeR, 0, Math.PI * 2);
+        ctx.fill();
       }
-=======
-      this.tunnels[fromEra].render(ctx, width, height, cx, cy, this.lightWaves, 1.0 - blend);
-      this.tunnels[toEra].render(ctx, width, height, cx, cy, this.lightWaves, blend);
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
-    } else {
-      this.tunnels[this.currentEra].render(ctx, width, height, cx, cy, this.lightWaves, 1.0);
+      return;
+    }
+
+    // Active era tunnel rendering
+    if (this.state === States.FALLING_0 || this.state === States.ERA_0_ACTIVE) {
+      this.tunnels[0].render(ctx, width, height, cx, cy, this.lightWaves, 1.0);
+    } else if (this.state === States.FALLING_1 || this.state === States.ERA_1_ACTIVE) {
+      this.tunnels[1].render(ctx, width, height, cx, cy, this.lightWaves, 1.0);
+    } else if (this.state === States.FALLING_2 || this.state === States.ERA_2_ACTIVE) {
+      this.tunnels[2].render(ctx, width, height, cx, cy, this.lightWaves, 1.0);
     }
   }
 }
@@ -3424,8 +3092,8 @@ class TransitionManager {
 
 // --- js/main.js ---
 /**
- * WHY BOTHER? — GENERATIVE RABBIT HOLE & CREATE STAGE
- * Main Entry Point & Orchestrator
+ * WHY BOTHER? — GENERATIVE RABBIT HOLE & CREATE
+ * Main Orchestrator & Entry Point
  */
 
 
@@ -3441,75 +3109,36 @@ const canvas = document.getElementById('tunnel-canvas');
 const ctx = canvas.getContext('2d');
 const watchCanvas = document.getElementById('pocket-watch-canvas');
 const watchContainer = document.getElementById('watch-container');
-
-const mainTitleEl = document.getElementById('main-title');
-const mainSubtitleEl = document.getElementById('main-subtitle');
-const eraBadgeContainer = document.getElementById('era-badge-container');
-const eraNumberEl = document.getElementById('era-number');
-const eraTitleEl = document.getElementById('era-title');
-const eraDescEl = document.getElementById('era-desc');
-const manifestoContainer = document.getElementById('manifesto-quote-container');
-const manifestoTextEl = document.getElementById('manifesto-text');
 const watchHintEl = document.getElementById('watch-hint');
+const mainUi = document.getElementById('main-ui');
 
-// Tool buttons
-const soundBtn = document.getElementById('btn-sound');
-const soundIcon = document.getElementById('sound-icon');
-const soundLabel = document.getElementById('sound-label');
-const fullscreenBtn = document.getElementById('btn-fullscreen');
-const choosePathBtn = document.getElementById('btn-choose-path');
+// Narrative DOM Elements
+const narrativeOverlay = document.getElementById('narrative-overlay');
+const openingBookContainer = document.getElementById('opening-book-container');
+const bookTextBody = document.getElementById('book-text-body');
+const transitionTextContainer = document.getElementById('transition-text-container');
+const transitionEraTag = document.getElementById('transition-era-tag');
+const transitionTextBody = document.getElementById('transition-text-body');
+const narrativeContinueHint = document.getElementById('narrative-continue-hint');
 
-// Decision & Reflection Modals
-const decisionModal = document.getElementById('decision-modal');
-const btnContinueExploring = document.getElementById('btn-continue-exploring');
-const btnStartCreating = document.getElementById('btn-start-creating');
-
-const reflectionModal = document.getElementById('reflection-modal');
-const createHintPanel = document.getElementById('create-hint-panel');
+// Create Stage Controls
+const createControlsPanel = document.getElementById('create-controls-panel');
 const btnContemplate = document.getElementById('btn-contemplate');
+
+// Final Contemplation & Reflection Overlay
+const finalOverlay = document.getElementById('final-contemplation-overlay');
+const finalClosingPhrase = document.getElementById('final-closing-phrase');
 const btnDownloadArt = document.getElementById('btn-download-art');
 const btnResumeCreating = document.getElementById('btn-resume-creating');
-const btnReturnRabbitHole = document.getElementById('btn-return-rabbit-hole');
+const btnRestartExperience = document.getElementById('btn-restart-experience');
 
-// Reflection Modal elements
-const reflectionModal = document.getElementById('reflection-modal');
-const createHintPanel = document.getElementById('create-hint-panel');
-const btnContemplate = document.getElementById('btn-contemplate');
-const btnDownloadArt = document.getElementById('btn-download-art');
-const btnResumeCreating = document.getElementById('btn-resume-creating');
-const btnReturnRabbitHole = document.getElementById('btn-return-rabbit-hole');
-
-// 4 Stages definitions: Libro -> Película -> Videojuego -> CREATE
-const ERAS = [
-  {
-    number: "Capítulo I · 1865",
-    title: "El Libro Original",
-    desc: "Lewis Carroll & John Tenniel — Grabado, tinta, tipografía y papel envejecido.",
-    quote: "«Al principio, la madriguera del conejo se extendía en línea recta como un túnel, y después torció bruscamente hacia abajo...»",
-    className: "era-0"
-  },
-  {
-    number: "Capítulo II · 1951",
-    title: "La Película Animada",
-    desc: "Walt Disney Productions — Acuarela suave, pigmentos diluidos en agua y pinceladas orgánicas.",
-    quote: "«Curioso y curioso... Si el mundo no tuviera ningún sentido, ¿por qué no inventarle uno?»",
-    className: "era-1"
-  },
-  {
-    number: "Capítulo III · 2000",
-    title: "El Videojuego Siniestro",
-    desc: "American McGee & Rogue Entertainment — Acuarela oscura, borgoña, índigo denso y espirales retorcidas.",
-    quote: "«Solo unos pocos encuentran el camino; otros no lo reconocen cuando lo encuentran; otros no quieren encontrarlo.»",
-    className: "era-2"
-  },
-  {
-    number: "Capítulo IV · Creación",
-    title: "Tu Propia Composición",
-    desc: "Materia generativa liberada — Alicia como inspiración fantástica y surrealista.",
-    quote: "«El observador se convierte en creador... Tu mano guía el curso de la materia generativa.»",
-    className: "era-create"
-  }
-];
+// Canvas dimensions and vanishing point
+let width = window.innerWidth;
+let height = window.innerHeight;
+let cx = width / 2;
+let cy = height / 2;
+let mouseTargetX = 0;
+let mouseTargetY = 0;
 
 // Subsystem instances
 const lightWaves = new LightWaveSystem();
@@ -3521,8 +3150,6 @@ const createStage = new CreateStage();
 
 let pocketWatch;
 let transitionManager;
-let isCreateMode = false;
-let isMouseDown = false;
 
 // Web Audio Ambiance Synthesizer
 class AmbianceAudio {
@@ -3536,24 +3163,28 @@ class AmbianceAudio {
 
   init() {
     if (this.ctx) return;
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    this.ctx = new AudioContext();
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      this.ctx = new AudioContext();
 
-    this.masterGain = this.ctx.createGain();
-    this.masterGain.gain.setValueAtTime(0.2, this.ctx.currentTime);
-    this.masterGain.connect(this.ctx.destination);
+      this.masterGain = this.ctx.createGain();
+      this.masterGain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+      this.masterGain.connect(this.ctx.destination);
 
-    this.droneOsc = this.ctx.createOscillator();
-    this.droneGain = this.ctx.createGain();
-    this.droneGain.gain.setValueAtTime(0.04, this.ctx.currentTime);
-    this.droneOsc.type = 'sine';
-    this.droneOsc.frequency.setValueAtTime(65, this.ctx.currentTime);
-    this.droneOsc.connect(this.droneGain);
-    this.droneGain.connect(this.masterGain);
-    this.droneOsc.start();
+      this.droneOsc = this.ctx.createOscillator();
+      this.droneGain = this.ctx.createGain();
+      this.droneGain.gain.setValueAtTime(0.04, this.ctx.currentTime);
+      this.droneOsc.type = 'sine';
+      this.droneOsc.frequency.setValueAtTime(55, this.ctx.currentTime);
+      this.droneOsc.connect(this.droneGain);
+      this.droneGain.connect(this.masterGain);
+      this.droneOsc.start();
 
-    this.startTickLoop();
-    this.isPlaying = true;
+      this.startTickLoop();
+      this.isPlaying = true;
+    } catch (e) {
+      console.warn('Web Audio not allowed or failed:', e);
+    }
   }
 
   startTickLoop() {
@@ -3567,7 +3198,7 @@ class AmbianceAudio {
 
       osc.type = tickCount % 2 === 0 ? 'sine' : 'triangle';
       osc.frequency.setValueAtTime(tickCount % 2 === 0 ? 980 : 720, now);
-      gain.gain.setValueAtTime(0.06, now);
+      gain.gain.setValueAtTime(0.05, now);
       gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
 
       osc.connect(gain);
@@ -3579,36 +3210,39 @@ class AmbianceAudio {
 
   triggerTransitionWhoosh() {
     if (!this.ctx || this.ctx.state !== 'running') return;
-    const now = this.ctx.currentTime;
+    try {
+      const now = this.ctx.currentTime;
+      const bufferSize = this.ctx.sampleRate * 1.5;
+      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
 
-    const bufferSize = this.ctx.sampleRate * 1.5;
-    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      data[i] = Math.random() * 2 - 1;
+      const noiseSource = this.ctx.createBufferSource();
+      noiseSource.buffer = buffer;
+
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(180, now);
+      filter.frequency.exponentialRampToValueAtTime(1400, now + 0.7);
+      filter.frequency.exponentialRampToValueAtTime(120, now + 1.4);
+      filter.Q.setValueAtTime(3.5, now);
+
+      const gain = this.ctx.createGain();
+      gain.gain.setValueAtTime(0.01, now);
+      gain.gain.linearRampToValueAtTime(0.18, now + 0.7);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+
+      noiseSource.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.masterGain);
+
+      noiseSource.start(now);
+      noiseSource.stop(now + 1.6);
+    } catch (e) {
+      // Audio sweep fallback
     }
-
-    const noiseSource = this.ctx.createBufferSource();
-    noiseSource.buffer = buffer;
-
-    const filter = this.ctx.createBiquadFilter();
-    filter.type = 'bandpass';
-    filter.frequency.setValueAtTime(180, now);
-    filter.frequency.exponentialRampToValueAtTime(1400, now + 0.7);
-    filter.frequency.exponentialRampToValueAtTime(120, now + 1.4);
-    filter.Q.setValueAtTime(3.5, now);
-
-    const gain = this.ctx.createGain();
-    gain.gain.setValueAtTime(0.01, now);
-    gain.gain.linearRampToValueAtTime(0.18, now + 0.7);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
-
-    noiseSource.connect(filter);
-    filter.connect(gain);
-    gain.connect(this.masterGain);
-
-    noiseSource.start(now);
-    noiseSource.stop(now + 1.6);
   }
 
   setEra(era) {
@@ -3621,102 +3255,193 @@ class AmbianceAudio {
     } else if (era === 2) {
       this.droneOsc.frequency.exponentialRampToValueAtTime(42, now + 1.0);
     } else {
-<<<<<<< HEAD
-      this.droneOsc.frequency.exponentialRampToValueAtTime(84, now + 1.0);
-=======
-      // Create stage harmonic drone
       this.droneOsc.frequency.exponentialRampToValueAtTime(88, now + 1.0);
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
-    }
-  }
-
-  toggle() {
-    if (!this.ctx) {
-      this.init();
-      return true;
-    }
-    if (this.ctx.state === 'running') {
-      this.ctx.suspend();
-      this.isPlaying = false;
-      return false;
-    } else {
-      this.ctx.resume();
-      this.isPlaying = true;
-      return true;
     }
   }
 }
 
 const audio = new AmbianceAudio();
 
-// Setup era change UI sync
-function handleEraChanged(newEraIndex) {
-  if (isCreateMode) return;
-  const meta = ERAS[newEraIndex];
-  document.body.className = meta.className;
+// ==========================================================================
+// NARRATIVE TEXT DEFINITIONS
+// ==========================================================================
+const NARRATIVES = {
+  // Opening: El Libro Original
+  0: {
+    isBook: true,
+    paragraphs: [
+      "Pero cuando el conejo se sacó un reloj de bolsillo del chaleco, lo miró y echó a correr, Alicia se levantó de un salto, porque comprendió de golpe que ella nunca había visto un conejo con chaleco, ni con reloj que sacarse de él, y, ardiendo de curiosidad, se puso a correr tras el conejo por la pradera, y llegó justo a tiempo para ver cómo se precipitaba en una madriguera que se abría al pie del seto.",
+      "Un momento más tarde, Alicia se metía también en la madriguera, sin pararse a considerar cómo se las arreglaría después para salir."
+    ]
+  },
+  // Transición hacia Disney: 1951
+  1: {
+    isBook: false,
+    tag: "1951 · La Película Animada",
+    paragraphs: [
+      "Ochenta y seis años habían pasado desde que aquella historia fuera escrita. El mundo había cambiado, y las historias comenzaban a encontrar nuevas maneras de existir. Ya no vivían solamente entre las páginas de un libro. Ahora podían cobrar vida a través de ilustraciones en movimiento, colores que parecían salirse del papel y melodías que acompañaban cada aventura.",
+      "En una de aquellas versiones, otra pequeña Alicia cantaba entre flores que hablaban, mientras se despedía de su gata Diana antes de seguir al conejo. El mundo que antes había sido imaginado con palabras ahora podía verse, escucharse y moverse ante nuestros ojos.",
+      "Pero la curiosidad seguía siendo la misma. Y, sin embargo, un momento más tarde, Alicia se metía también en la madriguera, sin pararse a considerar cómo se las arreglaría después para salir."
+    ]
+  },
+  // Transición hacia el Videojuego: 2011
+  2: {
+    isBook: false,
+    tag: "2011 · El Videojuego",
+    paragraphs: [
+      "Sesenta años más tarde, el mundo de Alicia era muy diferente. Las historias ya no se limitaban a ser leídas o contempladas. Ahora podían recorrerse, explorarse e incluso alterarse. Aquello que antes exigía miles y miles de dibujos podía tomar forma mediante herramientas digitales, y los mundos imaginados podían convertirse en lugares que cualquiera podía habitar.",
+      "Pero no todos los Países de las Maravillas conservaban la inocencia de aquel primero. En una nueva historia, Alicia Liddell regresaba a un mundo deformado por sus propios recuerdos. Los colores se habían vuelto más sombríos, los caminos más inquietantes y los personajes, mucho menos familiares. Ya no bastaba con observar cómo se desarrollaba la aventura. Esta vez, había que atravesarla.",
+      "Y aunque el mundo al otro lado fuera irreconocible, algo permanecía intacto. Un momento más tarde, Alicia se metía también en la madriguera, sin pararse a considerar cómo se las arreglaría después para salir."
+    ]
+  },
+  // Transición hacia CREATE
+  3: {
+    isBook: false,
+    tag: "El Tiempo Presente · Creación",
+    paragraphs: [
+      "Más de cien años habían pasado.",
+      "Cientos de Alicias habían existido desde entonces. Algunas habían sido dibujadas, otras pintadas, animadas, actuadas, reconstruidas y transformadas. Cada una había encontrado su propia forma de caer, y cada una había llevado consigo algo de quien la imaginó.",
+      "Las herramientas habían cambiado. Las posibilidades parecían no tener fin. Ahora, bastaba una instrucción para obtener imágenes de mundos que antes habrían requerido incontables horas de trabajo.",
+      "Y entonces...",
+      "¿qué quedaba por imaginar?"
+    ]
+  }
+};
 
-  eraTitleEl.style.opacity = '0';
-  eraDescEl.style.opacity = '0';
-  manifestoTextEl.style.opacity = '0';
+// Progressive Typing Engine
+class NarrativeTypewriter {
+  constructor() {
+    this.isTyping = false;
+    this.isComplete = false;
+    this.typeInterval = null;
+    this.currentNarrative = null;
+    this.targetElement = null;
+    this.fullHtml = '';
+  }
 
-  setTimeout(() => {
-    eraNumberEl.textContent = meta.number;
-    eraTitleEl.textContent = meta.title;
-    eraDescEl.textContent = meta.desc;
-    manifestoTextEl.textContent = meta.quote;
+  start(narrativeConfig, onComplete) {
+    this.currentNarrative = narrativeConfig;
+    this.onComplete = onComplete;
+    this.isComplete = false;
+    this.isTyping = true;
+    narrativeContinueHint.classList.remove('visible');
 
-    eraTitleEl.style.opacity = '1';
-    eraDescEl.style.opacity = '1';
-    manifestoTextEl.style.opacity = '1';
-  }, 250);
+    if (narrativeConfig.isBook) {
+      openingBookContainer.style.display = 'block';
+      transitionTextContainer.style.display = 'none';
+      this.targetElement = bookTextBody;
+    } else {
+      openingBookContainer.style.display = 'none';
+      transitionTextContainer.style.display = 'block';
+      transitionEraTag.textContent = narrativeConfig.tag || '';
+      this.targetElement = transitionTextBody;
+    }
 
-  if (newEraIndex === 3) {
-    // ENTERING CREATE STAGE
-    isCreateMode = true;
-    // Inherit the game tunnel canvas without erasing previous marks!
-    createStage.init(width, height, gameTunnel.offscreenCanvas);
+    this.targetElement.innerHTML = '';
 
-    mainTitleEl.textContent = 'Why Bother?';
-    mainSubtitleEl.textContent = 'Etapa de Creación · Tu Mano Interviene el Sistema';
+    // Build array of tokens (words and paragraph breaks)
+    const tokens = [];
+    narrativeConfig.paragraphs.forEach((pText, pIdx) => {
+      const words = pText.split(/\s+/);
+      words.forEach((w, wIdx) => {
+        tokens.push({ text: w + ' ', pIdx });
+      });
+      if (pIdx < narrativeConfig.paragraphs.length - 1) {
+        tokens.push({ text: '\n\n', pIdx });
+      }
+    });
 
-    if (createHintPanel) createHintPanel.style.display = 'flex';
-    if (watchHintEl) watchHintEl.textContent = 'Gira en sentido contrario para volver';
-    audio.setEra(3);
-  } else {
-    // RETURNING TO RABBIT HOLE STAGE
-    isCreateMode = false;
-    createStage.isActive = false;
+    let currentTokenIndex = 0;
+    let currentParagraphIndex = -1;
+    let currentPElement = null;
 
-    mainTitleEl.textContent = 'Why Bother?';
-    mainSubtitleEl.textContent = 'The Generative Rabbit Hole';
+    // Build full text for fast-skip
+    this.fullHtml = narrativeConfig.paragraphs.map(p => `<p>${p}</p>`).join('');
 
-    if (createHintPanel) createHintPanel.style.display = 'none';
-    if (watchHintEl) watchHintEl.textContent = 'Gira o mantén el reloj para caer';
-    audio.setEra(newEraIndex);
+    this.typeInterval = setInterval(() => {
+      if (currentTokenIndex >= tokens.length) {
+        this.finish();
+        return;
+      }
+
+      const tok = tokens[currentTokenIndex];
+      currentTokenIndex++;
+
+      if (tok.pIdx !== currentParagraphIndex) {
+        currentParagraphIndex = tok.pIdx;
+        currentPElement = document.createElement('p');
+        this.targetElement.appendChild(currentPElement);
+      }
+
+      if (tok.text === '\n\n') {
+        // Next paragraph
+      } else {
+        currentPElement.textContent += tok.text;
+      }
+    }, 42); // Comfortable, fluid literary typing cadence
+  }
+
+  fastForward() {
+    if (!this.isTyping) return;
+    clearInterval(this.typeInterval);
+    this.targetElement.innerHTML = this.fullHtml;
+    this.finish();
+  }
+
+  finish() {
+    clearInterval(this.typeInterval);
+    this.isTyping = false;
+    this.isComplete = true;
+    narrativeContinueHint.classList.add('visible');
+    if (this.onComplete) {
+      this.onComplete();
+    }
   }
 }
 
-// Automatic milestone: show decision prompt after user explores eras
-function handleTransitionsMilestone(count) {
-  if (count >= 2 && !isCreateMode) {
-    // Subtly highlight choice button
-    if (choosePathBtn) {
-      choosePathBtn.classList.add('highlight');
-    }
+const narrativeTypewriter = new NarrativeTypewriter();
+
+// Show narrative stage
+function displayNarrative(narrativeIndex) {
+  narrativeOverlay.classList.remove('hidden');
+  narrativeOverlay.style.display = 'flex';
+  mainUi.style.display = 'none';
+  createControlsPanel.style.display = 'none';
+  finalOverlay.style.display = 'none';
+
+  narrativeTypewriter.start(NARRATIVES[narrativeIndex], () => {
+    // Narrative fully rendered
+  });
+}
+
+function hideNarrativeOverlay() {
+  narrativeOverlay.classList.add('hidden');
+  setTimeout(() => {
+    narrativeOverlay.style.display = 'none';
+  }, 800);
+}
+
+// User action to advance narrative (SPACE key or mouse click)
+function handleNarrativeUserAction() {
+  audio.init();
+
+  if (narrativeTypewriter.isTyping) {
+    // If still typing: instantly reveal complete text
+    narrativeTypewriter.fastForward();
+    return;
+  }
+
+  if (narrativeTypewriter.isComplete) {
+    // If text finished: advance to next phase!
+    hideNarrativeOverlay();
+    transitionManager.onNarrativeFinished();
   }
 }
 
 // Initialize Pocket Watch & Transition Manager
 pocketWatch = new PocketWatch(watchCanvas, (direction) => {
-<<<<<<< HEAD
-=======
-  if (isCreateMode) return;
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
-  if (watchHintEl) {
-    watchHintEl.style.opacity = '0.5';
-  }
   audio.triggerTransitionWhoosh();
-  transitionManager.triggerTransition(direction);
+  transitionManager.triggerWatchTransition(direction);
 });
 
 transitionManager = new TransitionManager(
@@ -3727,29 +3452,97 @@ transitionManager = new TransitionManager(
   createStage,
   lightWaves,
   pocketWatch,
-  handleEraChanged,
-  handleTransitionsMilestone
+  {
+    onStateChanged: (state, activeEra) => {
+      audio.setEra(activeEra);
+
+      if (state === States.OPENING_BOOK) {
+        displayNarrative(0);
+      } else if (state === States.TEXT_1_DISNEY) {
+        displayNarrative(1);
+      } else if (state === States.TEXT_2_GAME) {
+        displayNarrative(2);
+      } else if (state === States.TEXT_3_CREATE) {
+        displayNarrative(3);
+      }
+    },
+    onShowWatch: (era) => {
+      mainUi.style.display = 'flex';
+      watchContainer.classList.add('visible');
+      if (era === 0) {
+        watchHintEl.textContent = 'Gira el reloj para avanzar';
+      } else if (era === 1) {
+        watchHintEl.textContent = 'Gira el reloj para viajar';
+      } else if (era === 2) {
+        watchHintEl.textContent = 'Gira el reloj para avanzar';
+      } else if (era === 3) {
+        watchHintEl.textContent = 'Gira en sentido contrario para volver';
+      }
+    },
+    onHideWatch: () => {
+      watchContainer.classList.remove('visible');
+    },
+    onEnterCreate: () => {
+      mainUi.style.display = 'flex';
+      createControlsPanel.style.display = 'flex';
+      watchContainer.classList.add('visible');
+      watchHintEl.textContent = 'Gira en sentido contrario para volver';
+    },
+    onContemplate: () => {
+      createControlsPanel.style.display = 'none';
+      watchContainer.classList.remove('visible');
+      finalOverlay.style.display = 'flex';
+      finalClosingPhrase.classList.remove('revealed');
+
+      // Dramatic pause before revealing the final Alice sentence
+      setTimeout(() => {
+        finalClosingPhrase.classList.add('revealed');
+      }, 1400);
+    },
+    onResumeCreate: () => {
+      finalOverlay.style.display = 'none';
+      createControlsPanel.style.display = 'flex';
+      watchContainer.classList.add('visible');
+    }
+  }
 );
 
-// Viewport & Resolution Management
-let width = window.innerWidth;
-let height = window.innerHeight;
-let cx = width / 2;
-let cy = height / 2;
+// Contemplate Button Click
+btnContemplate.addEventListener('click', (e) => {
+  e.stopPropagation();
+  transitionManager.triggerContemplate();
+});
 
+// Resume Creating Button Click
+btnResumeCreating.addEventListener('click', (e) => {
+  e.stopPropagation();
+  transitionManager.resumeCreating();
+});
+
+// Download Art as PNG
+btnDownloadArt.addEventListener('click', (e) => {
+  e.stopPropagation();
+  const link = document.createElement('a');
+  link.download = `WhyBother-ObraGenerativa-${Date.now()}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+});
+
+// Restart Experience
+btnRestartExperience.addEventListener('click', (e) => {
+  e.stopPropagation();
+  finalOverlay.style.display = 'none';
+  createControlsPanel.style.display = 'none';
+  watchContainer.classList.remove('visible');
+  transitionManager.setState(States.OPENING_BOOK);
+});
+
+// Window resize handling
 function handleResize() {
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
   width = window.innerWidth;
   height = window.innerHeight;
-
-  canvas.width = width * dpr;
-  canvas.height = height * dpr;
-  canvas.style.width = `${width}px`;
-  canvas.style.height = `${height}px`;
-
-  ctx.resetTransform();
-  ctx.scale(dpr, dpr);
-
+  canvas.width = width;
+  canvas.height = height;
   cx = width / 2;
   cy = height / 2;
 
@@ -3762,287 +3555,131 @@ function handleResize() {
 window.addEventListener('resize', handleResize);
 handleResize();
 
-// Mouse & Touch Parallax / Cursor Interaction
-let mouseTargetX = 0;
-let mouseTargetY = 0;
-
-function updatePointer(e) {
-  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-  if (isCreateMode) {
-    createStage.setCursor(clientX, clientY, isMouseDown);
-  } else {
-    const nx = (clientX / width) * 2 - 1;
-    const ny = (clientY / height) * 2 - 1;
-    mouseTargetX = nx;
-    mouseTargetY = ny;
-    alice.setMouse(nx, ny);
+// Keyboard interaction (SPACE key for narrative)
+window.addEventListener('keydown', (e) => {
+  if (e.code === 'Space') {
+    e.preventDefault();
+    if (!narrativeOverlay.classList.contains('hidden') && narrativeOverlay.style.display !== 'none') {
+      handleNarrativeUserAction();
+    }
   }
-}
-
-<<<<<<< HEAD
-window.addEventListener('mousemove', updatePointer);
-=======
-window.addEventListener('mousemove', (e) => {
-  updatePointer(e);
 });
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
+
+// Click interaction for narrative overlay
+narrativeOverlay.addEventListener('click', () => {
+  handleNarrativeUserAction();
+});
+
+// Mouse & Touch interaction for CREATE Stage & Alice parallax
+let isMouseDown = false;
 
 window.addEventListener('mousedown', (e) => {
-  if (e.target.closest('.modal-card') || e.target.closest('.extra-tools') || e.target.closest('.tool-btn')) {
+  audio.init();
+  if (e.target.closest('#watch-container') || e.target.closest('#create-controls-panel') || e.target.closest('#final-contemplation-overlay')) {
     return;
   }
   isMouseDown = true;
-  updatePointer(e);
+  if (transitionManager.state === States.CREATE_ACTIVE) {
+    createStage.setCursor(e.clientX, e.clientY, true);
+  }
+});
+
+window.addEventListener('mousemove', (e) => {
+  const nx = (e.clientX - width / 2) / (width / 2);
+  const ny = (e.clientY - height / 2) / (height / 2);
+  mouseTargetX = nx;
+  mouseTargetY = ny;
+  alice.setMouse(nx, ny);
+
+  if (transitionManager.state === States.CREATE_ACTIVE) {
+    createStage.setCursor(e.clientX, e.clientY, isMouseDown);
+  }
 });
 
 window.addEventListener('mouseup', () => {
   isMouseDown = false;
-  if (isCreateMode) {
+  if (transitionManager.state === States.CREATE_ACTIVE) {
     createStage.cursor.isDown = false;
   }
 });
 
+// Touch events for mobile
 window.addEventListener('touchstart', (e) => {
-  if (e.target.closest('.modal-card') || e.target.closest('.extra-tools') || e.target.closest('.tool-btn')) {
-    return;
+  audio.init();
+  if (e.touches && e.touches.length > 0) {
+    const t = e.touches[0];
+    if (transitionManager.state === States.CREATE_ACTIVE) {
+      createStage.setCursor(t.clientX, t.clientY, true);
+    }
   }
-  isMouseDown = true;
-  updatePointer(e);
 }, { passive: true });
 
-<<<<<<< HEAD
-window.addEventListener('touchmove', updatePointer, { passive: true });
-=======
 window.addEventListener('touchmove', (e) => {
-  updatePointer(e);
+  if (e.touches && e.touches.length > 0) {
+    const t = e.touches[0];
+    if (transitionManager.state === States.CREATE_ACTIVE) {
+      createStage.setCursor(t.clientX, t.clientY, true);
+    }
+  }
 }, { passive: true });
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
 
 window.addEventListener('touchend', () => {
-  isMouseDown = false;
-  if (isCreateMode) {
+  if (transitionManager.state === States.CREATE_ACTIVE) {
     createStage.cursor.isDown = false;
   }
 });
 
-// Keyboard navigation (Arrow Left: back, Arrow Right: forward)
-window.addEventListener('keydown', (e) => {
-  if (isCreateMode) return;
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-    pocketWatch.accumulatedAngle = 0;
-    pocketWatch.angularVelocity = 28.0;
-    audio.triggerTransitionWhoosh();
-    transitionManager.triggerTransition(1);
-  } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-    pocketWatch.accumulatedAngle = 0;
-    pocketWatch.angularVelocity = -28.0;
-    audio.triggerTransitionWhoosh();
-    transitionManager.triggerTransition(-1);
-  }
-});
-
-// Sound Toggle Button
-soundBtn.addEventListener('click', () => {
-  const playing = audio.toggle();
-  soundIcon.textContent = playing ? '🔊' : '🔈';
-  soundLabel.textContent = playing ? 'Silenciar' : 'Sonido';
-});
-
-// Fullscreen Button
-fullscreenBtn.addEventListener('click', () => {
-  if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen().catch(() => {});
-  } else {
-    document.exitFullscreen().catch(() => {});
-  }
-});
-
-<<<<<<< HEAD
-=======
-// --- DECISION & CREATE STAGE WIRING ---
-
-choosePathBtn.addEventListener('click', () => {
-  decisionModal.style.display = 'flex';
-});
-
-btnContinueExploring.addEventListener('click', () => {
-  decisionModal.style.display = 'none';
-});
-
-btnStartCreating.addEventListener('click', () => {
-  decisionModal.style.display = 'none';
-  enterCreateStage();
-});
-
-function enterCreateStage() {
-  isCreateMode = true;
-
-  // Active tunnel offscreen canvas is inherited so NOTHING is erased!
-  const currentTunnel = transitionManager.tunnels[transitionManager.currentEra];
-  const inheritedCanvas = currentTunnel ? currentTunnel.offscreenCanvas : null;
-  createStage.init(width, height, inheritedCanvas);
-
-  document.body.className = 'era-create';
-
-  // Update HUD
-  mainTitleEl.textContent = 'Why Bother?';
-  mainSubtitleEl.textContent = 'Etapa de Creación · Tu Mano Interviene el Sistema';
-
-  if (eraBadgeContainer) eraBadgeContainer.style.display = 'none';
-  if (manifestoContainer) manifestoContainer.style.display = 'none';
-  if (watchContainer) watchContainer.style.display = 'none';
-  if (createHintPanel) createHintPanel.style.display = 'flex';
-
-  audio.setEra(3);
-}
-
-function exitCreateStage() {
-  isCreateMode = false;
-  createStage.isActive = false;
-
-  const meta = ERAS[transitionManager.currentEra];
-  document.body.className = meta.className;
-
-  mainTitleEl.textContent = 'Why Bother?';
-  mainSubtitleEl.textContent = 'The Generative Rabbit Hole';
-
-  if (eraBadgeContainer) eraBadgeContainer.style.display = 'flex';
-  if (manifestoContainer) manifestoContainer.style.display = 'block';
-  if (watchContainer) watchContainer.style.display = 'flex';
-  if (createHintPanel) createHintPanel.style.display = 'none';
-
-  audio.setEra(transitionManager.currentEra);
-}
-
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
-// Reflection Modal triggers
-btnContemplate.addEventListener('click', () => {
-  reflectionModal.style.display = 'flex';
-});
-
-btnResumeCreating.addEventListener('click', () => {
-  reflectionModal.style.display = 'none';
-});
-
-btnReturnRabbitHole.addEventListener('click', () => {
-  reflectionModal.style.display = 'none';
-<<<<<<< HEAD
-  // Turning watch backward back to Game version
-  transitionManager.triggerTransition(-1);
-=======
-  exitCreateStage();
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
-});
-
-// Export Canvas Snapshot as PNG
-btnDownloadArt.addEventListener('click', () => {
-  const link = document.createElement('a');
-  link.download = `WhyBother-GenerativeArt-${Date.now()}.png`;
-  link.href = canvas.toDataURL('image/png');
-  link.click();
-});
-
-// Main Animation Loop with Delta-Time
+// Main Animation Loop with Delta Time
 let lastTime = performance.now();
 
 function animate(currentTime) {
   requestAnimationFrame(animate);
 
-  const dt = Math.min((currentTime - lastTime) / 1000, 0.1);
+  const dt = Math.min(0.08, (currentTime - lastTime) / 1000);
   lastTime = currentTime;
 
   ctx.clearRect(0, 0, width, height);
-<<<<<<< HEAD
 
   // Update Transition Manager
   transitionManager.update(dt);
   const speedMult = transitionManager.tunnelSpeedMultiplier;
 
-  if (isCreateMode && transitionManager.state === States.IDLE) {
-    // --- CREATE STAGE UPDATE & RENDER ---
-    createStage.update(dt, 1.0);
-    createStage.render(ctx);
-  } else {
-    // --- RABBIT HOLE STAGE UPDATE & RENDER ---
-    const targetCx = width / 2 + mouseTargetX * 22;
-    const targetCy = height / 2 + mouseTargetY * 16;
-    cx += (targetCx - cx) * Math.min(1.0, dt * 3);
-    cy += (targetCy - cy) * Math.min(1.0, dt * 3);
+  // Smooth vanishing point parallax
+  const targetCx = width / 2 + mouseTargetX * 22;
+  const targetCy = height / 2 + mouseTargetY * 16;
+  cx += (targetCx - cx) * Math.min(1.0, dt * 3);
+  cy += (targetCy - cy) * Math.min(1.0, dt * 3);
 
-    lightWaves.update(dt, transitionManager.currentEra, speedMult);
-    bookTunnel.update(dt, speedMult);
-    movieTunnel.update(dt, speedMult);
-    gameTunnel.update(dt, speedMult);
+  // Update light waves & tunnels
+  lightWaves.update(dt, transitionManager.activeEra, speedMult);
+  bookTunnel.update(dt, speedMult);
+  movieTunnel.update(dt, speedMult);
+  gameTunnel.update(dt, speedMult);
+  createStage.update(dt, speedMult);
 
-    if (isCreateMode) {
-      createStage.update(dt, speedMult);
-    }
+  // Update Alice
+  alice.update(dt, speedMult);
 
-    alice.update(dt, speedMult);
+  // 1. Render active generative rabbit hole tunnel or create stage
+  transitionManager.renderTunnels(ctx, width, height, cx, cy);
 
-    // 1. Render active generative rabbit hole tunnel (with morphing support)
-    transitionManager.renderTunnels(ctx, width, height, cx, cy);
-
-    // 2. Render radial energy glow waves
-    if (transitionManager.currentEra < 3) {
-      lightWaves.renderRadialGlow(ctx, width, height, cx, cy);
-    }
-
-    // 3. Render Alice character with 3D depth perspective
-    if (transitionManager.currentEra < 3 || transitionManager.state !== States.IDLE) {
-      alice.render(ctx, width, height, cx, cy);
-    }
+  // 2. Render radial energy glow waves (during tunnel eras)
+  if (transitionManager.activeEra < 3 && transitionManager.state !== States.OPENING_BOOK) {
+    lightWaves.renderRadialGlow(ctx, width, height, cx, cy);
   }
 
-  // 4. Render Pocket Watch on its dedicated canvas
+  // 3. Render Alice character with 3D depth perspective
+  if (transitionManager.activeEra < 3 && transitionManager.state !== States.OPENING_BOOK) {
+    alice.render(ctx, width, height, cx, cy);
+  }
+
+  // 4. Update and render Pocket Watch
   pocketWatch.update(dt);
   pocketWatch.render();
-=======
-
-  if (isCreateMode) {
-    // --- CREATE STAGE RENDER LOOP ---
-    createStage.update(dt, 1.0);
-    createStage.render(ctx);
-  } else {
-    // --- RABBIT HOLE STAGE RENDER LOOP ---
-    transitionManager.update(dt);
-    const speedMult = transitionManager.tunnelSpeedMultiplier;
-
-    // Dynamic vanishing point with subtle mouse parallax
-    const targetCx = width / 2 + mouseTargetX * 22;
-    const targetCy = height / 2 + mouseTargetY * 16;
-    cx += (targetCx - cx) * Math.min(1.0, dt * 3);
-    cy += (targetCy - cy) * Math.min(1.0, dt * 3);
-
-    // Update light waves & tunnels
-    lightWaves.update(dt, transitionManager.currentEra, speedMult);
-    bookTunnel.update(dt, speedMult);
-    movieTunnel.update(dt, speedMult);
-    gameTunnel.update(dt, speedMult);
-
-    // Update Alice
-    alice.update(dt, speedMult);
-
-    // Update Pocket Watch
-    pocketWatch.update(dt);
-
-    // 1. Render active generative rabbit hole tunnel (with morphing support)
-    transitionManager.renderTunnels(ctx, width, height, cx, cy);
-
-    // 2. Render radial energy glow waves
-    lightWaves.renderRadialGlow(ctx, width, height, cx, cy);
-
-    // 3. Render Alice character with 3D depth perspective
-    alice.render(ctx, width, height, cx, cy);
-
-    // 4. Render Pocket Watch on its dedicated canvas
-    pocketWatch.render();
-  }
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
 }
 
+// Start the experience
+transitionManager.start();
 requestAnimationFrame(animate);
 
 

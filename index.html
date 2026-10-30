@@ -3,142 +3,98 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>WHY BOTHER? — Generative Rabbit Hole</title>
+  <title>WHY BOTHER? — Generative Rabbit Hole & CREATE</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="era-0">
+<body class="mode-narrative">
   <!-- Rabbit Hole Canvas -->
   <div id="canvas-container">
     <canvas id="tunnel-canvas"></canvas>
   </div>
 
-  <!-- UI Overlay -->
-  <main class="ui-overlay">
-    <!-- Top Header -->
-    <header class="top-header">
-      <div class="brand-block">
-        <h1 class="title" id="main-title">Why Bother?</h1>
-        <p class="subtitle" id="main-subtitle">The Generative Rabbit Hole</p>
+  <!-- Narrative Overlay (Book Opening & Transition Texts) -->
+  <div id="narrative-overlay" class="narrative-overlay">
+    <!-- Opening Book Visual -->
+    <div id="opening-book-container" class="book-container">
+      <div class="book-cover">
+        <div class="book-page book-page-left">
+          <div class="book-illustration-ornament">✦ 1865 ✦</div>
+          <p class="book-subheading">Alicia en el País de las Maravillas</p>
+          <div class="book-divider"></div>
+          <div class="book-page-decor">Capítulo I<br>En la Madriguera del Conejo</div>
+        </div>
+        <div class="book-page book-page-right">
+          <div class="book-text-body" id="book-text-body"></div>
+        </div>
       </div>
+    </div>
 
-      <!-- Extra Controls (Audio Ambiance / Fullscreen / Stage Trigger) -->
-      <div class="extra-tools">
-        <button id="btn-sound" class="tool-btn" title="Alternar audio atmosférico">
-          <span id="sound-icon">🔈</span>
-          <span id="sound-label">Sonido</span>
-        </button>
-        <button id="btn-fullscreen" class="tool-btn" title="Pantalla Completa">
-          <span>⛶</span>
-          <span>Expandir</span>
-        </button>
-        <button id="btn-choose-path" class="tool-btn highlight" title="Tomar una decisión artística">
-          <span>✨</span>
-          <span id="choose-path-label">Decisión</span>
-        </button>
-      </div>
+    <!-- Literary Projection Container for Transitions -->
+    <div id="transition-text-container" class="transition-text-container" style="display: none;">
+      <div class="transition-era-tag" id="transition-era-tag"></div>
+      <div class="transition-text-body" id="transition-text-body"></div>
+    </div>
 
-      <!-- Era Badge Info -->
-      <div class="era-badge-container" id="era-badge-container">
-        <span class="era-number" id="era-number">Capítulo I · 1865</span>
-        <h2 class="era-title" id="era-title">El Libro Original</h2>
-        <p class="era-desc" id="era-desc">Lewis Carroll &amp; John Tenniel — Grabado, tinta, tipografía y papel envejecido.</p>
-      </div>
-    </header>
+    <!-- Discreet Continue Prompt (Appears ONLY when text finishes) -->
+    <div id="narrative-continue-hint" class="narrative-continue-hint">
+      <span class="hint-symbol">␣</span> Presiona <kbd>ESPACIO</kbd> o haz <kbd>CLIC</kbd> para continuar
+    </div>
+  </div>
 
-    <!-- Bottom Footer -->
-    <footer class="bottom-footer">
-      <div class="manifesto-quote" id="manifesto-quote-container">
-        <p id="manifesto-text">"Al principio, la madriguera del conejo se extendía en línea recta como un túnel, y después torció bruscamente hacia abajo..."</p>
-        <span class="manifesto-bold">Different tools. Different worlds. The same imagination.</span>
+  <!-- UI Overlay (Pocket Watch & Create Stage Controls) -->
+  <main class="ui-overlay" id="main-ui" style="display: none;">
+    <!-- Create Stage Floating Controls -->
+    <div class="create-controls-panel" id="create-controls-panel" style="display: none;">
+      <div class="create-hints-group">
+        <span class="create-hint-item">✦ Mueve para desviar la materia</span>
+        <span class="create-hint-item">✦ Mantén presionado para formar un vórtice</span>
+        <span class="create-hint-item">✦ Arrastra con velocidad para ramificar</span>
       </div>
+      <button id="btn-contemplate" class="btn-contemplate">
+        <span class="btn-icon">👁</span> CONTEMPLAR OBRA
+      </button>
+    </div>
 
-<<<<<<< HEAD
-      <!-- Create Mode Interactive Hint Panel (Shown only in CREATE stage) -->
-      <div class="create-hint-panel" id="create-hint-panel" style="display: none;">
-        <span class="hint-pill">Mueve el cursor para desviar</span>
-        <span class="hint-pill">Mantén presionado para generar vórtice</span>
-=======
-      <!-- Create Mode Interactive Hint (Visible only in CREATE stage) -->
-      <div class="create-hint-panel" id="create-hint-panel" style="display: none;">
-        <span class="hint-pill">Mueve el cursor para desviar</span>
-        <span class="hint-pill">Mantén pulsado para generar vórtice</span>
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
-        <span class="hint-pill">Arrastra rápido para ramificar</span>
-        <button id="btn-contemplate" class="tool-btn highlight-accent">Contemplar Obra</button>
-      </div>
-
-<<<<<<< HEAD
-      <!-- Pocket Watch Interactive Widget (Controls ALL navigation: Book -> Movie -> Game -> CREATE) -->
-=======
-      <!-- Pocket Watch Interactive Widget -->
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
-      <div class="watch-widget-container" id="watch-container">
-        <canvas id="pocket-watch-canvas"></canvas>
-        <div class="watch-hint" id="watch-hint">Gira o mantén el reloj para caer</div>
-      </div>
-    </footer>
+    <!-- Pocket Watch Widget (Bottom Right Navigation) -->
+    <div class="watch-widget-container" id="watch-container">
+      <canvas id="pocket-watch-canvas"></canvas>
+      <div class="watch-hint" id="watch-hint">Gira el reloj para avanzar</div>
+    </div>
   </main>
 
-<<<<<<< HEAD
-=======
-  <!-- Decision Modal: Continue Exploring vs Create Something Yourself -->
-  <div class="modal-backdrop" id="decision-modal" style="display: none;">
-    <div class="modal-card">
-      <span class="modal-tag">Una Bifurcación en el Tiempo</span>
-      <h2 class="modal-title">El Umbral de la Imaginación</h2>
-      <p class="modal-desc">
-        Has contemplado cómo distintos artistas y tecnologías reinterpretaron el mismo sueño a lo largo de los siglos.
-        Ahora la madriguera se abre ante ti: ¿deseas seguir explorando lo que otros crearon, o estás listo para intervenir la materia generativa con tu propia mano?
-      </p>
-
-      <div class="modal-actions">
-        <button class="choice-btn secondary" id="btn-continue-exploring">
-          <span class="choice-label">Continuar Explorando</span>
-          <span class="choice-sub">Seguir viajando entre las tres Alicias con el reloj</span>
-        </button>
-
-        <button class="choice-btn primary" id="btn-start-creating">
-          <span class="choice-label">Crear Algo Propio</span>
-          <span class="choice-sub">Liberar la madriguera y convertirte en co-creador</span>
-        </button>
-      </div>
-    </div>
-  </div>
-
->>>>>>> 8b20465b44451b5bc77d384c507305daa436c5f1
-  <!-- Reflection Closure Modal: WHY BOTHER? -->
-  <div class="modal-backdrop" id="reflection-modal" style="display: none;">
-    <div class="modal-card reflection-card">
-      <span class="modal-tag">Reflexión Final</span>
-      <h2 class="modal-title reflection-title">WHY BOTHER?</h2>
-      <p class="reflection-quote">«You could have left it untouched. But you didn't.»</p>
-      <p class="reflection-subquote">Podrías haberlo dejado intacto. Pero no lo hiciste.</p>
+  <!-- Final Contemplation & Reflection Overlay: WHY BOTHER? -->
+  <div id="final-contemplation-overlay" class="final-contemplation-overlay" style="display: none;">
+    <div class="final-card">
+      <h1 class="final-main-title">WHY BOTHER?</h1>
+      <h2 class="final-subtitle">¿Por qué molestarse?</h2>
       
-      <p class="modal-desc">
-        En un mundo donde los sistemas autónomos pueden generar infinitas formas por sí mismos,
-        la verdadera magia surge en el instante en que la voluntad humana decide intervenir, transformar y dejar su propia huella en el tiempo.
-      </p>
+      <div class="final-body-text">
+        <p>Porque crear nunca ha consistido únicamente en producir algo. Ha consistido en imaginar lo que todavía no existe, en explorar caminos que no siempre llevan a donde esperábamos y en encontrar algo propio entre todas las posibilidades.</p>
+        
+        <p>Porque ninguna herramienta puede decidir por nosotros qué nos conmueve, qué despierta nuestra curiosidad o qué queremos expresar.</p>
+        
+        <p>Las herramientas pueden cambiar, multiplicarse e incluso hacer posible lo que antes parecía inalcanzable. Pero siempre habrá tantas maneras de imaginar como personas dispuestas a hacerlo.</p>
+        
+        <p class="final-closing-phrase" id="final-closing-phrase">
+          Y porque, después de tantos años, de tantas historias y de tantas formas de contarla, Alicia siempre encontrará una madriguera en la que meterse.
+        </p>
+      </div>
 
-      <div class="modal-actions">
-        <button class="choice-btn primary" id="btn-download-art">
-          <span class="choice-label">📥 Descargar Mi Obra (PNG)</span>
-          <span class="choice-sub">Guardar captura de tu composición en alta resolución</span>
+      <div class="final-actions">
+        <button class="final-action-btn primary" id="btn-download-art">
+          <span class="action-icon">📥</span> Guardar Mi Obra (PNG)
         </button>
-
-        <button class="choice-btn secondary" id="btn-resume-creating">
-          <span class="choice-label">Continuar Pintando</span>
-          <span class="choice-sub">Seguir interactuando con el sistema generativo</span>
+        <button class="final-action-btn secondary" id="btn-resume-creating">
+          <span class="action-icon">🎨</span> Continuar Interviniendo
         </button>
-
-        <button class="choice-btn tertiary" id="btn-return-rabbit-hole">
-          <span class="choice-label">Regresar a la Madriguera</span>
-          <span class="choice-sub">Volver al viaje temporal de las tres versiones</span>
+        <button class="final-action-btn tertiary" id="btn-restart-experience">
+          <span class="action-icon">↺</span> Volver a la Madriguera
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Standalone script: works with both direct double-click (file:///) and web server -->
+  <!-- Standalone script bundle -->
   <script src="js/bundle.js"></script>
 </body>
 </html>
