@@ -35,7 +35,9 @@ export class BookTunnel {
 
     // Active spiral text streamers that continuously stream words outward
     this.textStreamers = [];
-    this.maxStreamers = 8;
+    this.maxStreamers = 6;
+    // Words slowly dissolve so the spiral stays legible and alive
+    this.textFadeTimer = 0;
     this.nextStreamerTime = 0;
 
     // Concentric paper ring bands with drop shadows
@@ -190,7 +192,12 @@ export class BookTunnel {
     const tier = Math.random();
     let strokeColor, strokeWidth, opacity;
 
-    if (tier < 0.35) {
+    if (tier < 0.07) {
+      // Rubric red: the red ink of illuminated Victorian chapter openings
+      strokeColor = '123, 44, 40';
+      strokeWidth = 1.2 + Math.random() * 1.8;
+      opacity = 0.7 + Math.random() * 0.25;
+    } else if (tier < 0.35) {
       // Light graphite gray
       strokeColor = '175, 170, 162';
       strokeWidth = 0.8 + Math.random() * 1.2;
@@ -358,6 +365,17 @@ export class BookTunnel {
       }
     }
 
+    // Gentle dissolve of older words (stepped so 8-bit alpha never leaves ghosts)
+    this.textFadeTimer += dt * speedMult;
+    if (this.textFadeTimer >= 0.22) {
+      this.textFadeTimer = 0;
+      textCtx.save();
+      textCtx.globalCompositeOperation = 'destination-out';
+      textCtx.fillStyle = 'rgba(0, 0, 0, 0.11)';
+      textCtx.fillRect(0, 0, this.width, this.height);
+      textCtx.restore();
+    }
+
     // Stamp white letters onto textCanvas (which renders directly on top of inkCanvas)
     for (let i = this.textStreamers.length - 1; i >= 0; i--) {
       const st = this.textStreamers[i];
@@ -391,8 +409,9 @@ export class BookTunnel {
         textCtx.shadowOffsetX = 0;
         textCtx.shadowOffsetY = 2;
 
-        textCtx.font = `700 ${fontSize}px "Cormorant Garamond", "Cinzel", "Times New Roman", serif`;
-        textCtx.fillStyle = '#ffffff'; // PURE WHITE LETTERS ON TOP OF SPREADING INK
+        const isKeyWord = /^(Alicia|madriguera|conejo|MERMELADA|NARANJA|pozo|cayendo)/i.test(currentWord);
+        textCtx.font = `${isKeyWord ? 'italic 700' : '700'} ${isKeyWord ? fontSize + 4 : fontSize}px "IM Fell English", "Cormorant Garamond", "Times New Roman", serif`;
+        textCtx.fillStyle = isKeyWord ? '#ffd98a' : '#ffffff'; // white words, gilded key words
         textCtx.textAlign = 'center';
         textCtx.textBaseline = 'middle';
         textCtx.fillText(currentWord, 0, 0);

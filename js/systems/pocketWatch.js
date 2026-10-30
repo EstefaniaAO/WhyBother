@@ -43,6 +43,10 @@ export class PocketWatch {
       'rgba(245, 185, 45, '   // Create: warm golden yellow & amber
     ];
     this.currentEra = 0;
+    this.eraYears = ['1865', '1951', '2011', 'HOY'];
+    this.time = 0;
+    this.lastTickAngle = 0;
+    this.onTick = null;
 
     this.bindEvents();
   }
@@ -130,6 +134,17 @@ export class PocketWatch {
   }
 
   update(dt) {
+    this.time += dt;
+    // Audible tick each time the minute hand sweeps a twelfth while being wound
+    if (this.onTick && (this.isPressed || this.isTransitionActive)) {
+      const step = Math.PI / 6;
+      if (Math.abs(this.minuteAngle - this.lastTickAngle) > step) {
+        this.lastTickAngle = this.minuteAngle;
+        this.onTick();
+      }
+    } else {
+      this.lastTickAngle = this.minuteAngle;
+    }
     // If user is just holding down without dragging, hands accelerate exponentially
     if (this.isPressed && !this.isDragging && !this.isTransitionActive) {
       const holdTime = (performance.now() - this.pressStartTime) / 1000;
@@ -186,6 +201,18 @@ export class PocketWatch {
     ctx.fill();
     ctx.stroke();
     ctx.restore();
+
+    // 1b. Idle invitation pulse (breathing era-colored halo)
+    if (!this.isPressed && !this.isTransitionActive && this.chargeLevel < 0.05) {
+      const ph = (this.time % 2.4) / 2.4;
+      ctx.save();
+      ctx.strokeStyle = `${this.eraColors[this.currentEra]}${0.55 * (1 - ph)})`;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r + 9 + ph * 12, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
 
     // 2. Outer Casing (antique brass / gold)
     ctx.save();
@@ -273,7 +300,29 @@ export class PocketWatch {
     ctx.font = 'italic 7px "Cormorant Garamond", serif';
     ctx.fillStyle = 'rgba(90, 70, 40, 0.6)';
     ctx.fillText('WONDERLAND', cx, cy - 18);
-    ctx.fillText('TEMPORAL', cx, cy + 18);
+    ctx.font = 'bold 9px "Cinzel", serif';
+    ctx.fillStyle = 'rgba(123, 44, 40, 0.85)';
+    ctx.fillText(this.eraYears[this.currentEra] || '', cx, cy + 19);
+
+    // Card suits that light up as the watch is wound
+    const suits = ['♠', '♥', '♦', '♣'];
+    ctx.font = '10px serif';
+    for (let i = 0; i < 4; i++) {
+      const a = (i / 4) * Math.PI * 2 - Math.PI / 4;
+      const lit = this.chargeLevel > (i + 1) / 5 || this.isTransitionActive;
+      const sx = cx + Math.cos(a) * (r - 30);
+      const sy = cy + Math.sin(a) * (r - 30);
+      if (lit) {
+        ctx.shadowColor = `${this.eraColors[this.currentEra]}1)`;
+        ctx.shadowBlur = 8;
+        ctx.fillStyle = i === 1 || i === 2 ? '#c8283f' : '#1c150c';
+      } else {
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = 'rgba(90, 70, 40, 0.25)';
+      }
+      ctx.fillText(suits[i], sx, sy);
+    }
+    ctx.shadowBlur = 0;
     ctx.restore();
 
     // 6. Clock Hands (Vintage spade / teardrop style)

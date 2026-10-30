@@ -12,6 +12,10 @@ const files = [
   'js/systems/aliceController.js',
   'js/systems/pocketWatch.js',
   'js/systems/createStage.js',
+  'js/systems/fx.js',
+  'js/systems/wonderObjects.js',
+  'js/systems/tunnelRings.js',
+  'js/systems/interludeScene.js',
   'js/transitionManager.js',
   'js/main.js'
 ];

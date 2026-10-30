@@ -3,7 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>WHY BOTHER? — Generative Rabbit Hole & CREATE</title>
+  <title>Why Bother? — Generative Rabbit Hole</title>
+  <meta name="description" content="Experiencia generativa interactiva: un viaje por las madrigueras de Alicia en el País de las Maravillas, de 1865 a hoy.">
+  <meta name="theme-color" content="#06040a">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%2306040a' stroke='%23e8c47a' stroke-width='3'/%3E%3Ccircle cx='32' cy='25' r='9' fill='%23e8c47a'/%3E%3Cpath d='M27 30h10l4 18H23z' fill='%23e8c47a'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Montserrat:wght@300;400;500;600&display=swap">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="mode-narrative">
@@ -15,8 +21,14 @@
   <!-- Narrative Overlay (Book Opening) -->
   <div id="narrative-overlay" class="narrative-overlay">
     <!-- Opening Book Visual (Fixed dimensions, stable layout) -->
+    <div class="opening-title" aria-hidden="true">
+      <span class="ot-small">una caída en cuatro madrigueras</span>
+      <span class="ot-big">Why Bother?</span>
+    </div>
     <div id="opening-book-container" class="book-container">
       <div class="book-cover">
+        <span class="book-corner tl">♠</span><span class="book-corner tr">♥</span>
+        <span class="book-corner bl">♦</span><span class="book-corner br">♣</span>
         <div class="book-page book-page-left">
           <div class="book-illustration-ornament">✦ 1865 ✦</div>
           <p class="book-subheading">Alicia en el País de las Maravillas</p>
@@ -37,22 +49,36 @@
 
   <!-- Cinematic Phrase-by-Phrase Transition Screen (Disney, Game, CREATE) -->
   <div id="cinematic-overlay" class="cinematic-overlay" style="display: none;">
+    <div id="cinematic-kicker" class="cinematic-kicker"></div>
     <div class="cinematic-phrase-wrap">
       <div id="cinematic-phrase-text" class="cinematic-phrase-text"></div>
     </div>
+    <div class="cinematic-footer">
+      <div id="cinematic-progress" class="cinematic-progress"></div>
+      <div class="cinematic-hint"><kbd>ESPACIO</kbd> o <kbd>CLIC</kbd> para seguir cayendo</div>
+    </div>
   </div>
+
+  <!-- Chapter HUD (top left) -->
+  <div id="era-hud" class="era-hud" aria-live="polite"></div>
+
+  <!-- Sound toggle (top right) -->
+  <button id="sound-toggle" class="sound-toggle" type="button" aria-label="Silenciar">
+    <span class="st-icon">♪</span>
+  </button>
 
   <!-- UI Overlay (Pocket Watch & Create Stage Controls) -->
   <main class="ui-overlay" id="main-ui" style="display: none;">
     <!-- Create Stage Floating Controls -->
     <div class="create-controls-panel" id="create-controls-panel" style="display: none;">
+      <div class="create-title">Tu turno de imaginar</div>
       <div class="create-hints-group">
-        <span class="create-hint-item">✦ Mueve para desviar la materia</span>
-        <span class="create-hint-item">✦ Mantén presionado para formar un vórtice</span>
-        <span class="create-hint-item">✦ Arrastra con velocidad para ramificar</span>
+        <span class="create-hint-item"><i>♠</i> Mueve para desviar la materia</span>
+        <span class="create-hint-item"><i class="r">♥</i> Mantén presionado para formar un vórtice</span>
+        <span class="create-hint-item"><i class="r">♦</i> Arrastra con velocidad para ramificar</span>
       </div>
       <button id="btn-contemplate" class="btn-contemplate">
-        <span class="btn-icon">👁</span> CONTEMPLAR OBRA
+        <span class="btn-icon">♣</span> CONTEMPLAR OBRA
       </button>
     </div>
 
@@ -77,7 +103,7 @@
     <!-- Subtle post-reflection controls (Appears only after all phrases are read) -->
     <div id="final-controls" class="final-controls" style="display: none;">
       <button class="final-action-btn secondary" id="btn-resume-creating">
-        <span class="action-icon">🎨</span> Continuar Interviniendo
+        <span class="action-icon">♥</span> Continuar Interviniendo
       </button>
       <button class="final-action-btn tertiary" id="btn-restart-experience">
         <span class="action-icon">↺</span> Volver a la Madriguera

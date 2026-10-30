@@ -13,7 +13,13 @@
  * 7. RETRACTING_2 -> TEXT_3_CREATE (Transition to user creation)
  * 8. CREATE_ACTIVE (Autonomous + user interactive composition)
  * 9. CONTEMPLATING (Artwork preserved + WHY BOTHER? final reflection)
+ *
+ * Every world opens through a keyhole (the tiny door Alice finds at the bottom of
+ * the well) and every forward exit is a dive deeper into the hole: the camera
+ * plunges, the scene zoom-blurs, speed lines streak and the keyhole closes.
  */
+import { TunnelRings } from './systems/tunnelRings.js';
+import { WonderObjects } from './systems/wonderObjects.js';
 
 export const States = {
   OPENING_BOOK: 'OPENING_BOOK',
@@ -35,7 +41,9 @@ export const States = {
 };
 
 export class TransitionManager {
-  constructor(aliceController, bookTunnel, movieTunnel, gameTunnel, createStage, lightWaves, pocketWatch, callbacks = {}) {
+  constructor(aliceController, bookTunnel, movieTunnel, gameTunnel, createStage, lightWaves, pocketWatch, callbacks = {}, fx = null, sfx = null) {
+    this.fx = fx;
+    this.sfx = sfx;
     this.alice = aliceController;
     this.tunnels = [bookTunnel, movieTunnel, gameTunnel];
     this.createStage = createStage;
@@ -53,6 +61,46 @@ export class TransitionManager {
     this.retractDuration = 1.5;
     this.retractDirection = 1;
     this.currentRetractEra = 0;
+
+    // Live depth layers per era (rings rushing past + Wonderland objects)
+    const styles = ['ink', 'toon', 'gothic'];
+    this.eraLayers = styles.map((st, i) => ({
+      rings: new TunnelRings(st),
+      objects: new WonderObjects({ style: st, mode: 'tunnel', maxObjects: [11, 14, 12][i] })
+    }));
+    this.rimColors = [[235, 196, 120], [140, 235, 230], [235, 50, 90]];
+  }
+
+  /** Index of the tunnel currently on screen, or -1 */
+  activeTunnelIndex() {
+    if (this.isRetractingTunnel) return this.currentRetractEra;
+    switch (this.state) {
+      case States.FALLING_0: case States.ERA_0_ACTIVE: return 0;
+      case States.FALLING_1: case States.ERA_1_ACTIVE: return 1;
+      case States.FALLING_2: case States.ERA_2_ACTIVE: return 2;
+      default: return -1;
+    }
+  }
+
+  isInterludeState() {
+    return this.state === States.OPENING_BOOK || this.state === States.TEXT_1_DISNEY ||
+      this.state === States.TEXT_2_GAME || this.state === States.TEXT_3_CREATE;
+  }
+
+  /** Open a world through the keyhole */
+  openWorld(era) {
+    if (!this.fx) return;
+    this.fx.setLook(era);
+    this.fx.irisTo(1, 1.7, { from: 0, shape: 'keyhole', rim: this.rimColors[era] || [235, 196, 120] });
+    this.fx.triggerFlash(era === 2 ? '220, 30, 70' : (era === 1 ? '200, 235, 255' : '255, 245, 225'), 0.35, 1.2);
+    if (this.sfx) this.sfx.chime([523, 660, 392][era] || 523);
+  }
+
+  resetEraLayers(era) {
+    const L = this.eraLayers[era];
+    if (!L) return;
+    L.rings.reset();
+    L.objects.reset(true);
   }
 
   start() {
@@ -89,6 +137,8 @@ export class TransitionManager {
     this.setState(States.FALLING_0);
     this.tunnelSpeedMultiplier = 1.0;
     this.tunnels[0].reset();
+    this.resetEraLayers(0);
+    this.openWorld(0);
 
     if (this.callbacks.onHideWatch) this.callbacks.onHideWatch();
 
@@ -107,6 +157,8 @@ export class TransitionManager {
     this.setState(States.FALLING_1);
     this.tunnelSpeedMultiplier = 1.0;
     this.tunnels[1].init(this.tunnels[1].width, this.tunnels[1].height);
+    this.resetEraLayers(1);
+    this.openWorld(1);
 
     if (this.callbacks.onHideWatch) this.callbacks.onHideWatch();
 
@@ -125,6 +177,8 @@ export class TransitionManager {
     this.setState(States.FALLING_2);
     this.tunnelSpeedMultiplier = 1.0;
     this.tunnels[2].init(this.tunnels[2].width, this.tunnels[2].height);
+    this.resetEraLayers(2);
+    this.openWorld(2);
 
     if (this.callbacks.onHideWatch) this.callbacks.onHideWatch();
 
@@ -150,6 +204,12 @@ export class TransitionManager {
     const width = this.tunnels[0].width;
     const height = this.tunnels[0].height;
     this.createStage.init(width, height);
+    if (this.fx) {
+      this.fx.setLook(3);
+      this.fx.setIris(1);
+      this.fx.triggerFlash('255, 248, 235', 0.3, 1.8);
+    }
+    if (this.sfx) this.sfx.chime(784);
 
     this.watch.setEra(3);
     if (this.callbacks.onShowWatch) this.callbacks.onShowWatch(3);
@@ -198,10 +258,18 @@ export class TransitionManager {
       }
     } else if (this.state === States.CREATE_ACTIVE) {
       if (direction < 0) {
-        // Backward from CREATE -> Game
+        // Backward from CREATE -> Game: the bloom closes back into a circle
         if (this.callbacks.onHideWatch) this.callbacks.onHideWatch();
-        this.activeEra = 2;
-        this.startThirdFall();
+        if (this.callbacks.onLeaveCreate) this.callbacks.onLeaveCreate();
+        this.isRetractingTunnel = true; // block re-entry while closing
+        if (this.sfx) this.sfx.whoosh(1.0, false);
+        const go = () => {
+          this.isRetractingTunnel = false;
+          this.activeEra = 2;
+          this.startThirdFall();
+        };
+        if (this.fx) this.fx.irisTo(0, 0.8, { shape: 'circle', rim: [255, 215, 90], onDone: go });
+        else go();
       }
     }
   }
@@ -220,6 +288,19 @@ export class TransitionManager {
 
     if (this.callbacks.onHideWatch) this.callbacks.onHideWatch();
     this.watch.setTransitionState(true);
+
+    if (this.fx) {
+      const rim = this.rimColors[fromEra] || [235, 196, 120];
+      if (direction > 0) {
+        // Dive deeper: keyhole closes at the end of the plunge
+        this.fx.irisTo(0, 0.7, { from: 1, delay: 0.85, shape: 'keyhole', rim });
+      } else {
+        // Pull back in time: a circular iris closes while the world shrinks away
+        this.fx.irisTo(0, 0.8, { from: 1, delay: 0.7, shape: 'circle', rim: [255, 240, 210] });
+        this.fx.triggerFlash('255, 236, 200', 0.25, 0.8);
+      }
+    }
+    if (this.sfx) this.sfx.whoosh(1.5, direction > 0);
 
     // Alice retracts into vanishing point
     this.alice.triggerRetract(direction);
@@ -266,6 +347,37 @@ export class TransitionManager {
     } else {
       this.tunnelSpeedMultiplier = 1.0;
     }
+
+    // Speed lines: strong during dives, fading during the opening fall
+    if (this.fx) {
+      let sl = 0;
+      if (this.isRetractingTunnel && this.state !== States.CREATE_ACTIVE) {
+        sl = Math.min(1, this.retractTime / this.retractDuration) * (this.retractDirection > 0 ? 1 : 0.5);
+      } else if (this.alice.isFalling) {
+        sl = Math.max(0, 1 - this.alice.fallElapsed / this.alice.fallDuration) * 0.7;
+      }
+      this.fx.speedLines = sl;
+    }
+  }
+
+  /** Update only what is on screen (tunnel paint + depth layers) */
+  updateScene(dt) {
+    const idx = this.activeTunnelIndex();
+    if (idx < 0) return;
+    const sm = this.tunnelSpeedMultiplier;
+    // While falling in, everything rushes a bit faster and settles
+    const fallBoost = this.alice.isFalling ? 1 + 2.2 * Math.max(0, 1 - this.alice.fallElapsed / this.alice.fallDuration) : 1;
+    this.tunnels[idx].update(dt, sm);
+    const L = this.eraLayers[idx];
+    L.rings.update(dt, sm * fallBoost);
+    L.objects.update(dt, sm * fallBoost);
+  }
+
+  renderEraScene(ctx, idx, width, height, cx, cy) {
+    this.tunnels[idx].render(ctx, width, height, cx, cy, this.lightWaves, 1.0);
+    const L = this.eraLayers[idx];
+    L.rings.render(ctx, width, height, cx, cy, 1);
+    L.objects.render(ctx, width, height, cx, cy, 1);
   }
 
   renderTunnels(ctx, width, height, cx, cy) {
@@ -276,38 +388,55 @@ export class TransitionManager {
 
     if (this.isRetractingTunnel) {
       const t = Math.min(1.0, this.retractTime / this.retractDuration);
-      const tunnel = this.tunnels[this.currentRetractEra];
-      if (tunnel && tunnel.offscreenCanvas) {
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.rotate(t * t * 0.8 * this.retractDirection);
+      const idx = this.currentRetractEra;
+      if (!this.tunnels[idx]) return;
+      ctx.save();
+      ctx.translate(cx, cy);
+      if (this.retractDirection > 0) {
+        // Forward: the camera plunges INTO the hole, spiralling
+        ctx.rotate(t * t * 0.9);
+        const s = 1 + Math.pow(t, 2.3) * 4.2;
+        ctx.scale(s, s);
+      } else {
+        // Backward: the world spins away and shrinks into the past
+        ctx.rotate(-t * t * 0.8);
         const s = Math.max(0.001, 1.0 - Math.pow(t, 1.8) * 0.995);
         ctx.scale(s, s);
-        ctx.translate(-cx, -cy);
-        ctx.drawImage(tunnel.offscreenCanvas, 0, 0);
-        ctx.restore();
-
-        // Central dark suction hole
-        const holeR = 38 + t * 24;
-        const holeGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, holeR);
-        holeGrad.addColorStop(0, '#000000');
-        holeGrad.addColorStop(0.7, '#08060a');
-        holeGrad.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = holeGrad;
-        ctx.beginPath();
-        ctx.arc(cx, cy, holeR, 0, Math.PI * 2);
-        ctx.fill();
       }
+      ctx.translate(-cx, -cy);
+      this.renderEraScene(ctx, idx, width, height, cx, cy);
+      ctx.restore();
+
+      // Cheap radial zoom blur: re-stamp the frame onto itself, slightly scaled
+      if (this.retractDirection > 0 && t > 0.05) {
+        const canvas = ctx.canvas;
+        ctx.save();
+        for (let k = 1; k <= 2; k++) {
+          const z = 1 + 0.045 * k * (0.4 + t);
+          ctx.globalAlpha = 0.22 / k;
+          ctx.setTransform(z, 0, 0, z, cx * (1 - z), cy * (1 - z));
+          ctx.drawImage(canvas, 0, 0, width, height);
+        }
+        ctx.restore();
+      }
+
+      // Central suction hole
+      const holeR = 38 + t * 60;
+      const holeGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, holeR);
+      holeGrad.addColorStop(0, '#000000');
+      holeGrad.addColorStop(0.7, 'rgba(8, 6, 10, 0.85)');
+      holeGrad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = holeGrad;
+      ctx.beginPath();
+      ctx.arc(cx, cy, holeR, 0, Math.PI * 2);
+      ctx.fill();
       return;
     }
 
     // Active era tunnel rendering
-    if (this.state === States.FALLING_0 || this.state === States.ERA_0_ACTIVE) {
-      this.tunnels[0].render(ctx, width, height, cx, cy, this.lightWaves, 1.0);
-    } else if (this.state === States.FALLING_1 || this.state === States.ERA_1_ACTIVE) {
-      this.tunnels[1].render(ctx, width, height, cx, cy, this.lightWaves, 1.0);
-    } else if (this.state === States.FALLING_2 || this.state === States.ERA_2_ACTIVE) {
-      this.tunnels[2].render(ctx, width, height, cx, cy, this.lightWaves, 1.0);
+    const idx = this.activeTunnelIndex();
+    if (idx >= 0) {
+      this.renderEraScene(ctx, idx, width, height, cx, cy);
     }
   }
 }

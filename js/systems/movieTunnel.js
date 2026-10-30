@@ -254,7 +254,9 @@ export class MovieTunnel {
       numPasses,
       bristleSpread,
       isWet: true,
-      isGothic: false
+      isGothic: false,
+      // Golden threads and fine turquoise filigrees glow like animation cel highlights
+      glow: lineage.type === 'yellow' ? 1.0 : (thickness < 7 && lineage.type !== 'dark' ? 0.6 : 0)
     });
     agent.lineage = lineage;
 
@@ -390,6 +392,19 @@ export class MovieTunnel {
       }
       ctx.restore();
     }
+
+    // Soft golden halo breathing around the vanishing point
+    const halo = 0.10 + 0.05 * Math.sin(this.time * 1.6);
+    const haloGrad = ctx.createRadialGradient(cx, cy, 20, cx, cy, 170);
+    haloGrad.addColorStop(0, `rgba(255, 214, 90, ${halo})`);
+    haloGrad.addColorStop(0.5, `rgba(120, 90, 230, ${halo * 0.5})`);
+    haloGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.fillStyle = haloGrad;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 170, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
 
     // Deep luminous center core gradient (Reference painting eye)
     const coreGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 32);

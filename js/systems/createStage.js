@@ -73,6 +73,11 @@ export class CreateStage {
 
     // Relaxation of previous central rabbit hole constraints (0 -> 1)
     this.freedomBlend = 0;
+
+    // Live (non-accumulated) sparkle particles and suit glyph bursts
+    this.sparkles = [];
+    this.glyphs = [];
+    this.suits = ['♠', '♥', '♦', '♣'];
   }
 
   init(width, height) {
@@ -117,6 +122,8 @@ export class CreateStage {
     this.freedomBlend = 0;
     this.emergenceAlpha = 0;
     this.time = 0;
+    this.sparkles = [];
+    this.glyphs = [];
   }
 
   resize(width, height) {
@@ -155,8 +162,62 @@ export class CreateStage {
     this.cursor.vy = dy;
     this.cursor.speed = Math.hypot(dx, dy);
 
+    const wasDown = this.cursor.isDown;
     this.cursor.isDown = isDown;
     this.cursor.active = true;
+
+    if (isDown && !wasDown) {
+      this.burst(x, y);
+    }
+    // Sparkle trail proportional to cursor speed
+    const n = Math.min(6, Math.floor(this.cursor.speed / 6) + (isDown ? 1 : 0));
+    for (let i = 0; i < n; i++) this.emitSparkle(x, y, dx * 0.5, dy * 0.5);
+  }
+
+  emitSparkle(x, y, vx = 0, vy = 0) {
+    if (this.sparkles.length > 260) return;
+    const col = this.palette[Math.floor(Math.random() * 9)];
+    const a = Math.random() * Math.PI * 2;
+    const sp = 20 + Math.random() * 70;
+    this.sparkles.push({
+      x: x + (Math.random() - 0.5) * 10,
+      y: y + (Math.random() - 0.5) * 10,
+      vx: Math.cos(a) * sp + vx * 4,
+      vy: Math.sin(a) * sp + vy * 4,
+      life: 0,
+      maxLife: 0.6 + Math.random() * 0.8,
+      size: 1 + Math.random() * 2.6,
+      col
+    });
+  }
+
+  /** Click: a ring of playing-card suits bursts out and a pigment bloom is stamped */
+  burst(x, y) {
+    const count = 8;
+    for (let i = 0; i < count; i++) {
+      const a = (i / count) * Math.PI * 2 + Math.random() * 0.3;
+      const sp = 120 + Math.random() * 90;
+      this.glyphs.push({
+        x, y,
+        vx: Math.cos(a) * sp,
+        vy: Math.sin(a) * sp,
+        rot: Math.random() * Math.PI,
+        spin: (Math.random() - 0.5) * 6,
+        life: 0,
+        maxLife: 1.1 + Math.random() * 0.5,
+        suit: this.suits[i % 4],
+        col: this.palette[Math.floor(Math.random() * 9)]
+      });
+    }
+    for (let i = 0; i < 24; i++) this.emitSparkle(x, y);
+    const col = this.palette[Math.floor(Math.random() * 9)];
+    const grad = this.offCtx.createRadialGradient(x, y, 0, x, y, 90);
+    grad.addColorStop(0, `rgba(${col.r}, ${col.g}, ${col.b}, 0.28)`);
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    this.offCtx.fillStyle = grad;
+    this.offCtx.beginPath();
+    this.offCtx.arc(x, y, 90, 0, Math.PI * 2);
+    this.offCtx.fill();
   }
 
   spawnAgent(atX = null, atY = null, inheritAngle = null) {
@@ -221,7 +282,8 @@ export class CreateStage {
       numPasses: thickness > 15 ? 4 : (thickness > 6 ? 3 : 2),
       bristleSpread: 0.44,
       isWet: true,
-      isGothic: false
+      isGothic: false,
+      glow: thickness < 6 ? 0.85 : 0
     }));
   }
 
@@ -256,7 +318,8 @@ export class CreateStage {
       numPasses: childThickness > 8 ? 3 : 2,
       bristleSpread: 0.35,
       isWet: true,
-      isGothic: false
+      isGothic: false,
+      glow: childThickness < 6 ? 0.7 : 0
     });
     child.isBranch = true;
     this.agents.push(child);
@@ -366,7 +429,7 @@ export class CreateStage {
 
     // Gradual emergence from darkness into visibility
     if (this.emergenceAlpha < 1.0) {
-      this.emergenceAlpha = Math.min(1.0, this.emergenceAlpha + dt * 0.45);
+      this.emergenceAlpha = Math.min(1.0, this.emergenceAlpha + dt * 0.32);
     }
 
     // Smoothly relax centralized rabbit hole pull (freedom blend 0 -> 1)
@@ -459,24 +522,129 @@ export class CreateStage {
 
     // Gentle pigment diffusion
     this.colorGrid.diffuse(0.018 * dt * currentSpeedMult);
+
+    // Live particles
+    for (let i = this.sparkles.length - 1; i >= 0; i--) {
+      const p = this.sparkles[i];
+      p.life += dt;
+      p.vx *= 0.94;
+      p.vy *= 0.94;
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      if (p.life >= p.maxLife) this.sparkles.splice(i, 1);
+    }
+    for (let i = this.glyphs.length - 1; i >= 0; i--) {
+      const g = this.glyphs[i];
+      g.life += dt;
+      g.vx *= 0.95;
+      g.vy *= 0.95;
+      g.x += g.vx * dt;
+      g.y += g.vy * dt;
+      g.rot += g.spin * dt;
+      if (g.life >= g.maxLife) this.glyphs.splice(i, 1);
+    }
   }
 
   render(ctx) {
     if (!this.isActive) return;
+    const w = this.width;
+    const h = this.height;
+    const cx = w / 2;
+    const cy = h / 2;
+
+    // Bloom reveal: the rabbit hole widens and lets every color out
+    const e = this.emergenceAlpha;
+    const eased = 1 - Math.pow(1 - e, 3);
+    const maxR = Math.hypot(w, h) * 0.56;
 
     ctx.save();
-    ctx.globalAlpha = this.emergenceAlpha;
-    ctx.drawImage(this.offscreenCanvas, 0, 0);
-
-    // Interactive cursor aura (only when active and not contemplating)
-    if (!this.isContemplating && this.cursor.active) {
-      const radius = this.cursor.isDown ? 42 + Math.sin(this.time * 6) * 6 : 24;
+    if (e < 1) {
+      ctx.fillStyle = '#030205';
+      ctx.fillRect(0, 0, w, h);
       ctx.beginPath();
-      ctx.arc(this.cursor.x, this.cursor.y, radius, 0, Math.PI * 2);
-      ctx.strokeStyle = this.cursor.isDown ? 'rgba(255, 215, 85, 0.55)' : 'rgba(168, 75, 215, 0.3)';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
+      ctx.arc(cx, cy, Math.max(1, eased * maxR * 1.02), 0, Math.PI * 2);
+      ctx.clip();
+    }
+    ctx.drawImage(this.offscreenCanvas, 0, 0);
+    ctx.restore();
+
+    if (e < 1) {
+      // Iridescent rim of the opening
+      const R = eased * maxR * 1.02;
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      const segs = 36;
+      for (let i = 0; i < segs; i++) {
+        const col = this.palette[i % 9];
+        const a0 = (i / segs) * Math.PI * 2 + this.time * 0.6;
+        ctx.beginPath();
+        ctx.arc(cx, cy, R, a0, a0 + (Math.PI * 2) / segs + 0.02);
+        ctx.strokeStyle = `rgba(${col.r}, ${col.g}, ${col.b}, ${0.75 * (1 - e)})`;
+        ctx.lineWidth = 3 + 14 * (1 - e);
+        ctx.shadowColor = `rgb(${col.r}, ${col.g}, ${col.b})`;
+        ctx.shadowBlur = 24;
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+
+    // Sparkles
+    for (const p of this.sparkles) {
+      const k = 1 - p.life / p.maxLife;
+      const r = p.size * (1 + (1 - k) * 1.5);
+      const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r * 3);
+      grad.addColorStop(0, `rgba(255, 255, 255, ${0.9 * k})`);
+      grad.addColorStop(0.3, `rgba(${p.col.r}, ${p.col.g}, ${p.col.b}, ${0.7 * k})`);
+      grad.addColorStop(1, `rgba(${p.col.r}, ${p.col.g}, ${p.col.b}, 0)`);
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, r * 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Suit glyph bursts
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    for (const g of this.glyphs) {
+      const k = 1 - g.life / g.maxLife;
+      ctx.save();
+      ctx.translate(g.x, g.y);
+      ctx.rotate(g.rot);
+      ctx.font = `${Math.round(18 + (1 - k) * 22)}px serif`;
+      ctx.shadowColor = `rgb(${g.col.r}, ${g.col.g}, ${g.col.b})`;
+      ctx.shadowBlur = 16;
+      ctx.fillStyle = `rgba(${g.col.r}, ${g.col.g}, ${g.col.b}, ${k})`;
+      ctx.fillText(g.suit, 0, 0);
+      ctx.restore();
     }
     ctx.restore();
+
+    // Interactive cursor aura: dashed rotating ring with orbiting suits
+    if (!this.isContemplating && this.cursor.active && e > 0.4) {
+      const down = this.cursor.isDown;
+      const radius = down ? 44 + Math.sin(this.time * 6) * 6 : 26;
+      ctx.save();
+      ctx.translate(this.cursor.x, this.cursor.y);
+      ctx.rotate(this.time * (down ? 2.4 : 0.8));
+      ctx.setLineDash([4, 7]);
+      ctx.beginPath();
+      ctx.arc(0, 0, radius, 0, Math.PI * 2);
+      ctx.strokeStyle = down ? 'rgba(255, 215, 85, 0.85)' : 'rgba(200, 160, 255, 0.55)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.font = `${down ? 13 : 10}px serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      for (let i = 0; i < 4; i++) {
+        const a = (i / 4) * Math.PI * 2;
+        ctx.fillStyle = i % 3 === 0 ? 'rgba(240, 236, 255, 0.85)' : 'rgba(255, 92, 138, 0.9)';
+        ctx.fillText(this.suits[i], Math.cos(a) * (radius + 9), Math.sin(a) * (radius + 9));
+      }
+      ctx.restore();
+    }
   }
 }

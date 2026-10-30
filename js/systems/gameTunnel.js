@@ -232,7 +232,8 @@ export class GameTunnel {
       numPasses,
       bristleSpread,
       isWet: true,
-      isGothic: true
+      isGothic: true,
+      glow: isStriking ? 0.9 : 0
     });
     agent.isStriking = isStriking;
     this.agents.push(agent);
@@ -466,6 +467,21 @@ export class GameTunnel {
       }
       ctx.restore();
     }
+
+    // Crimson heartbeat pulsing from the abyss (double beat)
+    const beatT = (this.time * 1.15) % 1;
+    const beat = Math.exp(-Math.pow((beatT - 0.08) * 18, 2)) + 0.7 * Math.exp(-Math.pow((beatT - 0.26) * 18, 2));
+    const pulseR = 140 + beat * 60;
+    const pulseGrad = ctx.createRadialGradient(cx, cy, 24, cx, cy, pulseR);
+    pulseGrad.addColorStop(0, `rgba(220, 30, 70, ${0.10 + beat * 0.22})`);
+    pulseGrad.addColorStop(0.6, `rgba(120, 10, 40, ${0.05 + beat * 0.08})`);
+    pulseGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.fillStyle = pulseGrad;
+    ctx.beginPath();
+    ctx.arc(cx, cy, pulseR, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
 
     // Deep blackened abyss core gradient
     const coreGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 32);

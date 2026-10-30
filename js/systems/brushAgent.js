@@ -28,6 +28,8 @@ export class BrushAgent {
     this.bristleSpread = config.bristleSpread || 0.45;
     this.isWet = config.isWet !== undefined ? config.isWet : true;
     this.isGothic = config.isGothic || false;
+    // Additive luminous halo strength (0 = none). Makes fine threads glow.
+    this.glow = config.glow || 0;
 
     this.history = [];
   }
@@ -141,6 +143,24 @@ export class BrushAgent {
       ctx.strokeStyle = `rgba(${col.r}, ${col.g}, ${col.b}, ${passAlpha.toFixed(3)})`;
       ctx.lineWidth = Math.max(0.8, cur.thickness * (0.35 + 0.25 * centerFactor));
       ctx.stroke();
+    }
+
+    // Pass 2b: Luminous additive halo for glowing threads
+    if (this.glow > 0) {
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.beginPath();
+      ctx.moveTo(prev.x, prev.y);
+      ctx.lineTo(cur.x, cur.y);
+      ctx.strokeStyle = `rgba(${col.r}, ${col.g}, ${col.b}, ${(mainAlpha * 0.22 * this.glow).toFixed(3)})`;
+      ctx.lineWidth = cur.thickness * 3.2 + 2;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(prev.x, prev.y);
+      ctx.lineTo(cur.x, cur.y);
+      ctx.strokeStyle = `rgba(255, 255, 255, ${(mainAlpha * 0.18 * this.glow).toFixed(3)})`;
+      ctx.lineWidth = Math.max(0.6, cur.thickness * 0.3);
+      ctx.stroke();
+      ctx.globalCompositeOperation = 'source-over';
     }
 
     // Pass 3: If gothic scene, sharp barbed thorns

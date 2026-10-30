@@ -53,6 +53,12 @@ export class AliceController {
     // Mode override for manual transition transforms
     this.isTransitionControlled = false;
 
+    // Motion trail (afterimages) during falls and dives
+    this.trail = [];
+    this.trailTimer = 0;
+    // Era aura glow colors (Tenniel ink keeps a dark drop shadow)
+    this.auraColors = [null, 'rgba(150, 215, 255, 0.85)', 'rgba(225, 30, 75, 0.8)'];
+
     this.loadAssets();
   }
 
@@ -117,6 +123,21 @@ export class AliceController {
       return;
     }
 
+    // Record afterimages while moving fast
+    const moving = this.isFalling || this.isRetracting;
+    this.trailTimer += dt;
+    if (moving && this.trailTimer > 0.045) {
+      this.trailTimer = 0;
+      this.trail.push({
+        scale: this.scale, rotation: this.rotation,
+        h: this.horizontalOffset, v: this.verticalOffset, alpha: this.alpha
+      });
+      if (this.trail.length > 6) this.trail.shift();
+    } else if (!moving && this.trail.length > 0 && this.trailTimer > 0.05) {
+      this.trailTimer = 0;
+      this.trail.shift();
+    }
+
     if (this.isFalling) {
       this.fallElapsed += dt;
       const progress = Math.min(1.0, this.fallElapsed / this.fallDuration);
@@ -178,7 +199,7 @@ export class AliceController {
       this.scale = 1.0 + Math.sin(this.time * 1.7) * 0.012;
 
       // Subtle swaying angle tilt
-      this.rotation = Math.sin(this.time * 0.85) * 0.03;
+      this.rotation = Math.sin(this.time * 0.85) * 0.055;
       this.horizontalOffset = 0;
       this.alpha = 1.0;
     }
@@ -206,38 +227,50 @@ export class AliceController {
     const img = this.images[this.eraIndex];
     if (!img || !this.isLoaded[this.eraIndex] || this.alpha <= 0.001) return;
 
-    ctx.save();
-    ctx.globalAlpha = Math.max(0, Math.min(1, this.alpha));
-
-    // Target height: 42% of viewport height
+    // Target height: 44% of viewport height
     const targetHeight = Math.min(height * 0.44, width * 0.48);
     const aspect = img.naturalWidth / img.naturalHeight;
     const drawWidth = targetHeight * aspect;
     const drawHeight = targetHeight;
+    const aura = this.auraColors[this.eraIndex];
 
+    // 1. Afterimage trail
+    for (let i = 0; i < this.trail.length; i++) {
+      const t = this.trail[i];
+      const k = (i + 1) / (this.trail.length + 1);
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, Math.min(1, t.alpha)) * 0.22 * k;
+      ctx.translate(cx + t.h + this.mouseX, cy + t.v + this.mouseY);
+      ctx.rotate(t.rotation);
+      ctx.scale(t.scale, t.scale);
+      ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+      ctx.restore();
+    }
+
+    // 2. Alice herself
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, Math.min(1, this.alpha));
     const posX = cx + this.horizontalOffset + this.mouseX;
     const posY = cy + this.verticalOffset + this.mouseY;
-
     ctx.translate(posX, posY);
     ctx.rotate(this.rotation);
     ctx.scale(this.scale, this.scale);
 
-    // Dynamic depth shadow scaling with depth
     if (this.scale > 0.1) {
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
-      ctx.shadowBlur = Math.min(30, 24 * this.scale);
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = Math.min(20, 10 * this.scale);
+      if (aura) {
+        ctx.shadowColor = aura;
+        ctx.shadowBlur = Math.min(42, 30 * this.scale) + Math.sin(this.time * 2) * 6;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+      } else {
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+        ctx.shadowBlur = Math.min(30, 24 * this.scale);
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = Math.min(20, 10 * this.scale);
+      }
     }
 
-    ctx.drawImage(
-      img,
-      -drawWidth / 2,
-      -drawHeight / 2,
-      drawWidth,
-      drawHeight
-    );
-
+    ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
     ctx.restore();
   }
 }
