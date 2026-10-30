@@ -1,9 +1,9 @@
 /**
  * Scene 1: Book Tunnel (Original Book, 1865)
  * Inspired by Lewis Carroll & John Tenniel.
- * Monochromatic antique engraving, cut paper with drop shadows,
- * grayscale depth tiers, and progressive spiral word streamers
- * building the perspective tunnel outward from the central vanishing point to the corners.
+ * Monochromatic antique engraving, spreading ink and grayscale pen strokes,
+ * with luminous WHITE letters forming a spiral word tunnel directly
+ * ON TOP of the spreading ink layer.
  */
 import { noise } from '../math/noise.js';
 
@@ -14,9 +14,13 @@ export class BookTunnel {
     this.width = 0;
     this.height = 0;
 
-    // Persistent offscreen canvas buffer
-    this.offscreenCanvas = document.createElement('canvas');
-    this.offCtx = this.offscreenCanvas.getContext('2d');
+    // Persistent canvas for ink and paper accumulation
+    this.inkCanvas = document.createElement('canvas');
+    this.inkCtx = this.inkCanvas.getContext('2d');
+
+    // Dedicated overlay canvas for text, ensuring letters appear ON TOP of spreading ink
+    this.textCanvas = document.createElement('canvas');
+    this.textCtx = this.textCanvas.getContext('2d');
 
     // Complete original paragraph of Lewis Carroll
     this.fullParagraph = 
@@ -29,61 +33,71 @@ export class BookTunnel {
 
     this.words = this.fullParagraph.split(/\s+/).filter(w => w.length > 0);
 
-    // Progressive spiral text streamers building the tunnel walls
+    // Active spiral text streamers that continuously stream words outward
     this.textStreamers = [];
     this.maxStreamers = 8;
     this.nextStreamerTime = 0;
 
-    // Concentric paper ring bands with drop shadows (structural tunnel arches)
+    // Concentric paper ring bands with drop shadows
     this.paperRings = [];
     this.nextRingTime = 0;
-    this.ringInterval = 1.35;
+    this.ringInterval = 1.25;
 
-    // Multi-tone engraving pen agents (grays and deep blacks for depth)
+    // Multi-tone pen agents spreading ink across the canvas
     this.penAgents = [];
-    this.maxPenAgents = 28;
-
-    // Tunnel progressive emergence timer
-    this.tunnelAge = 0;
+    this.maxPenAgents = 30;
 
     // Completed paths for light wave traversal
     this.recentPaths = [];
     this.maxRecentPaths = 50;
+
+    // Compatibility getter
+    this.offscreenCanvas = this.inkCanvas;
   }
 
   init(width, height) {
     this.width = width;
     this.height = height;
-    this.offscreenCanvas.width = width;
-    this.offscreenCanvas.height = height;
 
-    // Crisp heavy ivory paper ground
-    this.offCtx.fillStyle = '#faf8f4';
-    this.offCtx.fillRect(0, 0, width, height);
+    this.inkCanvas.width = width;
+    this.inkCanvas.height = height;
+    this.textCanvas.width = width;
+    this.textCanvas.height = height;
 
-    // Initial deep vanishing point aperture
+    // Crisp ivory paper ground
+    this.inkCtx.fillStyle = '#faf7f2';
+    this.inkCtx.fillRect(0, 0, width, height);
+
+    // Clear text layer
+    this.textCtx.clearRect(0, 0, width, height);
+
+    // Deep vanishing point aperture in center
     const cx = width / 2;
     const cy = height / 2;
-    const coreGrad = this.offCtx.createRadialGradient(cx, cy, 0, cx, cy, 38);
+    const coreGrad = this.inkCtx.createRadialGradient(cx, cy, 0, cx, cy, 38);
     coreGrad.addColorStop(0, '#000000');
-    coreGrad.addColorStop(0.65, '#0e0e12');
-    coreGrad.addColorStop(1, 'rgba(250, 248, 244, 0)');
-    this.offCtx.fillStyle = coreGrad;
-    this.offCtx.beginPath();
-    this.offCtx.arc(cx, cy, 38, 0, Math.PI * 2);
-    this.offCtx.fill();
+    coreGrad.addColorStop(0.65, '#0c0c10');
+    coreGrad.addColorStop(1, 'rgba(250, 247, 242, 0)');
+    this.inkCtx.fillStyle = coreGrad;
+    this.inkCtx.beginPath();
+    this.inkCtx.arc(cx, cy, 38, 0, Math.PI * 2);
+    this.inkCtx.fill();
 
     this.textStreamers = [];
     this.paperRings = [];
     this.penAgents = [];
     this.recentPaths = [];
     this.time = 0;
-    this.tunnelAge = 0;
-    this.nextRingTime = 0.5;
-    this.nextStreamerTime = 0.2;
+    this.nextRingTime = 0.4;
+    this.nextStreamerTime = 0;
 
-    // Initial pen agents with multi-tonal depth
-    for (let i = 0; i < 14; i++) {
+    // Seed 6 text streamers immediately so words begin emerging at once
+    for (let i = 0; i < 6; i++) {
+      this.spawnTextStreamer(i * (Math.PI * 2 / 6));
+    }
+
+    // Seed initial ink spreading agents
+    for (let i = 0; i < 16; i++) {
       this.spawnPenAgent();
     }
 
@@ -92,21 +106,23 @@ export class BookTunnel {
 
   resize(width, height) {
     if (!this.initialized || this.width !== width || this.height !== height) {
-      const temp = document.createElement('canvas');
-      temp.width = this.width;
-      temp.height = this.height;
-      const tCtx = temp.getContext('2d');
+      const tempInk = document.createElement('canvas');
+      tempInk.width = this.width;
+      tempInk.height = this.height;
+      const tCtx = tempInk.getContext('2d');
       if (this.width > 0 && this.height > 0) {
-        tCtx.drawImage(this.offscreenCanvas, 0, 0);
+        tCtx.drawImage(this.inkCanvas, 0, 0);
       }
 
       this.width = width;
       this.height = height;
-      this.offscreenCanvas.width = width;
-      this.offscreenCanvas.height = height;
+      this.inkCanvas.width = width;
+      this.inkCanvas.height = height;
+      this.textCanvas.width = width;
+      this.textCanvas.height = height;
 
-      if (temp.width > 0 && temp.height > 0) {
-        this.offCtx.drawImage(temp, 0, 0, width, height);
+      if (tempInk.width > 0 && tempInk.height > 0) {
+        this.inkCtx.drawImage(tempInk, 0, 0, width, height);
       } else {
         this.init(width, height);
       }
@@ -119,30 +135,24 @@ export class BookTunnel {
     }
   }
 
-  /**
-   * Spawns a spiral text stream emerging directly from the central vanishing point
-   */
   spawnTextStreamer(startAngle = null) {
     const baseAngle = startAngle !== null ? startAngle : Math.random() * Math.PI * 2;
-    const maxCorner = Math.hypot(this.width, this.height) * 0.84;
+    const maxCorner = Math.hypot(this.width, this.height) * 0.85;
 
     this.textStreamers.push({
       baseAngle,
-      currentR: 18 + Math.random() * 16, // starts tight at vanishing point
+      currentR: 20 + Math.random() * 18, // starts near vanishing point
       currentAngle: baseAngle,
-      spiralPitch: 34 + Math.random() * 24, // outward growth per revolution
-      angularSpeed: 0.65 + Math.random() * 0.35,
+      spiralPitch: 36 + Math.random() * 26, // outward radial growth per turn
+      angularSpeed: 0.70 + Math.random() * 0.35,
       wordIndex: Math.floor(Math.random() * this.words.length),
       charTimer: 0,
-      charInterval: 0.042, // steady, readable word-stream cadence
+      charInterval: 0.038, // brisk, readable typing stream
       maxDist: maxCorner,
       isDone: false
     });
   }
 
-  /**
-   * Spawns expanding cut-paper ring arches with drop shadows
-   */
   spawnPaperRing() {
     const cx = this.width / 2;
     const cy = this.height / 2;
@@ -158,10 +168,10 @@ export class BookTunnel {
     this.paperRings.push({
       currentRadius: 24 + Math.random() * 18,
       targetRadius: maxScreenRadius,
-      expansionSpeed: 24 + Math.random() * 30,
+      expansionSpeed: 26 + Math.random() * 32,
       rotationAngle: Math.random() * Math.PI * 2,
       rotationSpeed: (0.025 + Math.random() * 0.035) * (Math.random() > 0.5 ? 1 : -1),
-      irregularity: 0.032 + Math.random() * 0.038,
+      irregularity: 0.030 + Math.random() * 0.035,
       words: ringWords,
       isStamped: false,
       shadowBlur: 14 + Math.random() * 16,
@@ -169,37 +179,31 @@ export class BookTunnel {
     });
   }
 
-  /**
-   * Spawns multi-tone engraving pen agent (Grayscale tiers + deep black)
-   */
   spawnPenAgent() {
     const cx = this.width / 2;
     const cy = this.height / 2;
     const angle = Math.random() * Math.PI * 2;
-    const startR = 12 + Math.random() * 35;
-    const maxCorner = Math.hypot(this.width, this.height) * 0.84;
+    const startR = 12 + Math.random() * 40;
+    const maxCorner = Math.hypot(this.width, this.height) * 0.85;
 
-    // Grayscale Depth Tiers:
-    // 1. Light graphite gray (distant paper etching)
-    // 2. Medium charcoal gray (mid-ground cross-hatching)
-    // 3. Rich Victorian jet ink (foreground contrast)
+    // Multi-Tone Grayscale Pen Agents
     const tier = Math.random();
     let strokeColor, strokeWidth, opacity;
 
     if (tier < 0.35) {
       // Light graphite gray
-      strokeColor = '178, 172, 164';
-      strokeWidth = 0.6 + Math.random() * 1.0;
+      strokeColor = '175, 170, 162';
+      strokeWidth = 0.8 + Math.random() * 1.2;
       opacity = 0.35 + Math.random() * 0.25;
     } else if (tier < 0.70) {
       // Medium charcoal gray
-      strokeColor = '98, 92, 86';
-      strokeWidth = 0.9 + Math.random() * 1.4;
+      strokeColor = '95, 90, 84';
+      strokeWidth = 1.0 + Math.random() * 1.6;
       opacity = 0.55 + Math.random() * 0.25;
     } else {
-      // Rich deep ink black
-      strokeColor = '14, 14, 16';
-      strokeWidth = 1.2 + Math.random() * 1.8;
+      // Deep Victorian jet ink
+      strokeColor = '12, 12, 16';
+      strokeWidth = 1.4 + Math.random() * 2.2;
       opacity = 0.75 + Math.random() * 0.25;
     }
 
@@ -208,13 +212,13 @@ export class BookTunnel {
       y: cy + Math.sin(angle) * startR,
       angle: angle,
       r: startR,
-      speedR: 38 + Math.random() * 52,
-      speedTheta: (0.38 + Math.random() * 0.68) * (Math.random() > 0.45 ? 1 : -1),
+      speedR: 42 + Math.random() * 56,
+      speedTheta: (0.40 + Math.random() * 0.65) * (Math.random() > 0.45 ? 1 : -1),
       noiseScale: 0.0024 + Math.random() * 0.0025,
       strokeColor,
       lineWidth: strokeWidth,
       opacity,
-      isHatch: Math.random() > 0.50,
+      isHatch: Math.random() > 0.52,
       history: [],
       maxDist: maxCorner,
       age: 0
@@ -225,92 +229,16 @@ export class BookTunnel {
     if (!this.initialized) return;
 
     this.time += dt * speedMult;
-    this.tunnelAge += dt * speedMult;
     const cx = this.width / 2;
     const cy = this.height / 2;
-    const offCtx = this.offCtx;
+    const inkCtx = this.inkCtx;
+    const textCtx = this.textCtx;
 
-    // 1. Progressive Tunnel Word Streamers:
-    // Pace streamer appearance so the tunnel of words builds steadily from the center
-    if (this.textStreamers.length < this.maxStreamers) {
-      this.nextStreamerTime -= dt * speedMult;
-      if (this.nextStreamerTime <= 0) {
-        this.spawnTextStreamer();
-        this.nextStreamerTime = (1.4 + Math.random() * 1.4) / Math.max(1, speedMult * 0.85);
-      }
-    }
+    // =========================================================================
+    // 1. SPREADING INK LAYER (Cut Paper Rings, Pen Agents, Spreading Stains)
+    // =========================================================================
 
-    // Advance word streamers along spirals
-    for (let i = this.textStreamers.length - 1; i >= 0; i--) {
-      const st = this.textStreamers[i];
-      st.charTimer += dt * speedMult;
-
-      while (st.charTimer >= st.charInterval && st.wordIndex < this.words.length) {
-        st.charTimer -= st.charInterval;
-        const currentWord = this.words[st.wordIndex];
-        st.wordIndex++;
-
-        // Advance along spiral
-        const dAngle = 0.27;
-        st.currentAngle += dAngle;
-        st.currentR += (st.spiralPitch / (Math.PI * 2)) * dAngle;
-
-        // Position on spiral
-        const px = cx + Math.cos(st.currentAngle) * st.currentR;
-        const py = cy + Math.sin(st.currentAngle) * st.currentR;
-
-        // Dynamic font size scaling with radius (perspective depth)
-        // Starts small near center, grows larger towards corners
-        const fontSize = Math.max(9, Math.min(26, Math.floor(10 + (st.currentR / 360) * 14)));
-
-        offCtx.save();
-        offCtx.translate(px, py);
-        // Tangent rotation to follow the curve of the tunnel spiral
-        offCtx.rotate(st.currentAngle + Math.PI / 2);
-
-        // High contrast black ink typography
-        offCtx.font = `700 ${fontSize}px "Cormorant Garamond", "Cinzel", "Times New Roman", serif`;
-        offCtx.fillStyle = '#0a0a0c';
-        offCtx.textAlign = 'center';
-        offCtx.textBaseline = 'middle';
-        offCtx.fillText(currentWord, 0, 0);
-
-        // Subtle connecting ligature / pen underline
-        if (Math.random() > 0.48) {
-          const wWidth = offCtx.measureText(currentWord).width;
-          offCtx.beginPath();
-          offCtx.moveTo(-wWidth / 2, fontSize * 0.48);
-          offCtx.lineTo(wWidth / 2 + 4, fontSize * 0.48);
-          offCtx.strokeStyle = 'rgba(14, 14, 16, 0.65)';
-          offCtx.lineWidth = 0.85;
-          offCtx.stroke();
-        }
-
-        offCtx.restore();
-
-        // Loop seamlessly through words
-        if (st.wordIndex >= this.words.length) {
-          st.wordIndex = 0;
-        }
-
-        // Record recent path for subtle light wave shimmer
-        this.recentPaths.push([{ x: px, y: py, r: st.currentR }]);
-        if (this.recentPaths.length > this.maxRecentPaths) {
-          this.recentPaths.shift();
-        }
-
-        if (st.currentR >= st.maxDist) {
-          st.isDone = true;
-          break;
-        }
-      }
-
-      if (st.isDone) {
-        this.textStreamers.splice(i, 1);
-      }
-    }
-
-    // 2. Structural Concentric Cut-Paper Rings
+    // Structural paper rings with drop shadows
     this.nextRingTime -= dt * speedMult;
     if (this.nextRingTime <= 0) {
       this.spawnPaperRing();
@@ -338,60 +266,30 @@ export class BookTunnel {
         });
       }
 
-      offCtx.save();
-      offCtx.beginPath();
-      offCtx.moveTo(pts[0].x, pts[0].y);
+      inkCtx.save();
+      inkCtx.beginPath();
+      inkCtx.moveTo(pts[0].x, pts[0].y);
       for (let s = 1; s < pts.length; s++) {
-        offCtx.lineTo(pts[s].x, pts[s].y);
+        inkCtx.lineTo(pts[s].x, pts[s].y);
       }
-      offCtx.closePath();
+      inkCtx.closePath();
 
       // Sharp shadow & paper cut edge
-      offCtx.shadowColor = 'rgba(0, 0, 0, 0.20)';
-      offCtx.shadowBlur = ring.shadowBlur;
-      offCtx.shadowOffsetX = 0;
-      offCtx.shadowOffsetY = 4;
-      offCtx.strokeStyle = 'rgba(12, 12, 14, 0.80)';
-      offCtx.lineWidth = ring.lineWidth;
-      offCtx.stroke();
-      offCtx.restore();
-
-      // Stamp typography along paper ring edges
-      if (ring.currentRadius > 62 && !ring.isStamped) {
-        offCtx.save();
-        const fontSize = Math.max(10, Math.min(26, Math.floor(ring.currentRadius * 0.056)));
-        offCtx.font = `700 ${fontSize}px "Cormorant Garamond", "Cinzel", "Times New Roman", serif`;
-        offCtx.fillStyle = '#08080a';
-        offCtx.textAlign = 'center';
-        offCtx.textBaseline = 'middle';
-
-        const fullSentence = ring.words.join('   ');
-        const chars = fullSentence.split('');
-        const stepAngle = (Math.PI * 2) / chars.length;
-
-        for (let c = 0; c < chars.length; c++) {
-          const charAngle = ring.rotationAngle + c * stepAngle;
-          const charR = ring.currentRadius + 4;
-          const px = cx + Math.cos(charAngle) * charR;
-          const py = cy + Math.sin(charAngle) * charR;
-
-          offCtx.save();
-          offCtx.translate(px, py);
-          offCtx.rotate(charAngle + Math.PI / 2);
-          offCtx.fillText(chars[c], 0, 0);
-          offCtx.restore();
-        }
-        offCtx.restore();
-
-        ring.isStamped = true;
-      }
+      inkCtx.shadowColor = 'rgba(0, 0, 0, 0.22)';
+      inkCtx.shadowBlur = ring.shadowBlur;
+      inkCtx.shadowOffsetX = 0;
+      inkCtx.shadowOffsetY = 4;
+      inkCtx.strokeStyle = 'rgba(12, 12, 16, 0.82)';
+      inkCtx.lineWidth = ring.lineWidth;
+      inkCtx.stroke();
+      inkCtx.restore();
 
       if (ring.currentRadius >= ring.targetRadius) {
         this.paperRings.splice(i, 1);
       }
     }
 
-    // 3. Multi-Tone Pen Agents (Grayscale & Charcoal Depth)
+    // Maintain active ink pen agents
     while (this.penAgents.length < this.maxPenAgents) {
       this.spawnPenAgent();
     }
@@ -410,28 +308,28 @@ export class BookTunnel {
       p.x = cx + Math.cos(p.angle) * p.r;
       p.y = cy + Math.sin(p.angle) * p.r;
 
-      // Draw progressive stroke with assigned tone
-      offCtx.save();
-      offCtx.beginPath();
-      offCtx.moveTo(prevX, prevY);
-      offCtx.lineTo(p.x, p.y);
-      offCtx.strokeStyle = `rgba(${p.strokeColor}, ${p.opacity})`;
-      offCtx.lineWidth = p.lineWidth;
-      offCtx.lineCap = 'round';
-      offCtx.stroke();
+      // Draw progressive ink stroke
+      inkCtx.save();
+      inkCtx.beginPath();
+      inkCtx.moveTo(prevX, prevY);
+      inkCtx.lineTo(p.x, p.y);
+      inkCtx.strokeStyle = `rgba(${p.strokeColor}, ${p.opacity})`;
+      inkCtx.lineWidth = p.lineWidth;
+      inkCtx.lineCap = 'round';
+      inkCtx.stroke();
 
-      // Cross-hatching ticks (Victorian engraving style)
+      // Cross-hatching ticks (Victorian engraving)
       if (p.isHatch && Math.random() > 0.58) {
-        const hLen = 4 + Math.random() * 9;
+        const hLen = 4 + Math.random() * 10;
         const normAngle = p.angle + Math.PI / 2 + (Math.random() - 0.5) * 0.5;
-        offCtx.beginPath();
-        offCtx.moveTo(p.x, p.y);
-        offCtx.lineTo(p.x + Math.cos(normAngle) * hLen, p.y + Math.sin(normAngle) * hLen);
-        offCtx.strokeStyle = `rgba(${p.strokeColor}, ${p.opacity * 0.8})`;
-        offCtx.lineWidth = Math.max(0.5, p.lineWidth * 0.6);
-        offCtx.stroke();
+        inkCtx.beginPath();
+        inkCtx.moveTo(p.x, p.y);
+        inkCtx.lineTo(p.x + Math.cos(normAngle) * hLen, p.y + Math.sin(normAngle) * hLen);
+        inkCtx.strokeStyle = `rgba(${p.strokeColor}, ${p.opacity * 0.85})`;
+        inkCtx.lineWidth = Math.max(0.5, p.lineWidth * 0.65);
+        inkCtx.stroke();
       }
-      offCtx.restore();
+      inkCtx.restore();
 
       p.history.push({ x: p.x, y: p.y, r: p.r });
 
@@ -446,6 +344,87 @@ export class BookTunnel {
         this.penAgents.splice(i, 1);
       }
     }
+
+    // =========================================================================
+    // 2. LUMINOUS WHITE WORD TUNNEL LAYER (Drawn ON TOP of spreading ink)
+    // =========================================================================
+
+    // Maintain continuous spiral word streamers
+    if (this.textStreamers.length < this.maxStreamers) {
+      this.nextStreamerTime -= dt * speedMult;
+      if (this.nextStreamerTime <= 0) {
+        this.spawnTextStreamer();
+        this.nextStreamerTime = (1.2 + Math.random() * 1.2) / Math.max(1, speedMult * 0.85);
+      }
+    }
+
+    // Stamp white letters onto textCanvas (which renders directly on top of inkCanvas)
+    for (let i = this.textStreamers.length - 1; i >= 0; i--) {
+      const st = this.textStreamers[i];
+      st.charTimer += dt * speedMult;
+
+      while (st.charTimer >= st.charInterval && st.wordIndex < this.words.length) {
+        st.charTimer -= st.charInterval;
+        const currentWord = this.words[st.wordIndex];
+        st.wordIndex++;
+
+        // Advance along Archimedean spiral
+        const dAngle = 0.28;
+        st.currentAngle += dAngle;
+        st.currentR += (st.spiralPitch / (Math.PI * 2)) * dAngle;
+
+        // Position on spiral
+        const px = cx + Math.cos(st.currentAngle) * st.currentR;
+        const py = cy + Math.sin(st.currentAngle) * st.currentR;
+
+        // Perspective font scaling: small at center, large at corners
+        const fontSize = Math.max(10, Math.min(28, Math.floor(10 + (st.currentR / 340) * 16)));
+
+        textCtx.save();
+        textCtx.translate(px, py);
+        textCtx.rotate(st.currentAngle + Math.PI / 2);
+
+        // LUMINOUS WHITE TYPOGRAPHY with dark drop shadow:
+        // Highly visible on black ink as pure white, and visible on paper via shadow
+        textCtx.shadowColor = 'rgba(0, 0, 0, 0.95)';
+        textCtx.shadowBlur = 6;
+        textCtx.shadowOffsetX = 0;
+        textCtx.shadowOffsetY = 2;
+
+        textCtx.font = `700 ${fontSize}px "Cormorant Garamond", "Cinzel", "Times New Roman", serif`;
+        textCtx.fillStyle = '#ffffff'; // PURE WHITE LETTERS ON TOP OF SPREADING INK
+        textCtx.textAlign = 'center';
+        textCtx.textBaseline = 'middle';
+        textCtx.fillText(currentWord, 0, 0);
+
+        // Subtle white ink connecting ligature
+        if (Math.random() > 0.45) {
+          const wWidth = textCtx.measureText(currentWord).width;
+          textCtx.beginPath();
+          textCtx.moveTo(-wWidth / 2, fontSize * 0.48);
+          textCtx.lineTo(wWidth / 2 + 4, fontSize * 0.48);
+          textCtx.strokeStyle = 'rgba(255, 255, 255, 0.75)';
+          textCtx.lineWidth = 0.9;
+          textCtx.stroke();
+        }
+
+        textCtx.restore();
+
+        // Loop seamlessly through words
+        if (st.wordIndex >= this.words.length) {
+          st.wordIndex = 0;
+        }
+
+        if (st.currentR >= st.maxDist) {
+          st.isDone = true;
+          break;
+        }
+      }
+
+      if (st.isDone) {
+        this.textStreamers.splice(i, 1);
+      }
+    }
   }
 
   render(ctx, width, height, cx, cy, lightWaves, alpha = 1.0) {
@@ -456,12 +435,12 @@ export class BookTunnel {
     ctx.save();
     ctx.globalAlpha = alpha;
 
-    ctx.drawImage(this.offscreenCanvas, 0, 0);
+    // 1. Render Spreading Ink & Paper Layer
+    ctx.drawImage(this.inkCanvas, 0, 0);
 
-    // Subtle paper grain light wave highlight (no neon)
+    // 2. Light wave shimmers across existing paths
     if (lightWaves && lightWaves.waves.length > 0) {
       const maxR = Math.hypot(width, height) * 0.78;
-
       ctx.save();
       for (const wave of lightWaves.waves) {
         const waveRadius = (wave.direction > 0 ? (1.0 - wave.progress) : wave.progress) * maxR;
@@ -483,7 +462,7 @@ export class BookTunnel {
             }
           }
           if (hasPoints) {
-            ctx.strokeStyle = `rgba(255, 255, 255, ${0.32 * wave.intensity})`;
+            ctx.strokeStyle = `rgba(255, 255, 255, ${0.35 * wave.intensity})`;
             ctx.lineWidth = 1.8;
             ctx.stroke();
           }
@@ -492,15 +471,18 @@ export class BookTunnel {
       ctx.restore();
     }
 
-    // Defined, deep central vanishing point core
-    const coreGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 36);
+    // 3. Central Vanishing Point Dark Core
+    const coreGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 38);
     coreGrad.addColorStop(0, '#000000');
-    coreGrad.addColorStop(0.62, '#0c0c0e');
-    coreGrad.addColorStop(1, 'rgba(250, 248, 244, 0)');
+    coreGrad.addColorStop(0.65, '#0a0a0e');
+    coreGrad.addColorStop(1, 'rgba(250, 247, 242, 0)');
     ctx.fillStyle = coreGrad;
     ctx.beginPath();
-    ctx.arc(cx, cy, 36, 0, Math.PI * 2);
+    ctx.arc(cx, cy, 38, 0, Math.PI * 2);
     ctx.fill();
+
+    // 4. Render LUMINOUS WHITE WORD LAYER ON TOP OF EVERYTHING
+    ctx.drawImage(this.textCanvas, 0, 0);
 
     ctx.restore();
   }

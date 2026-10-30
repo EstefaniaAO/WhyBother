@@ -225,6 +225,43 @@ export class CreateStage {
     }));
   }
 
+  /**
+   * Spawns an organic child bifurcation / ramification from a parent stroke
+   */
+  spawnChildBranch(parentAgent, angleOffset = null) {
+    if (this.agents.length >= this.maxAgents + 20) return;
+
+    const parentAngle = Math.atan2(parentAgent.vy, parentAgent.vx);
+    const sign = angleOffset !== null ? Math.sign(angleOffset) : (Math.random() < 0.5 ? -1 : 1);
+    const offset = angleOffset !== null ? angleOffset : sign * (0.60 + Math.random() * 0.40);
+    const branchAngle = parentAngle + offset;
+
+    const childThickness = Math.max(1.6, parentAgent.thickness * 0.60);
+    const childSpeed = parentAgent.speed * (1.08 + Math.random() * 0.22);
+    const childColor = Math.random() > 0.35
+      ? parentAgent.currentColor
+      : this.palette[Math.floor(Math.random() * this.palette.length)];
+
+    const child = new BrushAgent({
+      x: parentAgent.x,
+      y: parentAgent.y,
+      vx: Math.cos(branchAngle) * childSpeed,
+      vy: Math.sin(branchAngle) * childSpeed,
+      speed: childSpeed,
+      maxSteerForce: 4.6,
+      thickness: childThickness,
+      opacity: Math.min(0.85, parentAgent.opacity * 1.15),
+      color: childColor,
+      maxLife: 5.0 + Math.random() * 4.0,
+      numPasses: childThickness > 8 ? 3 : 2,
+      bristleSpread: 0.35,
+      isWet: true,
+      isGothic: false
+    });
+    child.isBranch = true;
+    this.agents.push(child);
+  }
+
   getFlowForce(x, y, time) {
     const cx = this.width / 2;
     const cy = this.height / 2;
@@ -390,11 +427,27 @@ export class CreateStage {
       agent.update(dt, adapterFlow, this.colorGrid, this.width / 2, this.height / 2, this.time, currentSpeedMult);
       agent.drawSegment(offCtx);
 
-      // Branching when cursor flicks or during high energy
-      if (!this.isContemplating && this.cursor.speed > 10.0 && Math.random() > 0.92 && this.agents.length < this.maxAgents + 8) {
+      // 1. Interactive cursor branching (drag / flick / down-brush influence)
+      if (!this.isContemplating && this.cursor.active) {
         const distToCursor = Math.hypot(agent.x - this.cursor.x, agent.y - this.cursor.y);
-        if (distToCursor < 190) {
-          this.spawnAgent(agent.x, agent.y, Math.atan2(agent.vy, agent.vx));
+        const isNearCursor = distToCursor < (this.cursor.isDown ? 220 : 160);
+
+        if (isNearCursor) {
+          const isFlicking = this.cursor.speed > 2.0;
+          const isDrawing = this.cursor.isDown && this.cursor.speed > 0.5;
+          const branchChance = isFlicking ? 0.35 : (isDrawing ? 0.22 : 0.08);
+
+          if (Math.random() < branchChance) {
+            this.spawnChildBranch(agent);
+          }
+        }
+      }
+
+      // 2. Autonomous organic bifurcation along curved mature strokes
+      if (!agent.isBranch && !agent.hasBifurcated && agent.age > 1.2 && agent.thickness > 4.0) {
+        if (Math.random() < 0.035) {
+          agent.hasBifurcated = true;
+          this.spawnChildBranch(agent);
         }
       }
 

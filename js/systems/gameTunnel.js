@@ -41,6 +41,15 @@ export class GameTunnel {
       { r: 128, g: 112, b: 164 }  // Violeta grisáceo
     ];
 
+    // Occasional striking, high-contrast luminous strokes that pierce the dark gothic ground
+    this.strikingColors = [
+      { r: 110, g: 198, b: 248 }, // Azul acero eléctrico brillante
+      { r: 238, g: 38,  b: 78  }, // Carmesí / carmín vibrante
+      { r: 198, g: 185, b: 236 }, // Lavanda plateada / hielo
+      { r: 42,  g: 218, b: 206 }, // Petróleo turquesa resplandeciente
+      { r: 245, g: 168, b: 210 }  // Rosa cuarzo pálido llamativo
+    ];
+
     // FlowField for turbulent, twisted asymmetric curves reaching corners
     this.flowField = new FlowField({
       vortexStrength: 0.82,
@@ -163,13 +172,25 @@ export class GameTunnel {
     const x = cx + Math.cos(spawnAngle) * baseR;
     const y = cy + Math.sin(spawnAngle) * baseR;
 
-    const col = this.getColorForRadius(baseR);
+    // ~20% of strokes are striking, luminous and vivid amidst the dark tones
+    const isStriking = Math.random() < 0.20;
+    const col = isStriking
+      ? this.strikingColors[Math.floor(Math.random() * this.strikingColors.length)]
+      : this.getColorForRadius(baseR);
 
     // Varied Brush Hierarchy (Inspired by reference painting strata)
     const category = Math.random();
     let thickness, opacity, speed, maxLife, numPasses, bristleSpread;
 
-    if (category < 0.35) {
+    if (isStriking) {
+      // Striking, luminous expressive accent stroke
+      thickness = 2.0 + Math.random() * 4.2;
+      opacity = 0.72 + Math.random() * 0.24;
+      speed = 34 + Math.random() * 24;
+      maxLife = 12.0 + Math.random() * 5.0;
+      numPasses = 2;
+      bristleSpread = 0.22;
+    } else if (category < 0.35) {
       // 1. Broad deep midnight blue and wine strata
       thickness = 22 + Math.random() * 20;
       opacity = 0.24 + Math.random() * 0.16;
@@ -197,7 +218,7 @@ export class GameTunnel {
 
     const initForce = this.flowField.getForce(x, y, cx, cy, this.time);
 
-    this.agents.push(new BrushAgent({
+    const agent = new BrushAgent({
       x,
       y,
       vx: initForce.x * speed,
@@ -212,7 +233,9 @@ export class GameTunnel {
       bristleSpread,
       isWet: true,
       isGothic: true
-    }));
+    });
+    agent.isStriking = isStriking;
+    this.agents.push(agent);
   }
 
   /**
@@ -327,11 +350,11 @@ export class GameTunnel {
     const offCtx = this.offCtx;
     const maxCorner = Math.hypot(this.width, this.height) * 0.82;
 
-    // Organic Abstract Crimson Splatters
+    // Organic Abstract Crimson Splatters (more frequent per user request)
     this.nextSplatterTime -= dt * speedMult;
     if (this.nextSplatterTime <= 0) {
       this.spawnAbstractSplatter();
-      this.nextSplatterTime = (2.2 + Math.random() * 2.2) / Math.max(1, speedMult * 0.85);
+      this.nextSplatterTime = (0.75 + Math.random() * 0.75) / Math.max(1, speedMult * 0.85);
     }
 
     // Dark dense watercolor blotches
@@ -372,14 +395,16 @@ export class GameTunnel {
 
       // Dynamically blend agent color toward outward tone as it journeys away from center
       const currentR = Math.hypot(agent.x - cx, agent.y - cy);
-      const targetCol = this.getColorForRadius(currentR);
-      agent.currentColor = FastMath.blendRGB(agent.currentColor, targetCol, 0.04);
+      if (!agent.isStriking) {
+        const targetCol = this.getColorForRadius(currentR);
+        agent.currentColor = FastMath.blendRGB(agent.currentColor, targetCol, 0.04);
+      }
 
       agent.update(dt, this.flowField, this.colorGrid, cx, cy, this.time, speedMult);
       agent.drawSegment(offCtx);
 
-      // Occasional organic splatter spawned along high-curvature turns of dark agents
-      if (Math.random() > 0.985 && agent.currentColor.r > 100) {
+      // Occasional organic splatter spawned along high-curvature turns
+      if (Math.random() > 0.95 && agent.currentColor.r > 80) {
         this.spawnAbstractSplatter(agent.x, agent.y);
       }
 

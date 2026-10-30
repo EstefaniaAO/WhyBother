@@ -22,23 +22,21 @@ export class MovieTunnel {
     this.offscreenCanvas = document.createElement('canvas');
     this.offCtx = this.offscreenCanvas.getContext('2d');
 
-    // Rich Watercolor Palette with Deep Center Tones & Luminous Outer Tones
-    this.centerColors = [
-      { r: 16, g: 28, b: 56 },  // Azul Prusia profundo
-      { r: 24, g: 22, b: 54 },  // Índigo abisal
-      { r: 38, g: 18, b: 46 },  // Ciruela / violeta oscuro
-      { r: 18, g: 46, b: 62 },  // Azul petróleo denso
-      { r: 32, g: 24, b: 42 }   // Sombra berenjena suave
+    // Rich Palette lineages: Dark contrast tones coexisting with vibrant turquoise,
+    // royal purple, and fine luminous yellow threads emerging from center
+    this.centerDarkColors = [
+      { r: 14, g: 24, b: 50 },  // Azul Prusia profundo
+      { r: 22, g: 18, b: 48 },  // Índigo abisal
+      { r: 36, g: 16, b: 44 },  // Ciruela / violeta oscuro
+      { r: 16, g: 42, b: 58 },  // Azul petróleo denso
+      { r: 28, g: 20, b: 38 }   // Sombra berenjena suave
     ];
 
-    this.outerColors = [
-      { r: 135, g: 172, b: 212 }, // Azul empolvado clásico Disney
-      { r: 168, g: 205, b: 232 }, // Celeste cielo acuarelado
-      { r: 115, g: 198, b: 195 }, // Turquesa suave luminoso
-      { r: 178, g: 162, b: 212 }, // Lavanda suave
-      { r: 202, g: 178, b: 222 }, // Lila empolvado
-      { r: 218, g: 168, b: 182 }, // Rosa empolvado
-      { r: 142, g: 218, b: 214 }  // Menta translúcido
+    this.outerDarkColors = [
+      { r: 35,  g: 78,  b: 118 }, // Azul noche medio
+      { r: 64,  g: 92,  b: 145 }, // Azul cobalto suave
+      { r: 88,  g: 58,  b: 112 }, // Violeta medio
+      { r: 42,  g: 86,  b: 104 }  // Petróleo medio
     ];
 
     // FlowField for organic, sweeping watercolor vortex curves
@@ -133,18 +131,55 @@ export class MovieTunnel {
   }
 
   /**
-   * Samples color dynamically based on distance from center:
-   * Dark deep tones near vanishing point, blossoming to luminous tones at edges
+   * Generates a color lineage definition:
+   * - Turquoise: starts rich turquoise at center, brightens into luminous aquamarine outward
+   * - Purple: starts deep royal purple at center, brightens to vibrant lilac/violet outward
+   * - Fine Yellow: luminous warm golden thread ("un fino amarillo")
+   * - Dark: deep Prussian blue/indigo/plum/petrol contrast
    */
-  getColorForRadius(r) {
+  pickLineage() {
+    const roll = Math.random();
+    if (roll < 0.28) {
+      // 1. Vibrant Turquoise that brightens as it emerges and expands from center
+      return {
+        type: 'turquoise',
+        startCol: { r: 18, g: 155, b: 165 }, // Turquesa vivo
+        endCol: { r: 128, g: 242, b: 236 }   // Turquesa claro luminoso
+      };
+    } else if (roll < 0.54) {
+      // 2. Royal Purple / Violet emerging from center
+      return {
+        type: 'purple',
+        startCol: { r: 125, g: 38, b: 175 }, // Morado intenso
+        endCol: { r: 212, g: 172, b: 242 }   // Lila / violeta luminoso
+      };
+    } else if (roll < 0.72) {
+      // 3. Fine luminous yellow ribbon / filigree ("un fino amarillo")
+      return {
+        type: 'yellow',
+        startCol: { r: 250, g: 202, b: 48 }, // Dorado cálido
+        endCol: { r: 255, g: 232, b: 92 }    // Amarillo luminoso
+      };
+    } else {
+      // 4. Dark contrast tones (Prussian blue, dark indigo, plum, dark petrol)
+      const c = this.centerDarkColors[Math.floor(Math.random() * this.centerDarkColors.length)];
+      const o = this.outerDarkColors[Math.floor(Math.random() * this.outerDarkColors.length)];
+      return {
+        type: 'dark',
+        startCol: c,
+        endCol: o
+      };
+    }
+  }
+
+  getColorForLineage(lineage, r) {
     const maxCorner = Math.hypot(this.width, this.height) * 0.75;
-    const normDist = Math.min(1.0, r / Math.max(100, maxCorner));
+    const normDist = Math.min(1.0, r / Math.max(80, maxCorner));
+    return FastMath.blendRGB(lineage.startCol, lineage.endCol, Math.pow(normDist, 0.72));
+  }
 
-    // Choose base color from center or outer palette
-    const centerCol = this.centerColors[Math.floor(Math.random() * this.centerColors.length)];
-    const outerCol = this.outerColors[Math.floor(Math.random() * this.outerColors.length)];
-
-    return FastMath.blendRGB(centerCol, outerCol, Math.pow(normDist, 0.75));
+  getColorForRadius(r) {
+    return this.getColorForLineage(this.pickLineage(), r);
   }
 
   spawnAgent() {
@@ -152,49 +187,60 @@ export class MovieTunnel {
     const cy = this.height / 2;
     const maxCorner = Math.hypot(this.width, this.height) * 0.82;
 
-    // Spawning: 65% near center, 35% seeded at mid radii for continuous stratified coverage
-    const isMidSpawn = Math.random() > 0.65;
-    const baseR = isMidSpawn ? (45 + Math.random() * (maxCorner * 0.42)) : (10 + Math.random() * 26);
+    // Spawning: 70% near center, 30% seeded at mid radii for continuous stratified coverage
+    const isMidSpawn = Math.random() > 0.70;
+    const baseR = isMidSpawn ? (45 + Math.random() * (maxCorner * 0.40)) : (8 + Math.random() * 28);
 
     const spawnAngle = this.colorGrid.findLeastCoveredAngle(cx, cy, baseR);
     const x = cx + Math.cos(spawnAngle) * baseR;
     const y = cy + Math.sin(spawnAngle) * baseR;
 
-    const col = this.getColorForRadius(baseR);
+    const lineage = this.pickLineage();
+    const col = this.getColorForLineage(lineage, baseR);
 
-    // 3 Distinct Brush Categories for High Visual Richness (Reference Painting)
-    const category = Math.random();
+    // Brush categories: Special handling for fine luminous yellow ribbons, plus broad and medium washes
     let thickness, opacity, speed, maxLife, numPasses, bristleSpread;
 
-    if (category < 0.35) {
-      // 1. Broad translucent watercolor washes (soft billowing strata)
-      thickness = 24 + Math.random() * 22;
-      opacity = 0.16 + Math.random() * 0.14;
-      speed = 18 + Math.random() * 14; // very languid, fluid
-      maxLife = 18.0 + Math.random() * 8.0;
-      numPasses = 4;
-      bristleSpread = 0.52;
-    } else if (category < 0.75) {
-      // 2. Medium expressive pigment ribbons (defined curving bands)
-      thickness = 10 + Math.random() * 14;
-      opacity = 0.28 + Math.random() * 0.22;
-      speed = 24 + Math.random() * 18;
-      maxLife = 14.0 + Math.random() * 7.0;
-      numPasses = 3;
-      bristleSpread = 0.40;
-    } else {
-      // 3. Delicate sinuous filigrees (vein-like interconnecting lines)
-      thickness = 2.5 + Math.random() * 4.0;
-      opacity = 0.48 + Math.random() * 0.30;
-      speed = 30 + Math.random() * 20;
-      maxLife = 12.0 + Math.random() * 6.0;
+    if (lineage.type === 'yellow') {
+      // Delicate luminous yellow thread ("un fino amarillo")
+      thickness = 1.8 + Math.random() * 3.2; // fine and graceful
+      opacity = 0.68 + Math.random() * 0.24; // strong luminous presence
+      speed = 28 + Math.random() * 18;
+      maxLife = 14.0 + Math.random() * 6.0;
       numPasses = 2;
-      bristleSpread = 0.25;
+      bristleSpread = 0.22;
+    } else {
+      const category = Math.random();
+      if (category < 0.35) {
+        // 1. Broad translucent watercolor washes
+        thickness = 22 + Math.random() * 20;
+        opacity = 0.18 + Math.random() * 0.14;
+        speed = 18 + Math.random() * 14;
+        maxLife = 17.0 + Math.random() * 7.0;
+        numPasses = 4;
+        bristleSpread = 0.50;
+      } else if (category < 0.75) {
+        // 2. Medium expressive pigment ribbons
+        thickness = 9 + Math.random() * 12;
+        opacity = 0.30 + Math.random() * 0.22;
+        speed = 24 + Math.random() * 16;
+        maxLife = 13.0 + Math.random() * 6.0;
+        numPasses = 3;
+        bristleSpread = 0.38;
+      } else {
+        // 3. Delicate sinuous filigrees
+        thickness = 2.4 + Math.random() * 3.6;
+        opacity = 0.50 + Math.random() * 0.28;
+        speed = 30 + Math.random() * 18;
+        maxLife = 12.0 + Math.random() * 5.0;
+        numPasses = 2;
+        bristleSpread = 0.24;
+      }
     }
 
     const initForce = this.flowField.getForce(x, y, cx, cy, this.time);
 
-    this.agents.push(new BrushAgent({
+    const agent = new BrushAgent({
       x,
       y,
       vx: initForce.x * speed,
@@ -209,7 +255,10 @@ export class MovieTunnel {
       bristleSpread,
       isWet: true,
       isGothic: false
-    }));
+    });
+    agent.lineage = lineage;
+
+    this.agents.push(agent);
   }
 
   spawnWashStain() {
@@ -217,14 +266,15 @@ export class MovieTunnel {
     const cy = this.height / 2;
     const angle = Math.random() * Math.PI * 2;
     const r = 25 + Math.random() * (Math.hypot(this.width, this.height) * 0.55);
-    const col = this.getColorForRadius(r);
+    const lineage = this.pickLineage();
+    const col = this.getColorForLineage(lineage, r);
 
     this.washStains.push({
       x: cx + Math.cos(angle) * r,
       y: cy + Math.sin(angle) * r,
       radius: 28 + Math.random() * 75,
       color: col,
-      opacity: 0.08 + Math.random() * 0.12,
+      opacity: 0.09 + Math.random() * 0.12,
       drawn: false
     });
   }
@@ -276,7 +326,7 @@ export class MovieTunnel {
 
       // Dynamically blend agent color toward outward tone as it journeys away from center
       const currentR = Math.hypot(agent.x - cx, agent.y - cy);
-      const targetCol = this.getColorForRadius(currentR);
+      const targetCol = agent.lineage ? this.getColorForLineage(agent.lineage, currentR) : this.getColorForRadius(currentR);
       agent.currentColor = FastMath.blendRGB(agent.currentColor, targetCol, 0.04);
 
       agent.update(dt, this.flowField, this.colorGrid, cx, cy, this.time, speedMult);

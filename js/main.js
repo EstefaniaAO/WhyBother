@@ -329,6 +329,13 @@ class FinalReflectionPresenter {
 
     finalReflectionOverlay.style.display = 'flex';
     finalControls.style.display = 'none';
+
+    const cheshire = document.getElementById('cheshire-cat-container');
+    if (cheshire) {
+      cheshire.classList.remove('visible');
+      cheshire.style.display = 'none';
+    }
+
     this.showCurrentPhrase();
   }
 
@@ -353,7 +360,7 @@ class FinalReflectionPresenter {
     if (!this.isActive || this.isTransitioning) return;
 
     if (this.currentIndex >= FINAL_REFLECTION_SEQUENCE.length - 1) {
-      // Last phrase already shown, display controls
+      // Last phrase already shown, finish and show Cheshire cat & controls
       this.finish();
       return;
     }
@@ -369,13 +376,34 @@ class FinalReflectionPresenter {
 
   finish() {
     this.isActive = false;
-    finalControls.style.display = 'flex';
+    finalPhraseElement.classList.remove('visible');
+
+    // Reveal Cheshire Cat in the center over the living artwork
+    const cheshire = document.getElementById('cheshire-cat-container');
+    if (cheshire) {
+      cheshire.style.display = 'flex';
+      setTimeout(() => {
+        cheshire.classList.add('visible');
+      }, 80);
+    }
+
+    // Display action controls below
+    setTimeout(() => {
+      finalControls.style.display = 'flex';
+    }, 350);
   }
 
   hide() {
     this.isActive = false;
     finalReflectionOverlay.style.display = 'none';
     finalPhraseElement.classList.remove('visible');
+
+    const cheshire = document.getElementById('cheshire-cat-container');
+    if (cheshire) {
+      cheshire.classList.remove('visible');
+      cheshire.style.display = 'none';
+    }
+
     finalControls.style.display = 'none';
   }
 }
